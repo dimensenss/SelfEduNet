@@ -34,18 +34,18 @@
                                             }
                                             <li><a href="">Співробітництво</a></li>
 
-                                            @if (true)
+                                            @if (!User.Identity.IsAuthenticated)
                                             {
                                                 <li class="button-header margin-left">
-                                                    <a href="" class="btn btn3">Регістрація</a>
+                                                    <a asp-controller="Account" , asp-action="Registration" class="btn btn3">Регістрація</a>
                                                 </li>
                                                 <li>
-                                                    <a href="" class="btn btn3">Вхід</a>
+                                                    <a asp-controller="Account" , asp-action="Login" class="btn btn3">Вхід</a>
                                                 </li>
                                             }
                                             else
                                             {
-                                                <li><a href="">Вихід</a></li>
+                                                <li><a asp-controller="Account", asp-action="Logout">Вихід</a></li>
                                             }
                                         </ul>
                                     </nav>

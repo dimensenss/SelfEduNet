@@ -7,12 +7,11 @@ using static System.Reflection.Metadata.BlobBuilder;
 
 namespace SelfEduNet.Data
 {
-    public class ApplicationDbContext : IdentityDbContext<User>
+    public class ApplicationDbContext : IdentityDbContext<AppUser>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
-            Database.EnsureCreated();
         }
-        public DbSet<User> Users { get; set; }
+        public DbSet<AppUser> Users { get; set; }
     }
 }
