@@ -1,0 +1,65 @@
+﻿
+<header>
+    <!-- Header Start -->
+    <div class="header-area bg-dark fixed-top">
+        <div class="main-header">
+            <div class="header-bottom">
+                <div class="container-fluid">
+                    <div class="row align-items-center">
+                        <!-- Logo -->
+                        <div class="col-xl-2 col-lg-2">
+                            <div class="logo">
+                                <a href="@Url.Action("Index", "Home")" class="logo">
+                                    /selfedu<br>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-xl-10 col-lg-10">
+                            <div class="menu-wrapper d-flex align-items-center justify-content-end">
+                                <!-- Main-menu -->
+                                <div class="main-menu d-none d-lg-block">
+                                    <nav>
+                                        <ul id="navigation">
+                                            <li><a href="">Курси</a></li>
+                                            @if (true)
+                                            {
+                                                // Предположим, что у нас есть некая переменная userHasCourses
+                                                bool userHasCourses = true; // Это можно заменить логикой проверки наличия курсов у пользователя
+                                                <li>
+                                                    <a href="">
+                                                        @* @Url.Action(userHasCourses ? "Courses" : "TeachPromo", "Teach") *@
+                                                        Викладання
+                                                    </a>
+                                                </li>
+                                            }
+                                            <li><a href="">Співробітництво</a></li>
+
+                                            @if (true)
+                                            {
+                                                <li class="button-header margin-left">
+                                                    <a href="" class="btn btn3">Регістрація</a>
+                                                </li>
+                                                <li>
+                                                    <a href="" class="btn btn3">Вхід</a>
+                                                </li>
+                                            }
+                                            else
+                                            {
+                                                <li><a href="">Вихід</a></li>
+                                            }
+                                        </ul>
+                                    </nav>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Mobile Menu -->
+                        <div class="col-12">
+                            <div class="mobile_menu d-block d-lg-none"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Header End -->
+</header>
