@@ -1,0 +1,24 @@
+﻿
+@page
+@model ConfirmEmailModel
+@{
+	ViewData["Title"] = "Confirm email";
+}
+
+<h1>@ViewData["Title"]</h1>
+<partial name="_StatusMessage" model="Model.StatusMessage" />
+
+<p class="fs-3">Ви будете перенаправлені на головну сторінку через <span id="countdown">5</span> секунд...</p>
+
+<script type="text/javascript">
+    var countdown = 5;
+    var countdownInterval = setInterval(function() {
+        countdown--;
+        document.getElementById("countdown").innerText = countdown;
+
+        if (countdown <= 0) {
+            clearInterval(countdownInterval);
+            window.location.href = '@Url.Content("~/")';
+        }
+    }, 1000);
+</script>

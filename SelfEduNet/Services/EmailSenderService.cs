@@ -1,11 +1,12 @@
 ﻿using System.Net;
 using System.Net.Mail;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Options;
 using SelfEduNet.Configurations;
 
 namespace SelfEduNet.Services
 {
-    public class EmailSenderService(IOptions<EmailSMTPSettings> emailSettingsOptions)
+    public class EmailSenderService(IOptions<EmailSMTPSettings> emailSettingsOptions):IEmailSender
     {
 
         private readonly EmailSMTPSettings _emailSettings = emailSettingsOptions.Value;

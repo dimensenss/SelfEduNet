@@ -19,6 +19,8 @@ namespace SelfEduNet.Extensions
 					options.SupportedUICultures = supportedCultures;
 				});
 
+                
+
 		}
 	}
 }

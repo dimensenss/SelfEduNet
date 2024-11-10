@@ -37,15 +37,15 @@
                                             @if (!User.Identity.IsAuthenticated)
                                             {
                                                 <li class="button-header margin-left">
-                                                    <a asp-controller="Account" , asp-action="Registration" class="btn btn3">Регістрація</a>
+                                                    <a asp-area="Identity" asp-page="/Account/Register" class="btn btn3">Регістрація</a>
                                                 </li>
                                                 <li>
-                                                    <a asp-controller="Account" , asp-action="Login" class="btn btn3">Вхід</a>
+                                                    <a asp-area="Identity" asp-page="/Account/Login" class="btn btn3">Вхід</a>
                                                 </li>
                                             }
                                             else
                                             {
-                                                <li><a asp-controller="Account", asp-action="Logout">Вихід</a></li>
+                                                <li><a asp-controller="Account" asp-action="Logout">Вихід</a></li>
                                             }
                                         </ul>
                                     </nav>

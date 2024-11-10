@@ -28,6 +28,8 @@ namespace SelfEduNet.Data
 
 				if (result.Succeeded)
 				{
+					var confirmationToken = await userManager.GenerateEmailConfirmationTokenAsync(adminUser);
+					await userManager.ConfirmEmailAsync(adminUser, confirmationToken);
 					await userManager.AddToRoleAsync(adminUser, "Admin");
 				}
 			}
