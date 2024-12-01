@@ -1,0 +1,42 @@
+﻿@model IEnumerable<SelfEduNet.Models.Course>
+@{
+	var catId = ViewData["catId"] as int? ?? 0; // Получаем catId из ViewData
+}
+<div id="carousel-@catId" class="carousel carousel-dark slide">
+	<div class="carousel-inner">
+		@foreach (var group in Model.Select((course, index) => new { course, index })
+			          .GroupBy(x => x.index / 3)) // Группируем курсы по 6
+		{
+			<div class="carousel-item @(group.First().index == 0 ? "active" : "")">
+				<div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center gap-3 catalog__block">
+					@foreach (var course in group)
+					{
+						<div class="card course-card">
+							<div class="card-body">
+								<h5 class="card-title">@course.course.CourseName</h5>
+								<h6 class="card-subtitle mb-2 text-body-secondary">@course.course.Owner</h6>
+								<p class="card-text">@course.course.FullPrice</p>
+								<a href="#" class="card-link">Подробнее</a>
+							</div>
+						</div>
+					}
+				</div>
+			</div>
+		}
+	</div>
+	@if (Model.Count() > 6)
+	{
+		<button class="carousel-control-prev justify-content-start" type="button"
+		        data-bs-target="#carousel-@catId"
+		        data-bs-slide="prev">
+			<span class="custom-prev-icon" aria-hidden="true"></span>
+			<span class="visually-hidden">Previous</span>
+		</button>
+		<button class="carousel-control-next justify-content-end" type="button"
+		        data-bs-target="#carousel-@catId"
+		        data-bs-slide="next">
+			<span class="custom-next-icon" aria-hidden="true"></span>
+			<span class="visually-hidden">Next</span>
+		</button>
+	}
+</div>

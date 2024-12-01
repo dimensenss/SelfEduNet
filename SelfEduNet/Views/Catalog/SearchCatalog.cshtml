@@ -1,0 +1,103 @@
+﻿
+@{
+	Layout = "_Layout";
+}
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model IEnumerable<Course>
+
+<div class="marco-layout">
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-md-3 border-end ">
+				<div class="d-flex flex-column sticky-top stick-filter d-none d-md-flex">
+					@Html.Partial("_FiltersForm", new { form_type = "desktop" })
+				</div>
+			</div>
+
+			<div class="col-md-9">
+				<div class="catalog-main-content">
+					<div class="catalog-search-bar">
+						<div class="d-flex flex-row justify-content-center align-items-center catalog-search-form">
+							<form method="get" class="search-form d-flex align-items-center flex-fill"
+								  asp-action="SearchCatalog"
+								  id="courses-search-form-main">
+								<div class="input-group flex-fill me-3">
+									<span class="input-group-text">
+										<i class="fa-solid fa-magnifying-glass"></i>
+									</span>
+									<input type="text" name="Query" placeholder="Пошук..."
+										   class="form-control search-input"
+									> 
+									@* value="@Request.Query["q"]" *@
+								</div>
+								<div class="d-none d-md-flex">
+									<button class="button-3 flex-fill me-3">Пошук</button>
+								</div>
+								<div class="d-flex d-md-none">
+									<button class="filters-btn" type="button" data-bs-toggle="offcanvas"
+											data-bs-target="#offcanvasWithBothOptions"
+											aria-controls="offcanvasWithBothOptions">
+										<i class="fa-solid fa-filter"></i>
+									</button>
+								</div>
+							</form>
+						</div>
+					</div>
+					<div class="row">
+						<div class="active-filters d-flex flex-wrap mb-3">
+							<!-- Filter display will go here -->
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-12">
+							<div class="courses-list">
+
+								@foreach (var course in Model)
+								{
+									<a href="#" class="text-decoration-none">
+										<div class="card course-card">
+											<div class="card-body">
+												<div class="d-flex">
+													<!-- Изображение -->
+													@if (!string.IsNullOrEmpty(course.Preview))
+													{
+														<img src="@course.Preview" alt="@course.CourseName"
+															 class="img-fluid me-3 rounded card-image" />
+													}
+													else
+													{
+														<img src="https://dummyimage.com/450x300/dee2e6/6c757d.jpg"
+															 alt="@course.CourseName"
+															 class="img-fluid me-3 rounded card-image" />
+													}
+
+													<div>
+														<h5 class="card-title">@course.CourseName</h5>
+														<h6 class="card-subtitle mb-2 text-body-secondary">@course.Owner</h6>
+														<p class="card-text">@course.FullPrice</p>
+													</div>
+												</div>
+											</div>
+										</div>
+									</a>
+								}
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="offcanvas offcanvas-start" data-bs-scroll="true" tabindex="-1" id="offcanvasWithBothOptions"
+	 aria-labelledby="offcanvasWithBothOptionsLabel">
+	<div class="offcanvas-header">
+		<h5 class="offcanvas-title" id="offcanvasWithBothOptionsLabel">Backdrop with scrolling</h5>
+		<button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+	</div>
+	<div class="offcanvas-body">
+		@Html.Partial("_FiltersForm", new { form_type = "mobile" })
+	</div>
+</div>
+

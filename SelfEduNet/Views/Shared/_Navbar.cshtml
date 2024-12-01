@@ -9,7 +9,7 @@
                         <!-- Logo -->
                         <div class="col-xl-2 col-lg-2">
                             <div class="logo">
-                                <a href="@Url.Action("Index", "Home")" class="logo">
+                                <a asp-action="Index" asp-controller="Home" asp-area="" class="logo">
                                     /selfedu<br>
                                 </a>
                             </div>
@@ -45,7 +45,13 @@
                                             }
                                             else
                                             {
-                                                <li><a asp-controller="Account" asp-action="Logout">Вихід</a></li>
+	                                            @if (User.IsInRole("Admin"))
+	                                            {
+		                                            <li class="button-header margin-left">
+			                                            <a asp-area="Admin" asp-action="Index" asp-controller="Home" class="btn btn3">Адмін панель</a>
+                                                    </li>
+	                                            }
+                                                <li><a asp-area="" asp-controller="Account" asp-action="Logout">Вихід</a></li>
                                             }
                                         </ul>
                                     </nav>

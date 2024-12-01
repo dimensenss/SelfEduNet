@@ -1,0 +1,100 @@
+﻿@{
+	var formType = ViewData["form_type"]?.ToString() ?? "desktop";
+}
+
+<form method="get"
+	  action="@Url.Action("SearchCatalog", "Catalog")"
+	  id="catalog-search-form-@formType">
+	<div class="filter-section d-flex flex-column">
+		<div class="accordion" id="accordionPanelsStayOpenExample">
+			<div class="accordion-item">
+				<h2 class="accordion-header">
+					<button class="accordion-button" type="button" data-bs-toggle="collapse"
+							data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true"
+							aria-controls="panelsStayOpen-collapseOne">
+						<strong>Рівень</strong>
+					</button>
+				</h2>
+				<div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show">
+					<div class="accordion-body">
+						<select name="Difficulty" data-btn-label="Рівень" class="nice-select wide">
+							<option value="">Всі</option>
+							<option value="Beginner" data-btn-label="Починаючий">Починаючий</option>
+							<option value="Middle" data-btn-label="Середній">Середній</option>
+							<option value="Expert" data-btn-label="Продвинутий">Продвинутий</option>
+						</select>
+					</div>
+				</div>
+			</div>
+			<div class="accordion-item">
+				<h2 class="accordion-header">
+					<button class="accordion-button collapsed" type="button"
+							data-bs-toggle="collapse"
+							data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="false"
+							aria-controls="panelsStayOpen-collapseTwo">
+						<strong>Ціна</strong>
+					</button>
+				</h2>
+				<div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse show">
+					<div class="accordion-body">
+						<div class="d-flex justify-content-around align-items-center">
+							<div class="d-flex flex-column">
+								<label for="MinPrice-@formType" class="text-secondary">Від</label>
+								<input class="form-control" type="number" name="MinPrice"
+									   step="any" id="id_MinPrice-@formType" value="" data-btn-label="Від">
+							</div>
+
+							<div class="mx-2" style="padding-top: 2.2rem">-</div>
+
+							<div class="d-flex flex-column">
+								<label for="MaxPrice-@formType" class="text-secondary">До</label>
+								<input class="form-control" type="number" name="MaxPrice"
+									   step="any" id="id_MaxPrice-@formType" data-btn-label="До">
+							</div>
+						</div>
+
+					</div>
+				</div>
+			</div>
+			<div class="accordion-item">
+				<h4 class="accordion-header">
+					<div class="d-flex justify-content-between my-4"
+						 style="padding-left: 12px; padding-right: 12px;">
+						<strong>Безкоштовні</strong> <input type="checkbox" name="IsFree"
+													  id="id_is_free-@formType"
+													  data-btn-label="Безкоштовні">
+					</div>
+				</h4>
+			</div>
+			<div class="accordion-item">
+				<h4 class="accordion-header">
+					<div class="d-flex justify-content-between my-4"
+						 style="padding-left: 12px; padding-right: 12px;">
+						<strong>З сертифікатом</strong> <input type="checkbox" name="HaveCertificate"
+												   id="id_have_certificate-@formType"
+												   data-btn-label="З сертифікатом">
+					</div>
+				</h4>
+			</div>
+			<div class="accordion-item">
+				<h2 class="accordion-header">
+					<button class="accordion-button collapsed" type="button"
+							data-bs-toggle="collapse"
+							data-bs-target="#panelsStayOpen-collapseFourth" aria-expanded="false"
+							aria-controls="panelsStayOpen-collapseThree">
+						<strong>Мова</strong>
+					</button>
+				</h2>
+				<div id="panelsStayOpen-collapseFourth" class="accordion-collapse collapse show">
+					<div class="accordion-body">
+						<select name="Language" data-btn-label="Мова" class="nice-select wide">
+							<option value="">Всі</option>
+							<option value="Ukrainian" data-btn-label="Українська">Українська</option>
+							<option value="English" data-btn-label="Англійська">Англійська</option>
+						</select>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</form>

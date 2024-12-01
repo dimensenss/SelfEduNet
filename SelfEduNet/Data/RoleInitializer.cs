@@ -33,6 +33,8 @@ namespace SelfEduNet.Data
 					await userManager.AddToRoleAsync(adminUser, "Admin");
 				}
 			}
+
+
 		}
 	}
 }

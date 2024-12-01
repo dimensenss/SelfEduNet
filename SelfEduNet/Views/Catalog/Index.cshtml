@@ -1,0 +1,100 @@
+﻿ @model SelfEduNet.ViewModels.MainCatalogViewModel
+@{
+	Layout = "_Layout";
+}
+ <div class="catalog">
+
+	 <div class="catalog-search-bar">
+		 <div class="d-flex flex-row justify-content-center align-items-center catalog-search-form">
+			 <form method="get" class="mt-1 search-form d-flex align-items-center flex-fill"
+			       action="@Url.Action("SearchCatalog", "Catalog")" id="main-search-form">
+
+				 <div class="input-group flex-fill me-3">
+					 <span class="input-group-text"><i class="fa-solid fa-magnifying-glass"></i></span>
+					 <input type="text" name="Query" placeholder="Пошук..." class="form-control search-input"
+					        value="@Model.CourseFilter.Query">
+				 </div>
+
+				 <div class="d-none d-md-flex">
+					 <div class="flex-fill me-3">
+						 <select name="Language">
+							 <option value="">Будь-яка мова</option>
+							 <option value="English">English</option>
+							 <option value="Ukrainian">Українська</option>
+						 </select>
+					 </div>
+
+					 <div class="d-flex align-items-center me-3 flex-fill">
+						 <input type="checkbox" name="HaveCertificate">
+						 <span>З сертифікатами</span>
+					 </div>
+
+					 <div class="d-flex align-items-center me-3 flex-fill">
+						 <input type="checkbox" name="IsFree">
+						 <span>Безкоштовні</span>
+					 </div>
+				 </div>
+
+				 <button class="button-3 flex-fill me-3">Пошук</button>
+
+			 </form>
+		 </div>
+	 </div>
+
+	 <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+		 @foreach (var cat in Model.Categories)
+		 {
+			 <li class="nav-item" role="presentation">
+				 <button class="nav-link @(cat.Id == Model.Categories.First().Id ? "active" : "")" id="pills-@cat.Id-tab"
+				         data-bs-toggle="pill" data-bs-target="#pills-@cat.Id" data-cat-id="@cat.Id" type="button"
+				         role="tab" aria-controls="pills-@cat.Id-controls" aria-selected="true">
+					 @cat.Title
+				 </button>
+			 </li>
+		 }
+	 </ul>
+
+	 <div class="tab-content" id="pills-tabContent">
+		 @foreach (var cat in Model.Categories)
+		 {
+			 <div class="tab-pane fade show @(cat.Id == Model.Categories.First().Id ? "active" : "")" id="pills-@cat.Id" role="tabpanel" aria-labelledby="pills-@cat.Id-tab" tabindex="0">
+				@Html.Partial("_CoursesSliderPlaceholder")
+			 </div>
+		 }
+	 </div>
+
+
+ </div>
+<script src="~/js/vendor/jquery-1.12.4.min.js" asp-append-version="true"></script>
+<script>
+	$(document).ready(function () {
+		var loadedTabs = {};
+
+		function loadTabContent(cat_id) {
+			if (!loadedTabs[cat_id]) {
+				setTimeout(function () {
+					$.ajax({
+						type: 'GET',
+						url: "@Url.Action("GetCourses", "Catalog")",
+						data: {
+							catId: cat_id,
+						},
+						success: function (data) {
+							$('#pills-' + cat_id).html(data);
+							loadedTabs[cat_id] = true;
+						}
+					});
+				}, 300);
+			}
+		}
+
+		var activeTabCatId = parseInt($('button.nav-link.active').data('cat-id'), 10);
+		loadTabContent(activeTabCatId);
+
+		$('button[data-bs-toggle="pill"]').on('shown.bs.tab', function (e) {
+			var cat_id = parseInt($(e.target).data('cat-id'), 10);
+
+			loadTabContent(cat_id);
+		});
+	});
+</script>
