@@ -534,7 +534,7 @@ function updateFilterButtons(params) {
                         $('.search-input').val('');
                         searchInputCleared = true;
                     } else if (key === 'Language' || key === 'Difficulty') {
-                        resetSelectFields(key);
+                        //resetSelectFields(key);
                     }
                 }
             }).appendTo(filterContainer);
