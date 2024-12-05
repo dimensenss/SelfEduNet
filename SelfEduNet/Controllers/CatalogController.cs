@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SelfEduNet.Data;
 using SelfEduNet.Extensions;
-using SelfEduNet.Interfaces;
 using SelfEduNet.Models;
+using SelfEduNet.Repositories;
 using SelfEduNet.ViewModels;
 
 namespace SelfEduNet.Controllers
@@ -37,7 +37,7 @@ namespace SelfEduNet.Controllers
             var courses = _courseRepository.GetAllCoursesQuery().ApplyFilters(filter);
             return View(courses);
         }
-        public async Task<IActionResult> GetCourses([FromQuery] int catId)
+        public async Task<IActionResult> GetCoursesSlider([FromQuery] int catId)
         {
 	        var courses = await _courseRepository.GetCoursesByCategoryAsync(catId);
 
@@ -46,10 +46,10 @@ namespace SelfEduNet.Controllers
         }
 
         [HttpGet]
-		public IActionResult SearchCatalogCourseList([FromQuery] CourseFilter filter)
+		public IActionResult GetCoursesWithFilter([FromQuery] CourseFilter filter)
         {
 	        var courses = _courseRepository.GetAllCoursesQuery().ApplyFilters(filter);
-	        return PartialView("_SearchCatalogCourseList", courses);
+	        return PartialView("_GetCoursesWithFilter", courses);
         }
 
 	}

@@ -61,6 +61,7 @@ namespace SelfEduNet.Models
 
         public ICollection<CourseModules> Modules { get; set; } = new List<CourseModules>();
         public CourseInfo Info { get; set; }
+        public decimal Rating { get; set; }
 
         public override string ToString()
         {

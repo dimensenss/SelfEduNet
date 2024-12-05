@@ -1,10 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SelfEduNet.Data;
-using SelfEduNet.Interfaces;
 using SelfEduNet.Models;
 
 namespace SelfEduNet.Repositories
 {
+    public interface ICategoryRepository
+    {
+        Task<IEnumerable<Category>> GetAllCategoriesAsync();
+    }
     public class CategoryRepository:ICategoryRepository
     {
         private readonly ApplicationDbContext _context;

@@ -9,16 +9,18 @@
 		{
 			<div class="carousel-item @(group.First().index == 0 ? "active" : "")">
 				<div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center gap-3 catalog__block">
+					
 					@foreach (var course in group)
 					{
+						<a asp-controller="Course" asp-action="Detail" asp-route-id="@course.course.Id" asp-area="">
 						<div class="card course-card">
-							<div class="card-body">
-								<h5 class="card-title">@course.course.CourseName</h5>
-								<h6 class="card-subtitle mb-2 text-body-secondary">@course.course.Owner</h6>
-								<p class="card-text">@course.course.FullPrice</p>
-								<a href="#" class="card-link">Подробнее</a>
+								<div class="card-body">
+									<h5 class="card-title">@course.course.CourseName</h5>
+									<h6 class="card-subtitle mb-2 text-body-secondary">@course.course.Owner</h6>
+									<p class="card-text">@course.course.FullPrice</p>
+								</div>
 							</div>
-						</div>
+						 </a>
 					}
 				</div>
 			</div>

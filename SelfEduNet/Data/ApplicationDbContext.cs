@@ -31,8 +31,26 @@ namespace SelfEduNet.Data
 				.HasMany(c => c.Modules)
 				.WithOne(m => m.Course)
 				.HasForeignKey(m => m.CourseId);
+            modelBuilder.Entity<Course>()
+                .HasOne(c => c.Owner) // Один власник
+                .WithMany(u => u.OwnedCourses) // Має багато курсів
+                .HasForeignKey(c => c.OwnerId) // Зовнішній ключ
+                .OnDelete(DeleteBehavior.Restrict); // Заборонити каскадне видалення
+            // Налаштування зв'язку між AppUser і CourseUserRelation
+            modelBuilder.Entity<CourseUserRelation>()
+                .HasOne(c => c.User) // Один User
+                .WithMany(u => u.CourseRelations) // Має багато CourseRelations
+                .HasForeignKey(c => c.UserId) // Зовнішній ключ
+                .OnDelete(DeleteBehavior.Cascade); // Каскадне видалення (опціонально)
 
-			modelBuilder.Entity<CourseModules>()
+            // Налаштування зв'язку між Course і CourseUserRelation
+            modelBuilder.Entity<CourseUserRelation>()
+                .HasOne(c => c.Course) // Один Course
+                .WithMany() // (опціонально) можна додати UserRelations у модель Course
+                .HasForeignKey(c => c.CourseId) // Зовнішній ключ
+                .OnDelete(DeleteBehavior.Restrict); // Заборонити каскадне видалення
+
+            modelBuilder.Entity<CourseModules>()
 				.HasMany(cm => cm.Lessons)
 				.WithOne(l => l.CourseModule)
 				.HasForeignKey(l => l.CourseModuleId);

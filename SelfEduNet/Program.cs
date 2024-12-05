@@ -5,9 +5,9 @@ using SelfEduNet.Data;
 using SelfEduNet.Extensions;
 using SelfEduNet.Models;
 using System.Globalization;
+using EduProject.Helpers;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Localization;
-using SelfEduNet.Interfaces;
 using SelfEduNet.Services;
 using SelfEduNet.Repositories;
 
@@ -17,6 +17,7 @@ builder.Services.AddScoped<IEmailSender, EmailSenderService>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddTransient<Seeder>();
+builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));

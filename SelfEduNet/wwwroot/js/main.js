@@ -566,7 +566,7 @@ function updateFilterButtons(params) {
     // Обновление поиска
     function updateSearch(params) {
         updateUrl(params);
-        sendAjaxRequest('/Catalog/SearchCatalogCourseList', params, function (data) {
+        sendAjaxRequest('/Catalog/GetCoursesWithFilter', params, function (data) {
             $('.courses-list').empty().html(data);
             updateFilterButtons(params);
             updateFormFromParams(params);

@@ -1,10 +1,16 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SelfEduNet.Data;
-using SelfEduNet.Interfaces;
 using SelfEduNet.Models;
 
 namespace SelfEduNet.Repositories
 {
+    public interface ICourseRepository
+    {
+        Task<IEnumerable<Course>> GetAllCoursesAsync();
+        IQueryable<Course> GetAllCoursesQuery();
+        Task<IEnumerable<Course>> GetCoursesByCategoryAsync(int catId);
+        Task<Course> GetCourseByIdAsync(int courseId);
+    }
     public class CourseRepository: ICourseRepository
     {
         private readonly ApplicationDbContext _context;
@@ -34,6 +40,11 @@ namespace SelfEduNet.Repositories
 		public IQueryable<Course> GetAllCoursesQuery()
         {
             return _context.Courses.AsQueryable();
+        }
+
+        public async Task<Course> GetCourseByIdAsync(int courseId)
+        {
+            return await _context.Courses.FirstOrDefaultAsync(c => c.Id == courseId);
         }
     }
 }
