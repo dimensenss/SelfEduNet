@@ -60,6 +60,23 @@ namespace SelfEduNet.Data
 				.WithMany(c => c.Children)
 				.HasForeignKey(c => c.ParentId)
 				.OnDelete(DeleteBehavior.Restrict);
+
+			modelBuilder.Entity<CourseInfo>()
+				.HasMany(ci => ci.Authors) // CourseInfo has many authors
+				.WithMany(u => u.AuthoredCourses) // AppUser authors many CourseInfos
+				.UsingEntity<Dictionary<string, object>>(
+					"CourseInfoAuthor", // Name of the join table
+					j => j
+						.HasOne<AppUser>() // Join table references AppUser
+						.WithMany() // No navigation property in AppUser for join table
+						.HasForeignKey("AuthorId") // Foreign key in the join table
+						.OnDelete(DeleteBehavior.Cascade),
+					j => j
+						.HasOne<CourseInfo>() // Join table references CourseInfo
+						.WithMany() // No navigation property in CourseInfo for join table
+						.HasForeignKey("CourseInfoId") // Foreign key in the join table
+						.OnDelete(DeleteBehavior.Cascade)
+				);
 		}
 	}
 }

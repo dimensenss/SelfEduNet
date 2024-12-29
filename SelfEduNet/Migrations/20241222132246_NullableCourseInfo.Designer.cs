@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SelfEduNet.Data;
 
@@ -11,9 +12,11 @@ using SelfEduNet.Data;
 namespace SelfEduNet.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241222132246_NullableCourseInfo")]
+    partial class NullableCourseInfo
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,21 +24,6 @@ namespace SelfEduNet.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("CourseInfoAuthor", b =>
-                {
-                    b.Property<string>("AuthorId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("CourseInfoId")
-                        .HasColumnType("int");
-
-                    b.HasKey("AuthorId", "CourseInfoId");
-
-                    b.HasIndex("CourseInfoId");
-
-                    b.ToTable("CourseInfoAuthor");
-                });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
@@ -182,6 +170,9 @@ namespace SelfEduNet.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("CourseInfoId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -229,6 +220,8 @@ namespace SelfEduNet.Migrations
                         .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CourseInfoId");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -342,6 +335,7 @@ namespace SelfEduNet.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("PreviewVideo")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Workload")
@@ -449,21 +443,6 @@ namespace SelfEduNet.Migrations
                     b.ToTable("Lessons");
                 });
 
-            modelBuilder.Entity("CourseInfoAuthor", b =>
-                {
-                    b.HasOne("SelfEduNet.Models.AppUser", null)
-                        .WithMany()
-                        .HasForeignKey("AuthorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SelfEduNet.Models.CourseInfo", null)
-                        .WithMany()
-                        .HasForeignKey("CourseInfoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -513,6 +492,13 @@ namespace SelfEduNet.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("SelfEduNet.Models.AppUser", b =>
+                {
+                    b.HasOne("SelfEduNet.Models.CourseInfo", null)
+                        .WithMany("Authors")
+                        .HasForeignKey("CourseInfoId");
                 });
 
             modelBuilder.Entity("SelfEduNet.Models.Category", b =>
@@ -608,10 +594,14 @@ namespace SelfEduNet.Migrations
 
             modelBuilder.Entity("SelfEduNet.Models.Course", b =>
                 {
-                    b.Navigation("Info")
-                        .IsRequired();
+                    b.Navigation("Info");
 
                     b.Navigation("Modules");
+                });
+
+            modelBuilder.Entity("SelfEduNet.Models.CourseInfo", b =>
+                {
+                    b.Navigation("Authors");
                 });
 
             modelBuilder.Entity("SelfEduNet.Models.CourseModules", b =>
