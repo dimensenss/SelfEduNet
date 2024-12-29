@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using SelfEduNet.Data.Enum;
 
 namespace SelfEduNet.Models
 {
@@ -7,23 +8,7 @@ namespace SelfEduNet.Models
     {
         public int Id { get; set; }
 
-        public enum LanguageType
-        {
-            [Display(Name = "Українська")]
-            Ukrainian,
-            [Display(Name = "Англійська")]
-            English
-        }
-
-        public enum DifficultyType
-        {
-            [Display(Name = "Починаючий")]
-            Beginner,
-            [Display(Name = "Середній")]
-            Middle,
-            [Display(Name = "Продвинутий")]
-            Expert
-        }
+        
 
         [Required]
         public string OwnerId { get; set; }
@@ -51,7 +36,7 @@ namespace SelfEduNet.Models
 
         public bool HaveCertificate { get; set; } = false;
 
-        public string Preview { get; set; } // Путь к файлу изображения
+        public string? Preview { get; set; } // Путь к файлу изображения
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

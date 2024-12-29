@@ -21,7 +21,7 @@ namespace SelfEduNet.Controllers
         }
         public async Task<IActionResult> Index()
         {
-            var dto = new MainCatalogViewModel
+            var dto = new CourseBrowseViewModel
             {
                 Courses = await _courseRepository.GetAllCoursesAsync(),
                 Categories = await _categoryRepository.GetAllCategoriesAsync(),

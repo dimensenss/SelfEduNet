@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SelfEduNet.Models
 {
@@ -9,6 +10,7 @@ namespace SelfEduNet.Models
 
         [Required]
         public int CourseId { get; set; }
+        [ForeignKey("CourseId")]
         public Course Course { get; set; }
 
         [Range(0, int.MaxValue)]
@@ -16,6 +18,6 @@ namespace SelfEduNet.Models
 
         public ICollection<AppUser> Authors { get; set; } = new List<AppUser>();
 
-        public string PreviewVideo { get; set; } // URL для превью-видео
+        public string? PreviewVideo { get; set; } // URL для превью-видео
     }
 }
