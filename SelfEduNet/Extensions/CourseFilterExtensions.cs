@@ -1,4 +1,5 @@
 ﻿using Microsoft.IdentityModel.Tokens;
+using SelfEduNet.Data.Enum;
 using SelfEduNet.Models;
 using SelfEduNet.ViewModels;
 using static SelfEduNet.Models.Course;
@@ -57,13 +58,13 @@ namespace SelfEduNet.Extensions
                 query = query.Where(course => course.OwnerId.Contains(filter.Owner));
             }
 
-            if (filter.Status.HasValue)
+            if (!string.IsNullOrEmpty(filter.Status) && Enum.TryParse<StatusType>(filter.Status, true, out var status))
             {
-                if (filter.Status.Value == 1)
+                if (filter.Status == "Published")
                 {
                     query = query.Where(course => course.IsPublished);
                 }
-                else if (filter.Status.Value == 2)
+                if (filter.Status == "Draft")
                 {
                     query = query.Where(course => !course.IsPublished);
                 }

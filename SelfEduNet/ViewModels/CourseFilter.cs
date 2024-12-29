@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using SelfEduNet.Data.Enum;
 using SelfEduNet.Extensions;
 using SelfEduNet.Models;
 using static SelfEduNet.Models.Course;
@@ -17,6 +18,6 @@ namespace SelfEduNet.ViewModels
         public string? Language { get; set; }
         public string? Difficulty { get; set; }
         public string? Owner { get; set; }
-        public int? Status { get; set; }
+        public string? Status { get; set; }
     }
 }

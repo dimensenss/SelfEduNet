@@ -2,9 +2,7 @@
 	var formType = ViewData["form_type"]?.ToString() ?? "desktop";
 }
 
-<form method="get"
-	  action="@Url.Action("SearchCatalog", "Catalog")"
-	  id="catalog-search-form-@formType">
+<form method="get" asp-action="SearchCatalog" asp-controller="Catalog" id="catalog-search-form-@formType">
 	<div class="filter-section d-flex flex-column">
 		<div class="accordion" id="accordionPanelsStayOpenExample">
 			<div class="accordion-item">
