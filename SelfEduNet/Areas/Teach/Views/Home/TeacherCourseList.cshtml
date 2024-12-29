@@ -1,0 +1,81 @@
+﻿@using SelfEduNet.Data.Enum
+@model IEnumerable<Course>
+@{
+	ViewBag.Title = "title";
+	Layout = "_Layout";
+}
+
+<div class="marco-layout">
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-md-3 border-end ">
+				<div class="d-flex flex-column sticky-top stick-filter d-none d-md-flex">
+					@* 					@Html.Partial("_FiltersForm", new { form_type = "desktop" })
+					*@
+				</div>
+			</div>
+
+			<div class="col-md-9">
+				<div class="catalog-main-content">
+					<div class="catalog-search-bar">
+						<div class="d-flex flex-row justify-content-center align-items-center catalog-search-form">
+							@Html.Partial("_TeachFiltersForm")
+						</div>
+					</div>
+					<div class="row">
+						<div class="active-filters d-flex flex-wrap mb-3">
+							<!-- Filter display will go here -->
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-12">
+							<div class="courses-list">
+								@Html.Partial("_GetCoursesWithEdit")
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script src="~/js/vendor/jquery-1.12.4.min.js" asp-append-version="true"></script>
+
+<script>
+	$(document).ready(function () {
+		const forms = $('.teach-courses-search-form');
+
+		function applyFilters() {
+			$.ajax({
+				url: "@Url.Action("RenderTeacherCourses", "Home", new { area = "Teach" })",
+				type: 'GET',
+				data: forms.serialize(),
+				success: function (response) {
+					$('.courses-list').html(response);
+				},
+				error: function (xhr) {
+					const response = xhr.responseJSON;
+					const errorMessage = response && response.message ? response.message : "An unexpected error occurred.";
+					$.notify({
+						message: response.message
+					}, {
+						type: 'danger'
+					});
+				}
+			});
+		}
+
+		$('.teach-courses-search-form').on('keydown', function (event) {
+			if (event.key === 'Enter') {
+				event.preventDefault();
+				applyFilters();
+			}
+		});
+
+		forms.on('submit', function (event) {
+			event.preventDefault();
+			applyFilters();
+		});
+	});
+</script>
