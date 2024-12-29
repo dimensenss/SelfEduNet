@@ -26,8 +26,7 @@
                                                 // Предположим, что у нас есть некая переменная userHasCourses
                                                 bool userHasCourses = true; // Это можно заменить логикой проверки наличия курсов у пользователя
                                                 <li>
-                                                    <a href="">
-                                                        @* @Url.Action(userHasCourses ? "Courses" : "TeachPromo", "Teach") *@
+                                                    <a asp-area="Teach" asp-action="Index" asp-controller="Home">
                                                         Викладання
                                                     </a>
                                                 </li>

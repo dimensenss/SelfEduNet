@@ -1,0 +1,111 @@
+﻿@model IEnumerable<Course>
+
+@if (!Model.Any())
+{
+	<p class="text-center fs-2 fw-bold">Нічого не знайдено</p>
+}
+
+@foreach (var course in Model)
+{
+	<div class="card mb-3">
+		<div class="card-body">
+			<div class="d-flex justify-content-between">
+				<div class="d-flex mx-2">
+					<div class="course-img">
+						@if (!string.IsNullOrEmpty(course.Preview))
+						{
+							<img src="@course.Preview" alt="@course.CourseName"
+							     class="img-fluid me-3 rounded card-image" />
+						}
+						else
+						{
+							<img src="https://dummyimage.com/450x300/dee2e6/6c757d.jpg"
+							     alt="@course.CourseName"
+							     class="img-fluid me-3 rounded card-image" />
+						}
+					</div>
+					<div class="mx-2">
+						<h5 class="card-title">@course.CourseName</h5>
+						<h6 class="card-subtitle mb-2 text-body-secondary">@course.Owner</h6>
+					</div>
+				</div>
+				<div class="d-flex mx-2">
+					<div class="dropdown mx-2 fs-3">
+						<a class="dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+							<i class="fa-solid fa-list" style="color: #000000;"></i>
+						</a>
+						<ul class="dropdown-menu">
+							<li>
+								@if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+								{
+									<a asp-action="EditInfo" asp-controller="CoursesDashboard" asp-area="Admin" asp-route-id="@course.Id" class="dropdown-item fs-5">
+										<div class="d-flex justify-content-between">
+											Редагувати
+											<i class="fa-solid fa-pen-to-square"></i>
+										</div>
+									</a>
+								}
+							</li>
+							<li>
+								<a class="dropdown-item fs-5" data-delete-course-id="@course.Id">
+									<div class="d-flex justify-content-between">
+										Видалити
+										<i class="fa-solid fa-trash"></i>
+									</div>
+									
+								</a>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+<script src="~/js/vendor/jquery-1.12.4.min.js" asp-append-version="true"></script>
+
+<script>
+	$(document).ready(function () {
+		$(document).on('click', 'a[data-delete-course-id]', function () {
+			var courseId = $(this).data('delete-course-id');
+			$.ajax({
+				url: "@Url.Action("DeleteCourse", "CoursesDashboard", new { area = "Admin" })",
+				type: 'POST',
+				data: {
+					courseId: courseId,
+				},
+				success: function (response) {
+					$.notify({
+						message: response.message
+					}, {
+						type: 'success'
+					});
+					renderCoursesList();
+				},
+				error: function (xhr) {
+					const response = xhr.responseJSON;
+					const errorMessage = response && response.message ? response.message : "An unexpected error occurred.";
+					$.notify({
+						message: response.message
+					}, {
+						type: 'danger'
+					});
+				}
+			});
+		});
+
+		function renderCoursesList() {
+			$.ajax({
+				url: "@Url.Action("RenderCoursesList", "CoursesDashboard", new { area = "Admin" })",  // The action URL in your controller
+				type: 'GET',
+				data: { },
+				success: function (response) {
+					$('#courses-container').html(response);
+				},
+				error: function (xhr, status, error) {
+					console.error("Error loading courses list: ", status, error);
+				}
+			});
+		}
+	});
+</script>
