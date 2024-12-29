@@ -6,6 +6,7 @@ using SelfEduNet.Extensions;
 using SelfEduNet.Models;
 using System.Globalization;
 using EduProject.Helpers;
+using EduProject.Services;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Localization;
 using SelfEduNet.Services;
@@ -16,6 +17,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddScoped<IEmailSender, EmailSenderService>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IPhotoService, PhotoService>();
 builder.Services.AddTransient<Seeder>();
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -35,7 +37,11 @@ builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-
+builder.Services.ConfigureApplicationCookie(options =>
+{
+	options.LoginPath = "/Identity/Account/Login";
+	options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+});
 
 builder.Services.AddMemoryCache();
 builder.Services.AddSession();
@@ -43,8 +49,9 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     .AddCookie(
     options =>
     {
-        options.LoginPath = "/Account/Login";
-    })
+	    options.LoginPath = "/Identity/Account/Login";
+        options.AccessDeniedPath = "/Identity/Account/AccessDenied"; 
+	})
     .AddGoogle(googleOptions =>
     {
         googleOptions.ClientId = builder.Configuration.GetValue<string>("GoogleOAuthSettings:ClientId");
@@ -89,7 +96,7 @@ app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllerRoute(
         name: "areas",
-        pattern: "{area:exists}/{controller}/{action}/{id?}");
+        pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
 
     endpoints.MapControllerRoute(
         name: "default",

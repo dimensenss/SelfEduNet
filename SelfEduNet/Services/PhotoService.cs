@@ -7,7 +7,7 @@ using EduProject.Helpers;
 namespace EduProject.Services
 {
 
-    interface IPhotoService
+    public interface IPhotoService
     {
         Task<ImageUploadResult> AddPhotoAsync(IFormFile file);
         Task<DeletionResult> DeletePhotoAsync(string publicId);
