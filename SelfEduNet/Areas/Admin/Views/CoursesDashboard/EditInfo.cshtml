@@ -1,0 +1,326 @@
+﻿@{
+	Layout = "_Layout";
+}
+
+@using Microsoft.AspNetCore.Mvc.TagHelpers 
+@using SelfEduNet.Data.Enum
+@model SelfEduNet.Areas.Admin.ViewModels.EditCourseViewModel
+
+<div class="d-flex justify-content-center">
+	<div class="col-md-7">
+		<div class="main-content justify-content-center">
+			<form method="post" asp-action="EditInfo"
+			      enctype="multipart/form-data">
+				<input type="hidden" asp-for="Id"/>
+				<input type="hidden" asp-for="PreviewURL"/>
+				
+				<div class="row mb-50">
+					<div class="col-md-6">
+						<div id="image-box" class="upload-box @(string.IsNullOrEmpty(Model.PreviewURL) ? "upload-box-border mb-3" : "mb-3")">
+							@if (!string.IsNullOrEmpty(Model.PreviewURL))
+							{
+								<img id="imagePreview" src="@Model.PreviewURL" alt="@Model.CourseName"
+								     class="preview-img img-fluid rounded ">
+							}
+							else
+							{
+								<div class="text-center">Завантажте прев'ю курса</div>
+								<img id="imagePreview" src="" alt="imagePreview" class="d-none">
+							}
+							<span class="upload-image-placeholder d-block"></span>
+						</div>
+						<div class="mb-20">
+							<input asp-for="Preview" type="file" id="id_preview" class="form-control" placeholder="Preview">
+							<span asp-validation-for="Preview" class="text-danger"></span>
+						</div>
+						<div class="error-container" id="error_preview"></div>
+					</div>
+					<div class="col-md-6">
+						<div id="video-box"
+						     class="upload-box @(string.IsNullOrEmpty(Model.PreviewVideo) ? "upload-box-border" : "mb-3" )">
+							@if (!string.IsNullOrEmpty(Model.PreviewVideo))
+							{
+								<iframe id="youtubePlayer" width="100%" height="315"
+								        src=@YouTubeHelper.GetYouTubeEmbedUrl(Model.PreviewVideo)
+								        frameborder="0"
+								        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+								        allowfullscreen></iframe>
+							}
+							else
+							{
+								<span class="upload-video-placeholder d-block">🎥</span>
+							}
+						</div>
+						<input asp-for="PreviewVideo" type="text" class="form-control" id="id_preview_video" placeholder="Введіть посилання на YouTube">
+						<span asp-validation-for="PreviewVideo" class="text-danger"></span>
+					</div>
+
+				</div>
+
+				<div class="row mb-30">
+					<div class="col-md-12">
+						<label asp-for="CourseName">Заголовок</label>
+						<input asp-for="CourseName" type="text" class="form-control" placeholder="Введіть заголовок">
+						<span asp-validation-for="CourseName" class="text-danger"></span>
+					</div>
+				</div>
+
+				<div class="row mb-30">
+					<div class="col-md-12">
+						<label asp-for="Description">Опис</label>
+						<input asp-for="Description" type="text" class="form-control" placeholder="Введіть опис">
+						<span asp-validation-for="Description" class="text-danger"></span>
+					</div>
+				</div>
+
+				<div class="row mb-30">
+					<div class="col-md-12 ">
+						<div class="row align-items-baseline">
+							<div class="col-md-3 me-3">
+								<div class="d-flex flex-column">
+									<label asp-for="Language">Language</label>
+									<select asp-for="Language" asp-items="@(new SelectList(Enum.GetValues(typeof(LanguageType))))" class="form-control">
+										<option>--Select--</option>
+									</select>
+									<span asp-validation-for="Language" class="text-danger"></span>
+								</div>
+							</div>
+							<div class="col-md-3 me-3">
+								<div class="d-flex flex-column">
+									<label asp-for="Difficulty">Difficulty</label>
+									<select asp-for="Difficulty" asp-items="@(new SelectList(Enum.GetValues(typeof(DifficultyType))))" class="form-control">
+										<option>--Select--</option>
+									</select>
+									<span asp-validation-for="Difficulty" class="text-danger"></span>
+								</div>
+							</div>
+							<div class="col-md-3 me-3">
+								<div class="d-flex flex-column">
+									<label asp-for="Workload">Часи у неділю</label>
+									<input asp-for="Workload" type="text" class="form-control nice-select" placeholder="Enter workload">
+									<span asp-validation-for="Workload" class="text-danger"></span>
+								</div>
+								
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row mb-30">
+					<div class="row">
+						<h3>Автори</h3>
+						<p class="text-secondary">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aliquam
+							animi
+							aut
+							harum impedit incidunt
+							inventore magni numquam omnis quidem totam! Accusantium commodi corporis dignissimos
+							facilis
+							illum
+							laborum molestias suscipit, voluptate.</p>
+					</div>
+
+					<div class="row col-md-6">
+						
+						@Html.Partial("_AuthorsContainer")
+
+						
+					</div>
+					
+					<div class="block">
+						<select id="authorSelect" class="form-control" style="width:320px;"></select>
+						<button id="addAuthorButton" type="button" class="button-3">Додати автора</button>
+						<span asp-validation-for="Authors" class="text-danger"></span>
+					</div>
+					
+					
+				</div>
+				
+				<div class="course-editor-menu">
+					<div class="course-editor-menu-inner">
+						<button type="submit" class="button-3" id="save-button" style="background-color:#38a73a;">
+							Зберегти зміни
+						</button>
+					</div>
+				</div>
+				<div class="row mb-30">
+					<div class="col-md-12">
+						<label asp-for="IsPublished">Опубліковано</label>
+						<input asp-for="IsPublished" type="checkbox" placeholder="Опубліковано">
+						<span asp-validation-for="IsPublished" class="text-danger"></span>
+					</div>
+				</div>
+				<div class="row mb-30">
+					<div class="col-md-12">
+						<label asp-for="HaveCertificate">З сертифікатом</label>
+						<input asp-for="HaveCertificate" type="checkbox" placeholder="З сертифікатом">
+						<span asp-validation-for="HaveCertificate" class="text-danger"></span>
+					</div>
+				</div>
+
+			</form>
+		</div>
+	</div>
+</div>
+<script src="~/js/vendor/jquery-1.12.4.min.js" asp-append-version="true"></script>
+
+<script>
+	
+
+
+    $(document).ready(function () {
+
+		// Initialize the select2 dropdown
+		$('#authorSelect').select2({
+			ajax: {
+				url: "@Url.Action("SearchAuthors", "CoursesDashboard", new { area = "Admin" })", // Endpoint for searching authors
+				dataType: 'json',
+				delay: 250,
+				data: function (params) {
+					return {
+						name: params.term // Search term sent to the backend
+					};
+				},
+				processResults: function (data) {
+					return {
+						results: data.results // Format expected by select2
+					};
+				},
+				cache: true
+			},
+			placeholder: "Пошук автора за ім'ям",
+			minimumInputLength: 3,
+			language: {
+				inputTooShort: function (args) {
+					return `Введіть ${args.minimum} або більше символів`; // Ваш текст
+				}
+			}
+		});
+
+		function renderAuthorsList() {
+			$.ajax({
+				url: "@Url.Action("RenderAuthorsList", "CoursesDashboard", new { area = "Admin" })",  // The action URL in your controller
+				type: 'GET',
+				data: { courseId: @Model.Id},
+				success: function (response) {
+					$('#authors-container').html(response);
+				},
+				error: function (xhr, status, error) {
+					console.error("Error loading authors list: ", status, error);
+				}
+			});
+		}
+
+		// Handle the add author button click
+		$('#addAuthorButton').on('click', function () {
+
+			const selectedAuthorId = $('#authorSelect').val(); // Get the selected author ID
+			if (!selectedAuthorId) {
+				$.notify({
+					message: 'Please select an author before adding.'
+				}, {
+					type: 'warning'
+				});
+
+				return;
+			}
+
+			// Make an AJAX request to add the author
+			$.ajax({
+				url: "@Url.Action("AddCourseAuthor", "CoursesDashboard", new { area = "Admin" })",
+				type: 'POST',
+				data: {
+					courseId: "@Model.Id",
+					authorId: selectedAuthorId
+				},
+				success: function (response) {
+					$.notify({
+						message: response.message
+					}, {
+						type: 'success'
+					});
+
+					renderAuthorsList();
+
+				},
+				error: function (xhr) {
+					const response = xhr.responseJSON;
+					const errorMessage = response && response.message ? response.message : "An unexpected error occurred.";
+					$.notify({
+						message: response.message
+					}, {
+						type: 'danger'
+					});
+				}
+			});
+		});
+
+            $(document).on('click', 'a[data-author-id]', function () {
+                var author = $(this).data('author-id');
+				$.ajax({
+					url: "@Url.Action("DeleteCourseAuthor", "CoursesDashboard", new { area = "Admin" })",
+					type: 'POST',
+					data: {
+						courseId: "@Model.Id",
+						authorId: author
+					},
+					success: function (response) {
+						$.notify({
+							message: response.message
+						}, {
+							type: 'success'
+						});
+						renderAuthorsList();
+					},
+					error: function (xhr) {
+						const response = xhr.responseJSON;
+						const errorMessage = response && response.message ? response.message : "An unexpected error occurred.";
+						$.notify({
+							message: response.message
+						}, {
+							type: 'danger'
+						});
+					}
+				});
+            });
+            document.getElementById('id_preview').addEventListener('change', function (event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        document.getElementById('imagePreview').src = e.target.result;
+                        document.getElementById('imagePreview').classList.remove('d-none');
+                        document.getElementById('imagePreview').classList.add('img-fluid');
+                        document.querySelector('.upload-image-placeholder').classList.add('d-none');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            function getYouTubeVideoId(url) {
+                var pattern = /(?:v=|\/)([0-9A-Za-z_-]{11}).*/;
+                var match = url.match(pattern);
+                return match ? match[1] : null;
+            }
+
+            // Функция для вставки плеера YouTube
+            function updateYouTubePlayer(videoUrl) {
+                var videoId = getYouTubeVideoId(videoUrl);
+                if (videoId) {
+                    var embedUrl = "https://www.youtube.com/embed/" + videoId;
+                    var iframeHtml = '<iframe id="youtubePlayer" width="100%" height="315" src="' + embedUrl +
+                        '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+                    $('#video-box').html(iframeHtml);  // Вставляем плеер
+                } else {
+                    $('#video-box').html('<span class="upload-video-placeholder d-block">🎥</span>'); // Если невалидная ссылка
+                }
+            }
+
+            // Отслеживаем изменения в поле с ссылкой на видео
+            $('#id_preview_video').on('input', function () {
+                var videoUrl = $(this).val();
+                updateYouTubePlayer(videoUrl);
+            });
+
+
+        });
+</script>
+
