@@ -7827,3 +7827,6 @@ b, sup, sub, u, del {
     transition: transform 0.3s;
     color:#e219ff;
 }
+.select2-container .select2-selection--single {
+    height: 42px !important;
+}

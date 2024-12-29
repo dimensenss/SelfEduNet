@@ -1,0 +1,26 @@
+﻿
+.course-img {
+    width: 200px;
+}
+.main-content {
+    padding: 32px 0 64px;
+    padding-left: 32px;
+}
+
+.upload-box {
+    width: auto;
+    height: auto;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.3s ease;
+}
+
+.upload-box-border {
+    border: 2px dashed #ccc;
+}
+
+.upload-box:hover {
+    border-color: #007bff;
+}

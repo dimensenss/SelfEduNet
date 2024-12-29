@@ -590,34 +590,7 @@ function updateFilterButtons(params) {
     updateFormFromParams(initialParams);
 });
 
-// Обработка формы поиска по курсам для владельца
-$(document).ready(function () {
-    const forms = $('#teach-courses-search-form');
-    const userOwner = $('#teach-courses-search-form').find('#user_owner').val();
 
-    forms.on('submit', function (event) {
-        event.preventDefault();
-        const form = $(this);
-        const params = serializeFormToParams(form);
-
-        const searchQuery = form.find('input[name="q"]').val();
-        if (searchQuery) {
-            params.set('q', searchQuery);
-            params.set('owner', userOwner);
-        } else {
-            params.delete('q');
-            params.delete('owner');
-        }
-
-        const statusValue = form.find('select[name="status"]').val();
-        params.set('status', statusValue);
-
-        updateUrl(params);
-        sendAjaxRequest('/teach/api/v1/teach-search/', params, function (data) {
-            $('.courses-list').empty().html(data);
-        });
-    });
-});
  (function () {
         'use strict'
 
