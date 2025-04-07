@@ -1,0 +1,334 @@
+﻿@{
+	Layout = "_Layout";
+}
+@model SelfEduNet.ViewModels.CourseContentViewModel
+
+<div class="marco-layout">
+	<div class="container-fluid">
+		<div class="row">
+			@Html.Partial("_TeachSidepanelExtended", @Model.Id)
+			<div class="col-md-9">
+				<div class="catalog-main-content">
+
+					<div class="mb-3">
+						<h1>Програма курсу</h1>
+					</div>
+
+					@Html.Partial("_TeachAllModules")
+
+					<button type="button" name="create-module" class="button-3">
+						<i class="fa-solid fa-plus"></i> Додати модуль
+					</button>
+					<div class="course-editor-menu">
+						<div class="course-editor-menu-inner">
+							<button type="submit" class="button-3" id="save-all-modules" style="background-color:#38a73a;">
+								Зберегти
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section Scripts {
+
+	<script>
+		$(document).ready(function () {
+			$(document).on("click", "#save-all-modules", function () {
+				var modules = [];
+				var isValid = true;
+
+				// Проверяем валидацию каждой формы
+				$("[class^='module-form-']").each(function () {
+					var form = $(this);
+
+					// Запускаем валидацию
+					if (!form.valid()) {
+						isValid = false;
+						return false; // Прекращаем обработку, если есть ошибки
+					}
+
+					var moduleData = {};
+					form.serializeArray().forEach(function (field) {
+						moduleData[field.name] = field.value;
+					});
+					modules.push(moduleData);
+				});
+
+				if (!isValid) {
+					alert("Щось сталося не так!");
+					return;
+				}
+				console.log(modules);
+				$.ajax({
+					url: "@Url.Action("SaveModules", "TeachCourse", new { area = "Teach" })",
+					type: "POST",
+					data: JSON.stringify(modules),
+					contentType: "application/json",
+					success: function (response) {
+						$.notify({
+							message: response.message
+						}, {
+							type: 'success'
+						});
+						renderModulesList();
+					},
+					error: function (xhr) {
+
+						if (xhr.responseJSON && xhr.responseJSON.error_module_index !== undefined) {
+							var errorIndex = xhr.responseJSON.error_module_index;
+
+							$(".needs-validation").removeClass("was-validated");
+							$(".form-control").removeClass("is-invalid");
+							var form = $(".module-form-" + errorIndex);
+							// form.addClass("was-validated");
+							form.find(".form-control").addClass("is-invalid");
+							$.notify({
+								message: xhr.responseJSON.message
+							}, {
+								type: 'danger'
+							});
+						} else {
+							$.notify({
+								message: xhr.responseJSON?.message || "Виникла помилка!"
+							}, {
+								type: 'danger'
+							});
+						}
+					}
+				});
+
+			});
+
+			function renderModulesList() {
+				$.ajax({
+					url: "@Url.Action("RenderModulesList", "TeachCourse", new { area = "Teach" })",  // The action URL in your controller
+					type: 'GET',
+					data: { courseId: "@Model.Id" },
+					success: function (response) {
+						$('#modules-container').html(response);
+					},
+					error: function (xhr, status, error) {
+						console.error("Error loading modules list: ", status, error);
+					}
+				});
+			}
+
+			$(document).on("click", 'button[name="create-module"]', function (event) {
+				event.preventDefault();
+				$.ajax({
+					url: "@Url.Action("CreateModule", "TeachCourse", new { area = "Teach" })",
+					type: "POST",
+					data: { courseId: "@Model.Id" },
+					success: function (response) {
+						$.notify({
+							message: response.message
+						}, {
+							type: 'success'
+						});
+						renderModulesList();
+					},
+					error: function (xhr) {
+						$.notify({
+							message: response.message
+						}, {
+							type: 'danger'
+						});
+						console.log(xhr);
+					}
+				});
+			});
+
+			$(document).on("click", 'button[name^="create-lesson"]', function (event) {
+				event.preventDefault();
+				const formId = $(this).data('lesson-form-id').toString();
+				const moduleId = $(this).data('module-id').toString();
+
+				var form = $('#lesson-form-' + formId);
+				var title = form.find("input[name='Title']").val();
+
+				console.log(title);
+				$.ajax({
+					url: "@Url.Action("CreateUpdateLesson", "TeachCourse", new { area = "Teach" })",
+					type: "POST",
+					data: {
+						moduleId: moduleId,
+						title: title,
+					},
+					success: function (response) {
+						$.notify({
+							message: response.message
+						}, {
+							type: 'success'
+						});
+						renderModulesList();
+					},
+					error: function (xhr) {
+						$.notify({
+							message: response.message
+						}, {
+							type: 'danger'
+						});
+						console.log(xhr);
+					}
+				});
+			});
+			$(document).on("click", 'button[name^="update-lesson-"]', function (event) {
+				event.preventDefault();
+				const formId = $(this).data('lesson-form-id').toString();
+				const moduleId = $(this).data('module-id').toString();
+
+				var form = $('#update-lesson-form-' + formId);
+				var title = form.find("input[name='Title']").val();
+				const lessonId = form.find("input[name='LessonId']").val() || null;
+
+				$.ajax({
+					url: "@Url.Action("CreateUpdateLesson", "TeachCourse", new { area = "Teach" })",
+					type: "POST",
+					data: {
+						moduleId: moduleId,
+						lessonId: lessonId,
+						title: title,
+					},
+					success: function (response) {
+						$.notify({
+							message: response.message
+						}, {
+							type: 'success'
+						});
+						renderModulesList();
+					},
+					error: function (xhr) {
+						const response = xhr.responseJSON;
+						$.notify({
+							message: response.message
+						}, {
+							type: 'danger'
+						});
+						console.log(xhr);
+					}
+				});
+			});
+			$(document).on("click", 'button[name^="delete-lesson-"]', function (event) {
+				event.preventDefault();
+				const formId = $(this).data('lesson-form-id').toString();
+				var form = $('#' + formId);
+				const lessonId = form.find("input[name='LessonId']").val() || null;
+				showConfirmationDialog(
+					'Ви впевнені?',
+					'Ця дія видаляє модуль. Ви не зможете відновити його!',
+					'Так, видалити!',
+					'Відмінити',
+					() => {
+						$.ajax({
+							url: "@Url.Action("DeleteLesson", "TeachCourse", new { area = "Teach" })",
+							type: "POST",
+							data: {
+								lessonId: lessonId,
+							},
+							success: function (response) {
+								$.notify({
+									message: response.message
+								}, {
+									type: 'success'
+								});
+								renderModulesList();
+							},
+							error: function (xhr) {
+								$.notify({
+									message: response.message
+								}, {
+									type: 'danger'
+								});
+								console.log(xhr);
+							}
+						});
+					}
+				);
+			});
+			$(document).on("click", 'a[data-delete-module-id]', function (event) {
+				event.preventDefault();
+				var moduleId = $(this).data('delete-module-id');
+
+				showConfirmationDialog(
+					'Ви впевнені?',
+					'Ця дія видаляє модуль. Ви не зможете відновити його!',
+					'Так, видалити!',
+					'Відмінити',
+					() => {
+						$.ajax({
+							url: "@Url.Action("DeleteModule", "TeachCourse", new { area = "Teach" })",
+							type: "POST",
+							data: {
+								moduleId: moduleId,
+							},
+							success: function (response) {
+								$.notify({
+									message: response.message
+								}, {
+									type: 'success'
+								});
+								renderModulesList();
+							},
+							error: function (xhr) {
+								$.notify({
+									message: response.message
+								}, {
+									type: 'danger'
+								});
+								console.log(xhr);
+							}
+						});
+					}
+				);
+
+			});
+
+
+
+			$("#modules-container").sortable({
+				items: ".module-item", // Определяем, какие элементы будут сортироваться
+				placeholder: "sortable-placeholder", // Класс для визуального отображения
+				update: function (event, ui) {
+					saveModuleOrder(); // Вызываем функцию сохранения порядка
+				}
+			});
+
+			// Функция для сохранения порядка модулей
+			function saveModuleOrder() {
+				var moduleOrder = [];
+				$("#modules-container .module-item").each(function (index) {
+					moduleOrder.push({
+						moduleId: $(this).data("module-id"),
+						order: index + 1
+					});
+				});
+
+				// Отправляем новый порядок на сервер
+				$.ajax({
+					url: "@Url.Action("UpdateModuleOrder", "TeachCourse", new { area = "Teach" })",
+					type: "POST",
+					contentType: "application/json",
+					data: JSON.stringify(moduleOrder),
+					success: function (response) {
+						$.notify({
+							message: "Порядок модулів збережено!"
+						}, {
+							type: 'success'
+						});
+					},
+					error: function (xhr) {
+						$.notify({
+							message: "Помилка при збереженні порядку!"
+						}, {
+							type: 'danger'
+						});
+						console.error(xhr);
+					}
+				});
+			}
+		});
+	</script>
+}

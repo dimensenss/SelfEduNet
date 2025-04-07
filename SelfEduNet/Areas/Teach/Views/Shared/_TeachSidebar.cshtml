@@ -1,0 +1,93 @@
+﻿@model SelfEduNet.ViewModels.CourseContentViewModel
+@{
+	var modules = @Model.Modules;
+}
+<div class="sidebar" data-background-color="dark">
+<div class="sidebar-logo">
+	<!-- Logo Header -->
+	<div class="logo-header" data-background-color="dark">
+		<div class="logo">
+			<a asp-action="Index" asp-controller="Home" asp-area="" class="logo">
+				/selfedu<br>
+			</a>
+		</div>
+		<div class="nav-toggle">
+			<button class="btn btn-toggle toggle-sidebar" style="height:50px;">
+				<i class="gg-menu-right"></i>
+			</button>
+			<button class="btn btn-toggle sidenav-toggler">
+				<i class="gg-menu-left"></i>
+			</button>
+		</div>
+		<button class="topbar-toggler more">
+			<i class="gg-more-vertical-alt"></i>
+		</button>
+	</div>
+	@* пофіксіть *@
+	
+	<!-- End Logo Header -->
+</div>
+
+	<div class="sidebar-wrapper scrollbar scrollbar-inner">
+		<div class="sidebar-content">
+			<ul class="nav nav-secondary">
+				<li class="nav-section">
+					<span class="sidebar-mini-icon">
+						<i class="fa fa-ellipsis-h"></i>
+					</span>
+					<h4 class="text-section">@Model.CourseName</h4>
+				</li>
+				@if (@modules.Any())
+				{
+					int i = 1;
+					@foreach (var module in modules)
+					{
+						<li class="nav-item">
+							<a data-bs-toggle="collapse" href="#sidebar-item-@module.Id">
+								<p>@i &nbsp; @module.Title</p>
+								<span class="caret"></span>
+							</a>
+							<div class="collapse show" id="sidebar-item-@module.Id">
+								<ul class="nav nav-collapse pb-0">
+									<li>
+										@if (module.Lessons.Any())
+										{
+											int j = 1;
+											foreach (var lesson in module.Lessons.OrderBy(l => l.Order))
+											{
+												if ((string)ViewData["Mode"] == "Edit")
+												{
+													<a asp-action="EditLesson" asp-controller="Lesson" asp-area="Teach" 
+													   asp-route-courseId="@Model.Id" 
+													   asp-route-lessonId="@lesson.Id">
+														<span class="sub-item">@($"{i}.{j}") &nbsp;@lesson.Title</span>
+													</a>
+												}
+												else
+												{
+													<a asp-action="ViewLesson" asp-controller="Lesson" asp-area="Teach"
+													   asp-route-courseId="@Model.Id"
+													   asp-route-lessonId="@lesson.Id">
+														<span class="sub-item">@($"{i}.{j}") &nbsp;@lesson.Title</span>
+													</a>
+												}
+												
+												@* <button type="button"
+												        name="goto-lesson-@lesson.Id" 
+												        data-lesson-id="@lesson.Id">
+													@lesson.Title
+												</button> *@
+												j++;
+											}
+										}
+									</li>
+								</ul>
+							</div>
+						</li>
+						i++;
+					}
+				}
+			</ul>
+		</div>
+	</div>
+</div>

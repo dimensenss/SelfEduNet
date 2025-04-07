@@ -1,0 +1,91 @@
+﻿@using System.Reflection
+@model CourseModules
+
+<div class="accordion mb-30" id="modulesAccordion">
+
+	<div class="accordion-item ">
+		<h2 class="accordion-header" id="module-heading-@Model.Id">
+			<button class="accordion-button collapsed p-0 mb-4" type="button" data-bs-toggle="collapse" data-bs-target="#module-collapse-@Model.Id" aria-expanded="false" aria-controls="module-collapse-@Model.Id">
+				<h1>
+					@Model.Title
+				</h1>
+			</button>
+		</h2>
+		<div id="module-collapse-@Model.Id" class="accordion-collapse collapse show" aria-labelledby="module-heading-@Model.Id" data-bs-parent="#modulesAccordion">
+			<div class="accordion-body-@Model.Id">
+				<form class="module-form-@Model.Id needs-validation section-editor__head" novalidate>
+					<input asp-for="Id" value="@Model.Id" type="hidden" />
+					<input asp-for="CourseId" type="hidden" />
+					<div class="d-flex justify-content-end">
+						<i class="fa-solid fa-hand unit-editor__drag"></i>
+					</div>
+					<div class="row mb-30">
+						<div class="d-flex align-items-end">
+							<div class="col-md-10 has-validation">
+								<label asp-for="Title">Назва</label>
+								<input asp-for="Title" type="text" class="form-control" placeholder="Введіть назву">
+								<span asp-validation-for="Title" class="text-danger"></span>
+								<div class="invalid-feedback">
+									Назва модуля може містити лише літери, цифри, пробіли та дефіси.
+								</div>
+							</div>
+							<div class="d-flex col-md-2 justify-content-end">
+								<div class="dropdown mx-2 fs-3">
+									<a class="dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+										<i class="fa-solid fa-list" style="color: #000000;"></i>
+									</a>
+									<ul class="dropdown-menu dropdown-menu-end">
+										<li>
+											<a class="dropdown-item fs-5 gj-cursor-pointer" data-delete-module-id="@Model.Id">
+												<div class="d-flex align-items-baseline justify-content-between">
+													<p class="m-0 mx-2">Видалити</p>
+													<i class="fa-solid fa-trash"></i>
+												</div>
+
+											</a>
+										</li>
+									</ul>
+								</div>
+							</div>
+						</div>
+						
+					</div>
+					<div class="row mb-30">
+						<div class="col-md-12 has-validation">
+							<label asp-for="Description">Опис</label>
+							<textarea asp-for="Description" type="text" class="form-control" placeholder="Введіть опис"></textarea>
+							<span asp-validation-for="Description" class="text-danger"></span>
+							<div class="invalid-feedback">
+								Опис не може бути більшим за 1024 символи.
+							</div>
+						</div>
+					</div>
+					<input type="hidden" asp-for="Order"/>
+				</form>
+				<div class="d-flex">
+					<div class="col-md-1"></div>
+					<div class="col-md-11 section-editor__unit-list">
+						<form class="needs-validation unit-editor" method="post" novalidate id="lesson-form-@Model.Id">
+							<div class="col-md-12 has-validation mb-3">
+								<label for="Title">Назва уроку</label>
+								<input name="Title" type="text" class="form-control" placeholder="Введіть назву уроку" required="True">
+								<div class="invalid-feedback">
+									Назва урока може містити лише літери, цифри, пробіли та дефіси.
+								</div>
+							</div>
+
+							<button class="mb-3 button-3" type="button" name="create-lesson" data-lesson-form-id="@Model.Id"
+							        data-module-id="@Model.Id">
+								Створити урок
+							</button>
+						</form>
+						<div class="accordion m-3" id="lessonsAccordion-@Model.Id">
+							@Html.Partial("_TeachLessonForm", @Model)
+						</div>
+					</div>
+					
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

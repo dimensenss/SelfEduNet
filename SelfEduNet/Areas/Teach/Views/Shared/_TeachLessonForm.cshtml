@@ -1,0 +1,63 @@
+﻿@model CourseModules
+
+@foreach (var lesson in @Model.Lessons)
+{
+	<div class="accordion-item">
+
+		<h2 class="accordion-header" id="lesson-heading-@lesson.Id">
+			<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+					data-bs-target="#lesson-collapse-@lesson.Id" aria-expanded="false"
+					aria-controls="lesson-collapse-@lesson.Id">
+				Урок:
+				@if (lesson.Title.Length > 0)
+				{
+					@lesson.Title
+				}
+			</button>
+		</h2>
+		<div id="lesson-collapse-@lesson.Id" class="accordion-collapse collapse"
+			 aria-labelledby="lesson-heading-@lesson.Id" data-bs-parent="#lessonsAccordion-@Model.Id">
+			<div class="accordion-body">
+				<form class="needs-validation" method="post"
+				      id="update-lesson-form-@lesson.Id" novalidate>
+					<input type="hidden" name="LessonId" value="@lesson.Id" />
+					<div class="input-group mb-3">
+						<div class="flex-grow-1">
+							<label for="Title" class="form-label">Назва уроку</label>
+							<input id="Title" name="Title" type="text" class="form-control"
+							       placeholder="Введіть назву уроку" required value="@lesson.Title" style="height:42px;">
+							<div class="invalid-feedback">
+								Назва урока може містити лише літери, цифри, пробіли та дефіси.
+							</div>
+						</div>
+						<div class="align-self-end">
+							<button class="button-3 ms-2" type="button"
+							        name="update-lesson-@lesson.Id"
+							        data-lesson-form-id="@lesson.Id"
+							        data-module-id="@Model.Id">
+								Оновити урок
+							</button>
+						</div>
+					</div>
+
+
+					<div class="d-flex flex-row justify-content-between">
+						@* <button class="button-3 mb-3" type="button"
+					name="edit-lesson-@lesson.Id" data-lesson-form-id="lesson-form-@lesson.Id" data-module-id="@Model.Id">
+					Редагувати урок
+					</button> *@
+						<a class="button-4 mb-3" asp-action="EditLesson" asp-controller="Lesson" asp-area="Teach"
+						   asp-route-courseId="@Model.CourseId" asp-route-lessonId="@lesson.Id">
+							Редагувати урок
+						</a>
+
+						<button class="btn mb-3 fs-4" type="button"
+						        name="delete-lesson-@lesson.Id" data-lesson-form-id="lesson-form-@lesson.Id">
+							<i class="fa-solid fa-trash"></i>
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+}

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using SelfEduNet.Extensions;
 using SelfEduNet.Models;
@@ -17,16 +18,16 @@ namespace SelfEduNet.Areas.Teach.Controllers
 		{
 			return View();
 		}
-
-        public async Task<IActionResult> TeacherCourseList()
+		[Authorize]
+		public async Task<IActionResult> TeacherCourseList()
         {
             string userId = User.GetUserId();
             var user = await _userManager.FindByIdAsync(userId);
 
-            if (user == null)
-            {
-                return NotFound(new { message = "User not found." });
-            }
+            //if (user == null)
+            //{
+            //    return NotFound(new { message = "User not found." });
+            //}
 
             var courses = await _courseRepository.GetCoursesByOwnerAsync(userId);
 
@@ -34,19 +35,5 @@ namespace SelfEduNet.Areas.Teach.Controllers
 
         }
 
-        public async Task<IActionResult> RenderTeacherCourses([FromQuery] CourseFilter filter)
-        {
-	        string userId = User.GetUserId();
-	        var user = await _userManager.FindByIdAsync(userId);
-
-	        if (user == null)
-	        {
-		        return NotFound(new { message = "User not found." });
-	        }
-
-	        var courses =  _courseRepository.GetAllCoursesByOwnerQuery(userId).ApplyFilters(filter);
-
-            return PartialView("_GetCoursesWithEdit", courses);
-        }
 	}
 }

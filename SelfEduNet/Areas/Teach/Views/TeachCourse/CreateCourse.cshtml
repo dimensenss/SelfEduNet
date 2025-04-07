@@ -1,0 +1,47 @@
+﻿@model SelfEduNet.ViewModels.CreateCourseViewModel
+@{
+	Layout = "_Layout";
+}
+<div class="marco-layout">
+	<div class="container-fluid">
+		<div class="row">
+			@Html.Partial("_TeachSidepanel", @Model.Id)
+			<div class="col-md-9">
+				<div class="catalog-main-content">
+					<form method="post" asp-action="CreateCourse">
+
+						<input type="hidden" asp-for="OwnerId" />
+						<div class="row mb-30">
+							<div class="col-md-12">
+								<label asp-for="CourseName">Заголовок</label>
+								<input asp-for="CourseName" type="text" class="form-control" placeholder="Введіть заголовок">
+								<span asp-validation-for="CourseName" class="text-danger"></span>
+							</div>
+						</div>
+						<button type="submit" class="button-3 text-center">Створити курс</button>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+@* <script>
+	document.addEventListener('DOMContentLoaded', function () {
+		const submitBtn = document.getElementById('submit-btn');
+		const captchaContainer = document.getElementById('captcha-container');
+		let captchaVisible = false;
+
+		// Слушаем нажатие на кнопку сабмита
+		submitBtn.addEventListener('click', function (event) {
+
+			if (!captchaVisible) {
+				event.preventDefault();  // Останавливаем отправку формы
+				captchaContainer.style.display = 'block';  // Показываем капчу
+				captchaVisible = true;  // Теперь капча видна
+			}
+		});
+
+	});
+</script> *@

@@ -8,74 +8,63 @@
 <div class="marco-layout">
 	<div class="container-fluid">
 		<div class="row">
-			<div class="col-md-3 border-end ">
-				<div class="d-flex flex-column sticky-top stick-filter d-none d-md-flex">
-					@* 					@Html.Partial("_FiltersForm", new { form_type = "desktop" })
-					*@
-				</div>
-			</div>
-
+			@await Html.PartialAsync("_TeachSidepanel", @Model.First().Id)
 			<div class="col-md-9">
 				<div class="catalog-main-content">
-					<div class="catalog-search-bar">
-						<div class="d-flex flex-row justify-content-center align-items-center catalog-search-form">
-							@Html.Partial("_TeachFiltersForm")
-						</div>
-					</div>
-					<div class="row">
-						<div class="active-filters d-flex flex-wrap mb-3">
-							<!-- Filter display will go here -->
-						</div>
-					</div>
-					<div class="row">
-						<div class="col-12">
-							<div class="courses-list">
-								@Html.Partial("_GetCoursesWithEdit")
+					@if (@Model.Count() > 0)
+					{
+						<div class="catalog-search-bar">
+							<div class="d-flex flex-row justify-content-center align-items-center catalog-search-form">
+								@await Html.PartialAsync("_TeachFiltersForm")
+
 							</div>
 						</div>
-					</div>
+						<div class="row">
+							<div class="active-filters d-flex flex-wrap mb-3">
+								<!-- Filter display will go here -->
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-12">
+								<div class="courses-list" id="courses-container">
+									@await Html.PartialAsync("_GetCoursesWithEdit")
+								</div>
+							</div>
+						</div>
+					}
+					else
+					{
+						<div class="d-flex justify-content-center">
+							<div class="col-3">
+								<div class="text-center d-flex flex-column">
+									<h3 class="mb-3">Створіть свій перший курс</h3>
+									<a asp-action="CreateCourse" asp-controller="TeachCourse" asp-area="Teach" class="button-4">Створити курс</a>
+								</div>
+							</div>
+						</div>
+					}
 				</div>
 			</div>
 		</div>
 	</div>
 </div>
+@section Scripts {
+	<script src="~/js/courses-with-edit.js"></script>
+	<script>
+		$(document).ready(function () {
 
-<script src="~/js/vendor/jquery-1.12.4.min.js" asp-append-version="true"></script>
-
-<script>
-	$(document).ready(function () {
-		const forms = $('.teach-courses-search-form');
-
-		function applyFilters() {
-			$.ajax({
-				url: "@Url.Action("RenderTeacherCourses", "Home", new { area = "Teach" })",
-				type: 'GET',
-				data: forms.serialize(),
-				success: function (response) {
-					$('.courses-list').html(response);
-				},
-				error: function (xhr) {
-					const response = xhr.responseJSON;
-					const errorMessage = response && response.message ? response.message : "An unexpected error occurred.";
-					$.notify({
-						message: response.message
-					}, {
-						type: 'danger'
-					});
+			$(document).on("submit", '.teach-courses-search-form', function (event) {
+				event.preventDefault();
+				var data = $(this).serialize();
+				renderCoursesList(true, data);
+			});
+			$(document).on("keydown", '.teach-courses-search-form', function (event) {
+				if (event.key === 'Enter') {
+					event.preventDefault();
+					var data = $(this).serialize();
+					renderCoursesList(true, data);
 				}
 			});
-		}
-
-		$('.teach-courses-search-form').on('keydown', function (event) {
-			if (event.key === 'Enter') {
-				event.preventDefault();
-				applyFilters();
-			}
-		});
-
-		forms.on('submit', function (event) {
-			event.preventDefault();
-			applyFilters();
-		});
 	});
 </script>
+}

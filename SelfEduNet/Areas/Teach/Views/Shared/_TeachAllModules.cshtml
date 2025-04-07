@@ -1,0 +1,18 @@
+﻿@model SelfEduNet.ViewModels.CourseContentViewModel
+
+<div id="modules-container">
+	@if (!@Model.Modules.Any())
+	{
+		<p>Створіть перший модуль</p>
+	}
+
+	@foreach (var module in @Model.Modules)
+	{
+		<div class="module-item" data-module-id="@module.Id">
+			@Html.Partial("_TeachModuleForm", module)
+		</div>
+
+		<hr class="border border-2 opacity-50">
+	}
+</div>
+
