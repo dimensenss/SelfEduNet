@@ -11,21 +11,46 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Localization;
 using SelfEduNet.Services;
 using SelfEduNet.Repositories;
+using Ganss.Xss;
+using System;
+using StackExchange.Redis;
+using OpenAI;
+using SelfEduNet.Configurations;
+using Microsoft.Extensions.Hosting;
 
+var environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Production";
 var builder = WebApplication.CreateBuilder(args);
+builder.Configuration
+	.SetBasePath(Directory.GetCurrentDirectory())
+	.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+	.AddJsonFile($"appsettings.{environment}.json", optional: true, reloadOnChange: true)
+	.AddEnvironmentVariables();
 
 builder.Services.AddScoped<IEmailSender, EmailSenderService>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IStepRepository, StepRepository>();
+builder.Services.AddScoped<IUserStepRepository, UserStepRepository>();
 builder.Services.AddScoped<IPhotoService, PhotoService>();
+builder.Services.AddScoped<ICourseService, CourseService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IStepService, StepService>();
+builder.Services.AddScoped<IUserStepService, UserStepService>();
+builder.Services.AddScoped<IUserLessonService, UserLessonService>();
+builder.Services.AddScoped<IUserLessonRepository, UserLessonRepository>();
+builder.Services.AddSingleton<IHtmlSanitizer, HtmlSanitizer>();
 builder.Services.AddTransient<Seeder>();
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-{
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-});
 
-//builder.Services.AddDefaultIdentity<AppUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<ApplicationDbContext>();
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+	options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddStackExchangeRedisCache(options =>
+    options.Configuration = builder.Configuration.GetConnectionString("RedisConnection"));
+
+// IConnectionMultiplexer для работы с очередью
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+	ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("RedisConnection")));
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
@@ -56,6 +81,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     {
         googleOptions.ClientId = builder.Configuration.GetValue<string>("GoogleOAuthSettings:ClientId");
         googleOptions.ClientSecret = builder.Configuration.GetValue<string>("GoogleOAuthSettings:ClientSecret");
+        googleOptions.Scope.Add("profile");
+        googleOptions.Scope.Add("email");
     });
 
 builder.Services.AddOptionsInjection(builder.Configuration);
@@ -84,7 +111,16 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
+if (app.Environment.IsDevelopment())
+{
+	app.ApplyMigrations();
 
+    using (var scope = app.Services.CreateScope())
+    {
+        var seeder = scope.ServiceProvider.GetService<Seeder>();
+        await seeder.SeedAsync();
+    }
+}
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
@@ -105,10 +141,5 @@ app.UseEndpoints(endpoints =>
 
 app.MapRazorPages();
 
-using (var scope = app.Services.CreateScope())
-{
-    var seeder = scope.ServiceProvider.GetService<Seeder>();
-    await seeder.SeedAsync();
-}
 
 app.Run();
