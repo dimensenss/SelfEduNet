@@ -444,23 +444,32 @@
     $('#bar6').barfiller();
 
 })(jQuery);
-$(document).ready(function ($) {
-    var successMessage = $("#jq-notification");
+
+$(document).ready(function () {
     var notification = $('#notification');
-    var warning_notification = $('#warning-jq-notification');
-
     if (notification.length > 0) {
-        setTimeout(function () {
-            notification.alert('close');
+        var notificationMessage = notification.html();
+        var notificationType = notification.data('notify-type');
 
-        }, 3000);
+        $.notify({
+            message: notificationMessage
+        }, {
+            type: notificationType,
+            placement: {
+                from: 'top',
+                align: 'right'
+            },
+            delay: 3000,
+            offset: { x: 20, y: 60 }
+        });
+
+        notification.remove();
     }
 });
-
 function sendAjaxRequest(url, params, successCallback, dataType = 'json') {
         $.ajax({
             url: url,
-            type: 'GET',
+            type: "GET",
             data: params.toString(),
             dataType: dataType,
             success: successCallback,
@@ -468,128 +477,36 @@ function sendAjaxRequest(url, params, successCallback, dataType = 'json') {
                 console.error('Ошибка:', error);
             }
         });
-    }
-
-    // Обновление URL без перезагрузки страницы
-    function updateUrl(params) {
-        const newUrl = `${window.location.pathname}?${params.toString()}`;
-        window.history.replaceState({}, '', newUrl);
-    }
-    function serializeFormToParams(form) {
-        const formData = form.serializeArray();
-        const params = new URLSearchParams(window.location.search);
-
-        formData.forEach(({name, value}) => {
-            if (value && value !== '0') {
-                params.set(name, value);
-            } else {
-                params.delete(name);
-            }
-        });
-
-        return params;
-    }
+}
 $(document).ready(function () {
-    // Обработка сериализации формы и обновления URL
+    'use strict';
 
-
-    // Общая функция для отправки AJAX-запросов
-
-
-    // Обновление фильтров и полей формы
-function updateFilterButtons(params) {
-    const filterContainer = $('.active-filters').empty();
-    let searchInputCleared = false;
-
-    params.forEach((value, key) => {
-        if (value && value !== '0') {
-            let displayText = value;
-            const element = $(`input[name="${key}"], select[name="${key}"]`);
-
-            if (element.length) {
-                // Для селектов ищем значение в опциях
-                if (element.is('select')) {
-                    const option = element.find(`option[value="${value}"]`);
-                    displayText = option.data('btn-label') || option.text();
-                } else if (element.attr('type') === 'checkbox') {
-                    // Для чекбоксов используем data-btn-label
-                    displayText = element.data('btn-label') || value;
-                } else {
-                    displayText = element.data('btn-label') || value;
-                    if (key.startsWith('MinPrice') || key.startsWith('MaxPrice')) { //
-                        displayText = `${element.data('btn-label')} ${value}`;
-                    }
-                }
+    $('.needs-validation').each(function () {
+        $(this).on('submit', function (event) {
+            if (!this.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
             }
-
-            $('<button>', {
-                type: 'button',
-                class: 'button-4 m-0 me-2 mb-2',
-                style: 'height: 35px',
-                text: `${displayText} ✕`,
-                click: function () {
-                    params.delete(key);
-                    updateSearch(params);
-                    if (key === 'Query') {
-                        $('.search-input').val('');
-                        searchInputCleared = true;
-                    } else if (key === 'Language' || key === 'Difficulty') {
-                        //resetSelectFields(key);
-                    }
-                }
-            }).appendTo(filterContainer);
+            $(this).addClass('was-validated');
+        });
+    });
+});
+function showConfirmationDialog(title, text, confirmText, cancelText, onConfirm) {
+    Swal.fire({
+        title: title || 'Ви вневнені?',
+        text: text || 'Цю дію неможливо відмінити!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#31ce36',
+        cancelButtonColor: '#f25961',
+        confirmButtonText: confirmText || 'Ок',
+        cancelButtonText: cancelText || 'Відмінити'
+    }).then((result) => {
+        if (result.isConfirmed && typeof onConfirm === 'function') {
+            onConfirm();
         }
     });
-
-    if (searchInputCleared) $('.search-input').val('');
 }
-
-
-    // Обновление полей формы на основе параметров URL
-    function updateFormFromParams(params) {
-        forms.find('input, select').each(function () {
-            const field = $(this);
-            const value = params.get(field.attr('name')) || '';
-
-            if (field.is('select')) {
-                field.val(value);
-            } else if (field.attr('type') === 'checkbox') {
-                field.prop('checked', value === field.val());
-            } else {
-                field.val(value);
-            }
-        });
-
-        $('.search-input').val(params.get('Query') || ''); //
-    }
-
-    // Обновление поиска
-    function updateSearch(params) {
-        updateUrl(params);
-        sendAjaxRequest('/Catalog/GetCoursesWithFilter', params, function (data) {
-            $('.courses-list').empty().html(data);
-            updateFilterButtons(params);
-            updateFormFromParams(params);
-        }, 'html');
-    }
-
-    const forms = $('#catalog-search-form-main, #catalog-search-form-desktop, #catalog-search-form-mobile');
-
-    // Обработчик для всех форм
-    forms.on('submit change', function (event) {
-        event.preventDefault();
-        const form = $(this);
-        const params = serializeFormToParams(form);
-
-        updateSearch(params);
-    });
-
-    // Инициализация фильтров и формы при загрузке
-    const initialParams = new URLSearchParams(window.location.search);
-    updateFilterButtons(initialParams);
-    updateFormFromParams(initialParams);
-});
-
 
  (function () {
         'use strict'
@@ -607,4 +524,5 @@ function updateFilterButtons(params) {
                     form.classList.add('was-validated')
                 }, false)
             })
-    })()
+ })()
+

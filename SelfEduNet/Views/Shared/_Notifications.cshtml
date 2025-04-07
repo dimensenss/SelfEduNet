@@ -19,70 +19,9 @@
 		</div>
 	</div>
 }
-@if (TempData["SuccessMessage"] != null)
+@if (TempData["NotifyMessage"] != null)
 {
-	<div id="notification"
-	     class="mt-3 position-fixed start-50 translate-middle-x z-3 alert alert-success fade show custom-shadow"
-	     role="alert" style="z-index: 99999; top: 100px;">
-		@TempData["SuccessMessage"]
+    <div id="notification" data-notify-type="@TempData["NotifyType"]" class="d-none">
+		@TempData["NotifyMessage"]
 	</div>
 }
-
-@if (TempData["WarningMessage"] != null)
-{
-	<div id="notification"
-	     class="mt-3 position-fixed start-50 translate-middle-x z-3 alert alert-danger fade show"
-	     style="z-index: 99999; top: 100px;" role="alert">
-		@TempData["WarningMessage"]
-	</div>
-}
-@* <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var errors = document.querySelectorAll('.alert .form-error-1');
-        errors.forEach(function (error) {
-            if (error.textContent.includes('Ваш обліковий запис неактивний')) {
-                var link = document.createElement('a');
-                link.href = '@Url.Action("Register", "Clients")';  // Используем Url.Action для ссылки
-                link.className = "text-decoration-none text-danger";
-                link.textContent = "Надішліть підтвердження ще раз";
-
-                const toEmail = document.getElementById('id_username').value;
-                link.addEventListener('click', function (event) {
-                    event.preventDefault();
-                    sendActivationEmail(toEmail);
-                });
-
-                var additionalText = document.createElement('p');
-                error.appendChild(additionalText);
-                error.appendChild(link);
-            }
-        });
-    });
-
-    function sendActivationEmail(toEmail) {
-        const data = {
-            subject: 'Підтвердження реєстрації',
-            to_email: toEmail
-        };
-
-        $.ajax({
-            url: '@Url.Action("SendActivationEmail", "Clients")',  // Заменим URL на правильный маршрут
-            method: 'POST',
-            headers: {
-                'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()  // CSRF токен
-            },
-            contentType: 'application/json',
-            data: JSON.stringify(data),
-            success: function (response) {
-                if (response.status === 'success') {
-                    window.location.href = '@Url.Action("Login", "Clients")';
-                } else {
-                    alert('Ошибка: ' + JSON.stringify(response));
-                }
-            },
-            error: function (xhr, status, error) {
-                console.error('Ошибка:', error);
-            }
-        });
-    }
-</script> *@

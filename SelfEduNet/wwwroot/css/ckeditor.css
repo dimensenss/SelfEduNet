@@ -1,0 +1,41 @@
+﻿.main-container {
+    font-family: 'Lato';
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+}
+.ck-content {
+    font-family: 'Lato';
+    line-height: 1.6;
+    word-break: break-word;
+}
+
+.editor-container_classic-editor .editor-container__editor {
+    min-width: 1000px;
+    max-width: 1000px;
+}
+
+.editor_container__word-count .ck-word-count {
+    color: var(--ck-color-text);
+    display: flex;
+    height: 20px;
+    gap: var(--ck-spacing-small);
+    justify-content: flex-end;
+    font-size: var(--ck-font-size-base);
+    line-height: var(--ck-line-height-base);
+    font-family: var(--ck-font-face);
+    padding: var(--ck-spacing-small) var(--ck-spacing-standard);
+}
+
+.editor-container_include-word-count.editor-container_classic-editor .editor_container__word-count {
+    border: 1px solid var(--ck-color-base-border);
+    border-radius: var(--ck-border-radius);
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-top: none;
+    padding-bottom:5px;
+}
+
+.editor-container_include-word-count.editor-container_classic-editor .editor-container__editor .ck-editor .ck-editor__editable {
+    border-radius: 0;
+}
