@@ -149,15 +149,19 @@ namespace SelfEduNet.Areas.Identity.Pages.Account
                 ErrorMessage = "Error loading external login information during confirmation.";
                 return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
             }
-
-            if (ModelState.IsValid)
+			if (ModelState.IsValid)
             {
                 var user = CreateUser();
+                string userName = info.Principal.Identity.Name;
 
-                await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
+				if (!string.IsNullOrWhiteSpace(userName))
+				{
+					(user.FirstName, user.LastName) = SplitFullName(userName);
+				}
+				await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
-
-                var result = await _userManager.CreateAsync(user);
+                
+				var result = await _userManager.CreateAsync(user);
                 if (result.Succeeded)
                 {
                     result = await _userManager.AddLoginAsync(user, info);
@@ -223,5 +227,28 @@ namespace SelfEduNet.Areas.Identity.Pages.Account
             }
             return (IUserEmailStore<AppUser>)_userStore;
         }
-    }
+        public (string FirstName, string LastName) SplitFullName(string fullName)
+        {
+	        // Перевірка, чи не є рядок порожнім
+	        if (string.IsNullOrWhiteSpace(fullName))
+	        {
+		        throw new ArgumentException("Повне ім'я не може бути порожнім.");
+	        }
+
+	        // Розділення імені та прізвища за допомогою пробілу
+	        var nameParts = fullName.Split(' ');
+
+	        // Якщо в імені тільки одне слово (наприклад, тільки ім'я без прізвища)
+	        if (nameParts.Length == 1)
+	        {
+		        return (FirstName: nameParts[0], LastName: string.Empty);
+	        }
+
+	        // Якщо в імені два або більше слів, вважаємо останнє слово прізвищем
+	        var firstName = string.Join(" ", nameParts.Take(nameParts.Length - 1)); // Ім'я
+	        var lastName = nameParts.Last(); // Прізвище
+
+	        return (firstName, lastName);
+        }
+	}
 }

@@ -126,3 +126,4 @@ src/.vs/config/applicationhost.config
 .idea/
 /SelfEduNet/appsettings.Production.json
 /Worker/appsettings.Development.json
+/.containers/selfedu-db
