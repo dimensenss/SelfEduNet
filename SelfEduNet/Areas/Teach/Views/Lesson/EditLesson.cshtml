@@ -1,0 +1,248 @@
+﻿@model SelfEduNet.ViewModels.EditLessonViewModel
+
+@{
+	Layout = "_AdminLayout";
+	var currentStep = ViewData["Step"] as Step;
+	ViewData["Mode"] = "Edit";
+}
+
+@section Sidebar
+{
+	@await Html.PartialAsync("_TeachSidebar", @Model.Course, ViewData)
+}
+
+<div class="row">
+	<div class="d-flex pt-2 pb-4 flex-column" id="lesson-container" style="max-width:1000px;">
+
+		@await Html.PartialAsync("EditLessonMode/_EditLessonContent", @Model)
+	</div>
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-xl">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h1 class="modal-title fs-5" id="exampleModalLabel">Додати крок</h1>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body modal-dialog__content">
+				<div class="create-list">
+					<h1 class="st-h1 plugins-list__header">
+						Оберіть тип кроку
+					</h1>
+
+					<h2 class="st-h2 plugins-list__header" hidden="">
+						Popular
+					</h2>
+
+					<ol class="plugins-list">
+						<li class="plugins-list__item" role="button"
+							name="add-step-@Model.Lesson.Id"
+							data-lesson-id="@Model.Lesson.Id"
+							data-step-type="1">
+
+							<span class="svg-icon fs-1 me-3">
+								<i class="fa-regular fa-file-lines"></i>
+							</span>
+							<div>
+								<div class="plugin-list__item-title">
+									Текст
+
+									<!---->
+								</div>
+								<div class="plugin-list__item-descr">
+									Текст з форматуванням, зображеннями, формулами
+								</div>
+							</div>
+						</li>
+						<li class="plugins-list__item" role="button"
+							name="add-step-@Model.Lesson.Id"
+							data-lesson-id="@Model.Lesson.Id"
+							data-step-type="2">
+
+							<span class="svg-icon fs-1 me-3">
+								<i class="fa-solid fa-video"></i>
+							</span>
+							<div>
+								<div class="plugin-list__item-title">
+									Відео
+
+									<!---->
+								</div>
+								<div class="plugin-list__item-descr">
+									Завантажуйте відео
+								</div>
+							</div>
+						</li>
+						<li class="plugins-list__item" role="button"
+							name="add-step-@Model.Lesson.Id"
+							data-lesson-id="@Model.Lesson.Id"
+							data-step-type="3">
+
+							<span class="svg-icon fs-1 me-3">
+								<i class="fa-solid fa-square-check"></i>
+							</span>
+							<div>
+								<div class="plugin-list__item-title">
+									Тест (задача)
+
+									<!---->
+								</div>
+								<div class="plugin-list__item-descr">
+									Виберіть відповід(ь, і) зі списку
+								</div>
+							</div>
+						</li>
+						<li class="plugins-list__item" role="button"
+							name="add-step-@Model.Lesson.Id"
+							data-lesson-id="@Model.Lesson.Id"
+							data-step-type="4">
+
+							<span class="svg-icon fs-1 me-3">
+								<i class="fa-solid fa-code"></i>
+							</span>
+							<div>
+								<div class="plugin-list__item-title">
+									Завдання з програмування
+
+									<!---->
+								</div>
+								<div class="plugin-list__item-descr">
+									Напишіть програму, яку можна перевірити за допомогою stdin → stdout
+								</div>
+							</div>
+						</li>
+					</ol>
+					<!---->
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрити</button>
+
+			</div>
+		</div>
+	</div>
+</div>
+
+@section Scripts
+{
+	<script src="~/js/youtubePlayer.js" asp-append-version="true"></script>
+	<script src="~/js/ckeditorLessonContent.js" asp-append-version="true"></script>
+	<script>
+		$(document).on("change", 'input[name="uploadType"]', function (event) {
+			if ($("#fileOption").is(":checked")) {
+				$("#fileUploadSection").show();
+				$("#linkUploadSection").hide();
+			} else if ($("#linkOption").is(":checked")) {
+				$("#fileUploadSection").hide();
+				$("#linkUploadSection").show();
+			}
+		});
+
+		$(document).on("submit", "#linkUploadSection", function (event) {
+			event.preventDefault();
+
+			let form = $(this);
+			let videoUrl = form.find('input[name="videoUrl"]').val();
+			let stepId = form.data("step-id");
+
+			$.ajax({
+				url: "@Url.Action("UploadVideo", "Step", new { area = "Teach" })",
+				type: 'POST',
+				data: {
+					id: stepId,
+					videoUrl: videoUrl,
+				},
+				success: function (response) {
+					updateYouTubePlayer(videoUrl);
+					$.notify({
+						message: response.message
+					}, {
+						type: 'success'
+					});
+				},
+				error: function (xhr, status, error) {
+					const response = xhr.responseJSON;
+					$.notify({
+						message: response.message
+					}, {
+						type: 'danger'
+					});
+				}
+			});
+		});
+
+
+		$(document).on("click", 'button[name^="update-lesson-"]', function (event) {
+			event.preventDefault();
+			const formId = $(this).data('lesson-form-id').toString();
+			const moduleId = $(this).data('module-id').toString();
+
+			var form = $('#update-lesson-form-' + formId);
+			var title = form.find("input[name='Title']").val();
+			const lessonId = form.find("input[name='LessonId']").val() || null;
+
+			$.ajax({
+				url: "@Url.Action("CreateUpdateLesson", "TeachCourse", new { area = "Teach" })",
+				type: "POST",
+				data: {
+					moduleId: moduleId,
+					lessonId: lessonId,
+					title: title,
+				},
+				success: function (response) {
+					$.notify({
+						message: response.message
+					}, {
+						type: 'success'
+					});
+					renderModulesList();
+				},
+				error: function (xhr) {
+					const response = xhr.responseJSON;
+					$.notify({
+						message: response.message
+					}, {
+						type: 'danger'
+					});
+					console.log(xhr);
+				}
+			});
+		});
+
+		$(document).on("click", 'li[name^="add-step-"]', function (event) {
+			event.preventDefault();
+			const lessonId = $(this).data('lesson-id').toString();
+			const stepType = $(this).data('step-type').toString();
+			$.ajax({
+				url: "@Url.Action("AddStep", "Lesson", new { area = "Teach" })",
+				type: "POST",
+				data: {
+					lessonId: lessonId,
+					stepType: stepType,
+				},
+				success: function (response) {
+					const redirectUrl = `/EditLesson/@Model.Course.Id/${lessonId}?stepId=${response.stepId}`;
+					window.location.href = redirectUrl;
+					$.notify({
+						message: response.message
+					}, {
+						type: 'success'
+					});
+				},
+				error: function (xhr) {
+					const response = xhr.responseJSON;
+					$.notify({
+						message: response.message
+					}, {
+						type: 'danger'
+					});
+					console.log(xhr);
+				}
+			});
+		});
+
+	</script>
+}

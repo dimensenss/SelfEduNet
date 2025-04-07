@@ -1,0 +1,25 @@
+﻿@model SelfEduNet.ViewModels.EditLessonViewModel
+@{
+	var currentStep = ViewData["Step"] as Step;
+}
+@if (@Model.Lesson != null)
+{
+	@await Html.PartialAsync("EditLessonMode/_EditLessonForm", @Model.Lesson)
+	@await Html.PartialAsync("EditLessonMode/_EditStepList", @Model)
+					
+					
+	<div>
+		@await Html.PartialAsync("EditLessonMode/_EditStepBase", currentStep)
+	</div>
+	<a asp-action="ViewLesson" asp-controller="Lesson" asp-area="Teach"
+	   asp-route-courseId="@Model.Course.Id"
+	   asp-route-lessonId="@Model.Lesson.Id"
+	   asp-route-stepId="@currentStep.Id">
+		Повернутися до перегляду <i class="fa-solid fa-eye"></i>
+	</a>
+
+}
+else
+{
+	@await Html.PartialAsync("EditLessonMode/_EditLessonForm", @Model.Course.Lessons.FirstOrDefault())
+}

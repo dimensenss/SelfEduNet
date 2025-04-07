@@ -1,0 +1,16 @@
+﻿@model Step
+@{
+	var currentStep = ViewData["Step"] as Step;
+}
+<link rel="stylesheet" href="~/css/ckeditor.css" />
+
+<p id="saveStatus"></p>
+
+<div class="main-container mx-0">
+	<div class="editor-container editor-container_classic-editor editor-container_include-word-count" id="editor-container">
+		<div class="editor-container__editor">
+			<div id="editor" data-step-id="@Model.Id" data-initial="@Html.Raw(System.Net.WebUtility.HtmlEncode(currentStep.Content))"></div>
+		</div>
+		<div class="editor_container__word-count" id="editor-word-count"></div>
+	</div>
+</div>

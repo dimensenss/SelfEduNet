@@ -1,0 +1,36 @@
+﻿@model Lesson
+@{
+
+}
+<div class="row">
+	<form class="needs-validation" method="post"
+		  id="update-lesson-form-@Model.Id" novalidate>
+		<input type="hidden" name="LessonId" value="@Model.Id" />
+		<div class="input-group mb-3">
+			<div class="flex-grow-1">
+				<label for="Title" class="form-label">Назва уроку</label>
+				<input id="Title" name="Title" type="text" class="form-control"
+					   placeholder="Введіть назву уроку" required value="@Model.Title" style="height:42px;">
+				<div class="invalid-feedback">
+					Назва урока може містити лише літери, цифри, пробіли та дефіси.
+				</div>
+			</div>
+			<div class="align-self-end">
+				<button class="btn btn-primary ms-2" type="button"
+						name="update-lesson-@Model.Id"
+						data-lesson-form-id="@Model.Id"
+						data-module-id="@Model.Id">
+					Оновити урок
+				</button>
+			</div>
+		</div>
+
+
+		<div class="d-flex flex-row justify-content-between">
+			@* 		<button class="btn mb-3 fs-4" type="button"
+		        name="delete-lesson-@lesson.Id" data-lesson-form-id="lesson-form-@lesson.Id">
+			<i class="fa-solid fa-trash"></i>
+		</button> *@
+		</div>
+	</form>
+</div>

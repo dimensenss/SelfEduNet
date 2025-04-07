@@ -1,0 +1,48 @@
+﻿@model Step
+
+<div class="step-text-wrapper">
+	<div class="video-uploader__section">
+		<p>Прив'язувати відео можна тільки з YouTube, посилання з інших сервісів зберігатися не будуть</p>
+        
+		<div role="radiogroup" id="uploadOptions" class="radio-button-group video-uploader__select">
+			<input type="radio" class="btn-check" name="uploadType" id="linkOption" autocomplete="off" checked>
+			<label class="btn" for="linkOption">Зовнішне посилання</label>
+
+			<input type="radio" class="btn-check" name="uploadType" id="fileOption" autocomplete="off" disabled>
+			<label class="btn" for="fileOption">Завантажити файл</label>
+		</div>
+	</div>
+
+	<!-- File Upload Form -->
+	@* <form asp-controller="Step" asp-action="UploadFile" method="post" enctype="multipart/form-data" id="fileUploadSection">
+		<div class="video-uploader__actions">
+			<label for="fileInput" class="btn btn-primary">Choose file</label>
+			<input id="fileInput" class="file-upload__input" name="videoFile" accept="video/mp4,video/x-m4v,video/*" type="file">
+			<button type="submit" class="btn btn-success">Upload</button>
+		</div>
+	</form> *@
+
+	<!-- URL Submission Form -->
+	<form asp-controller="Step" asp-action="UploadVideo" method="post" id="linkUploadSection" data-step-id="@Model.Id">
+		<div>
+			<input type="url" class="form-control my-3" name="videoUrl" placeholder="Вставьте посилання на відео" required 
+			       value="@(Model.VideoUrl != null ? Model.VideoUrl : "")">
+			<button type="submit" class="btn btn-success">Прив'язати відео</button>
+		</div>
+	</form>
+	<div id="video-box"
+		 class="upload-box @(string.IsNullOrEmpty(Model.VideoUrl) ? "upload-box-border mb-3" : "mb-3")">
+		@if (!string.IsNullOrEmpty(Model.VideoUrl))
+		{
+			<iframe id="youtubePlayer" width="100%" height="315"
+					src=@YouTubeHelper.GetYouTubeEmbedUrl(Model.VideoUrl)
+			        frameborder="0"
+			        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+			        allowfullscreen></iframe>
+		}
+		else
+		{
+			<span class="upload-video-placeholder d-block">🎥</span>
+		}
+	</div>
+</div>
