@@ -32,12 +32,26 @@ namespace SelfEduNet.Controllers
         }
 
 		[HttpGet]
-        public IActionResult SearchCatalog([FromQuery] CourseFilter filter)
-        {
-            var courses = _courseRepository.GetAllCoursesQuery().ApplyFilters(filter);
-            return View(courses);
-        }
-        public async Task<IActionResult> GetCoursesSlider([FromQuery] int catId)
+		public IActionResult SearchCatalog([FromQuery] CourseFilter filter)
+		{
+			var query = _courseRepository.GetAllCoursesQuery().ApplyFilters(filter);
+
+			int totalItems = query.Count();
+			var courses = query
+				.Skip((filter.Page - 1) * filter.PageSize)
+				.Take(filter.PageSize)
+				.ToList();
+
+			var viewModel = new CourseCatalogViewModel
+			{
+				Courses = courses,
+				Filter = filter,
+				TotalItems = totalItems
+			};
+
+			return View(viewModel);
+		}
+		public async Task<IActionResult> GetCoursesSlider([FromQuery] int catId)
         {
 	        var courses = await _courseRepository.GetCoursesByCategoryAsync(catId);
 
@@ -48,9 +62,21 @@ namespace SelfEduNet.Controllers
         [HttpGet]
 		public IActionResult GetCoursesWithFilter([FromQuery] CourseFilter filter)
         {
-	        var courses = _courseRepository.GetAllCoursesQuery().ApplyFilters(filter);
-	        return PartialView("_GetCoursesWithFilter", courses);
-        }
+			var query = _courseRepository.GetAllCoursesQuery().ApplyFilters(filter);
 
+			int totalItems = query.Count();
+			var courses = query
+				.Skip((filter.Page - 1) * filter.PageSize)
+				.Take(filter.PageSize)
+				.ToList();
+
+			var viewModel = new CourseCatalogViewModel
+			{
+				Courses = courses,
+				Filter = filter,
+				TotalItems = totalItems
+			};
+			return PartialView("_GetCoursesWithFilter", viewModel);
+        }
 	}
 }

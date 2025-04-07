@@ -12,18 +12,13 @@ namespace SelfEduNet.Models
         [Display(Name = "Назва категорії")]
         public string Title { get; set; }
 
-        [Required]
-        [MaxLength(255)]
-        [Display(Name = "URL")]
-        public string Slug { get; set; }
-
         [Display(Name = "Батьківська категорія")]
         public int? ParentId { get; set; }
 
         [ForeignKey("ParentId")]
-        public Category Parent { get; set; }
+        public Category? Parent { get; set; }
 
-        public ICollection<Category> Children { get; set; } = new List<Category>();
+        public ICollection<Category>? Children { get; set; } = new List<Category>();
 
         public override string ToString()
         {
