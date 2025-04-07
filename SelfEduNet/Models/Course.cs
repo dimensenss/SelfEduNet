@@ -20,21 +20,23 @@ namespace SelfEduNet.Models
         public string CourseName { get; set; }
 
         [MaxLength(1024)]
-        public string Description { get; set; }
+        public string? Description { get; set; }
+        [MaxLength(5000)]
+        public string? PromoText { get; set; }
 
-        public int? CategoryId { get; set; }
+		public int? CategoryId { get; set; }
         [ForeignKey("CategoryId")]
-        public Category Category { get; set; }
+        public Category Category { get; set; } = new Category { Title = "Drafts" };
 
-        [Range(0, int.MaxValue)]
+		[Range(0, int.MaxValue)]
         public int FullPrice { get; set; } = 0;
 
-        [Required]
-        public LanguageType Language { get; set; }
+        [Required] public LanguageType Language { get; set; } = LanguageType.Ukrainian;
 
-        public DifficultyType? Difficulty { get; set; }
 
-        public bool HaveCertificate { get; set; } = false;
+		public DifficultyType? Difficulty { get; set; } = DifficultyType.Beginner;
+
+		public bool HaveCertificate { get; set; } = false;
 
         public string? Preview { get; set; } // Путь к файлу изображения
 
@@ -45,8 +47,8 @@ namespace SelfEduNet.Models
         public bool IsPublished { get; set; } = false;
 
         public ICollection<CourseModules> Modules { get; set; } = new List<CourseModules>();
-        public CourseInfo Info { get; set; }
-        public decimal Rating { get; set; }
+        public CourseInfo Info { get; set; } = new CourseInfo();
+        public decimal Rating { get; set; } = 0;
 
         public override string ToString()
         {

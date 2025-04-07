@@ -8,17 +8,17 @@ namespace SelfEduNet.Models
 
         [Required]
         public int CourseModuleId { get; set; }
-        public CourseModules CourseModule { get; set; }
-
+        public CourseModules? CourseModule { get; set; }
         [Required]
         [MaxLength(255)]
         public string Title { get; set; }
+        public int Order { get; set; }
+		public ICollection<Step>? Steps { get; set; } = new List<Step>();
+		public ICollection<UserLesson> UserLessons { get; set; } = new List<UserLesson>();
 
-        public string Content { get; set; } // Основной текст урока
-
-        public string VideoUrl { get; set; } // URL для видео
-
-        public override string ToString()
+		public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+		public override string ToString()
         {
             return $"Lesson: {Title}";
         }
