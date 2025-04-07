@@ -1,6 +1,10 @@
 ﻿@{
 	Layout = "_AdminLayout";
 }
+@section Sidebar
+{
+	@await Html.PartialAsync("_AdminSidebar")
+}
 @section Search {
 	<form asp-action="SearchCourse" asp-controller="CoursesDashboard" asp-area="Admin" method="get">
 		<div class="input-group">
@@ -29,6 +33,7 @@
 		</div>
 	</div>
 </div>
+<script src="~/js/courses-with-edit.js"></script>
 
 
 
