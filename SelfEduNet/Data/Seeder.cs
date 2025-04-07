@@ -18,6 +18,8 @@ namespace SelfEduNet.Data
 
             if (!_context.Courses.Any())
             {
+                var admin = _context.Users.FirstOrDefault(u => u.Email == "root@gmail.com");
+
                 var coursesInfos = new List<CourseInfo>
                 {
                     new CourseInfo
@@ -75,14 +77,13 @@ namespace SelfEduNet.Data
                 {
                     new Course
                     {
-                        OwnerId = "3d580ca7-b836-408c-8ad6-d95b7cbc4a53",
+                        OwnerId = admin.Id,
                         CourseName = "Основи програмування на C#",
                         Description = "Цей курс допоможе вам вивчити основи програмування на C#.",
                         FullPrice = 0,
                         Language = LanguageType.Ukrainian,
                         Difficulty = DifficultyType.Beginner,
                         HaveCertificate = true,
-                        Preview = "/images/csharp_intro.jpg",
                         CreatedAt = DateTime.UtcNow,
                         UpdatedAt = DateTime.UtcNow,
                         Info = coursesInfos[0],
@@ -91,14 +92,13 @@ namespace SelfEduNet.Data
                     },
                     new Course
                     {
-                        OwnerId = "3d580ca7-b836-408c-8ad6-d95b7cbc4a53",
+                        OwnerId = admin.Id,
                         CourseName = "Веб-розробка з JavaScript",
                         Description = "Дізнайтеся, як створювати динамічні веб-сайти з використанням JavaScript.",
                         FullPrice = 1000,
                         Language = LanguageType.Ukrainian,
                         Difficulty = DifficultyType.Middle,
                         HaveCertificate = false,
-                        Preview = "/images/javascript_web_dev.jpg",
                         CreatedAt = DateTime.UtcNow,
                         UpdatedAt = DateTime.UtcNow,
                         Info = coursesInfos[1],
@@ -107,14 +107,13 @@ namespace SelfEduNet.Data
                     },
                     new Course
                     {
-                        OwnerId = "3d580ca7-b836-408c-8ad6-d95b7cbc4a53",
+                        OwnerId = admin.Id,
                         CourseName = "Основи Python",
                         Description = "Навчіться основам програмування на Python.",
                         FullPrice = 0,
                         Language = LanguageType.Ukrainian,
                         Difficulty = DifficultyType.Beginner,
                         HaveCertificate = true,
-                        Preview = "/images/python_intro.jpg",
                         CreatedAt = DateTime.UtcNow,
                         UpdatedAt = DateTime.UtcNow,
                         Info = coursesInfos[2],
@@ -123,14 +122,13 @@ namespace SelfEduNet.Data
                     },
                     new Course
                     {
-                        OwnerId = "3d580ca7-b836-408c-8ad6-d95b7cbc4a53",
+                        OwnerId = admin.Id,
                         CourseName = "Просунутий JavaScript",
                         Description = "Дізнайтеся всі тонкощі JavaScript для розробки складних веб-додатків.",
                         FullPrice = 1500,
                         Language = LanguageType.Ukrainian,
                         Difficulty = DifficultyType.Expert,
                         HaveCertificate = true,
-                        Preview = "/images/advanced_javascript.jpg",
                         CreatedAt = DateTime.UtcNow,
                         UpdatedAt = DateTime.UtcNow,
                         Info = coursesInfos[3],
@@ -139,14 +137,13 @@ namespace SelfEduNet.Data
                     },
                     new Course
                     {
-                        OwnerId = "3d580ca7-b836-408c-8ad6-d95b7cbc4a53",
+                        OwnerId = admin.Id,
                         CourseName = "Промо курс зі створення сайтів",
                         Description = "Отримайте безкоштовний доступ до матеріалів по створенню сайтів.",
                         FullPrice = 0,
                         Language = LanguageType.Ukrainian,
                         Difficulty = DifficultyType.Beginner,
                         HaveCertificate = false,
-                        Preview = "/images/promo_course.jpg",
                         CreatedAt = DateTime.UtcNow,
                         UpdatedAt = DateTime.UtcNow,
                         Info = coursesInfos[4],

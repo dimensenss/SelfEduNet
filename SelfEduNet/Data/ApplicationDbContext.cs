@@ -17,8 +17,10 @@ namespace SelfEduNet.Data
 		public DbSet<CourseInfo> CourseInfos { get; set; }
 		public DbSet<CourseModules> CourseModules { get; set; }
 		public DbSet<Lesson> Lessons { get; set; }
+		public DbSet<Step> Steps { get; set; }
 		public DbSet<Category> Categories { get; set; }
-
+		public DbSet<UserStep> UserSteps { get; set; }
+		public DbSet<UserLesson> UserLessons { get; set; }
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			base.OnModelCreating(modelBuilder);
@@ -32,28 +34,32 @@ namespace SelfEduNet.Data
 				.WithOne(m => m.Course)
 				.HasForeignKey(m => m.CourseId);
             modelBuilder.Entity<Course>()
-                .HasOne(c => c.Owner) // Один власник
-                .WithMany(u => u.OwnedCourses) // Має багато курсів
-                .HasForeignKey(c => c.OwnerId) // Зовнішній ключ
-                .OnDelete(DeleteBehavior.Restrict); // Заборонити каскадне видалення
-            // Налаштування зв'язку між AppUser і CourseUserRelation
-            modelBuilder.Entity<CourseUserRelation>()
-                .HasOne(c => c.User) // Один User
-                .WithMany(u => u.CourseRelations) // Має багато CourseRelations
-                .HasForeignKey(c => c.UserId) // Зовнішній ключ
-                .OnDelete(DeleteBehavior.Cascade); // Каскадне видалення (опціонально)
+                .HasOne(c => c.Owner)
+                .WithMany(u => u.OwnedCourses)
+                .HasForeignKey(c => c.OwnerId)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<UserCourse>()
+                .HasOne(c => c.User)
+                .WithMany(u => u.UserCourses)
+                .HasForeignKey(c => c.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-            // Налаштування зв'язку між Course і CourseUserRelation
-            modelBuilder.Entity<CourseUserRelation>()
-                .HasOne(c => c.Course) // Один Course
-                .WithMany() // (опціонально) можна додати UserRelations у модель Course
-                .HasForeignKey(c => c.CourseId) // Зовнішній ключ
-                .OnDelete(DeleteBehavior.Restrict); // Заборонити каскадне видалення
+            modelBuilder.Entity<UserCourse>()
+                .HasOne(c => c.Course)
+                .WithMany()
+                .HasForeignKey(c => c.CourseId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<CourseModules>()
 				.HasMany(cm => cm.Lessons)
 				.WithOne(l => l.CourseModule)
 				.HasForeignKey(l => l.CourseModuleId);
+
+            modelBuilder.Entity<Lesson>()
+	            .HasMany(l => l.Steps)
+	            .WithOne(s => s.Lesson)
+	            .HasForeignKey(s => s.LessonId)
+	            .OnDelete(DeleteBehavior.Cascade);
 
 			modelBuilder.Entity<Category>()
 				.HasOne(c => c.Parent)
@@ -62,21 +68,46 @@ namespace SelfEduNet.Data
 				.OnDelete(DeleteBehavior.Restrict);
 
 			modelBuilder.Entity<CourseInfo>()
-				.HasMany(ci => ci.Authors) // CourseInfo has many authors
-				.WithMany(u => u.AuthoredCourses) // AppUser authors many CourseInfos
+				.HasMany(ci => ci.Authors)
+				.WithMany(u => u.AuthoredCourses)
 				.UsingEntity<Dictionary<string, object>>(
-					"CourseInfoAuthor", // Name of the join table
+					"CourseInfoAuthor",
 					j => j
-						.HasOne<AppUser>() // Join table references AppUser
-						.WithMany() // No navigation property in AppUser for join table
-						.HasForeignKey("AuthorId") // Foreign key in the join table
+						.HasOne<AppUser>()
+						.WithMany()
+						.HasForeignKey("AuthorId")
 						.OnDelete(DeleteBehavior.Cascade),
 					j => j
-						.HasOne<CourseInfo>() // Join table references CourseInfo
-						.WithMany() // No navigation property in CourseInfo for join table
-						.HasForeignKey("CourseInfoId") // Foreign key in the join table
+						.HasOne<CourseInfo>()
+						.WithMany()
+						.HasForeignKey("CourseInfoId") 
 						.OnDelete(DeleteBehavior.Cascade)
 				);
+			modelBuilder.Entity<UserStep>()
+				.HasKey(us => new { us.UserId, us.StepId });
+
+			modelBuilder.Entity<UserStep>()
+				.HasOne(us => us.User)
+				.WithMany(u => u.UserSteps)
+				.HasForeignKey(us => us.UserId);
+
+			modelBuilder.Entity<UserStep>()
+				.HasOne(us => us.Step)
+				.WithMany(s => s.UserSteps)
+				.HasForeignKey(us => us.StepId);
+
+			modelBuilder.Entity<UserLesson>()
+				.HasKey(us => new { us.UserId, us.LessonId });
+
+			modelBuilder.Entity<UserLesson>()
+				.HasOne(us => us.User)
+				.WithMany(u => u.UserLessons)
+				.HasForeignKey(us => us.UserId);
+
+			modelBuilder.Entity<UserLesson>()
+				.HasOne(us => us.Lesson)
+				.WithMany(s => s.UserLessons)
+				.HasForeignKey(us => us.LessonId);
 		}
 	}
 }
