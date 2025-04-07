@@ -1,11 +1,11 @@
 ﻿@model IEnumerable<Course>
 
-@if (!Model.Any())
+@if (!@Model.Any())
 {
 	<p class="text-center fs-2 fw-bold">Нічого не знайдено</p>
 }
 
-@foreach (var course in Model)
+@foreach (var course in @Model)
 {
 	<div class="card mb-3">
 		<div class="card-body">
@@ -25,8 +25,8 @@
 						}
 					</div>
 					<div class="mx-2">
-						<h5 class="card-title">@course.CourseName</h5>
-						<h6 class="card-subtitle mb-2 text-body-secondary">@course.Owner</h6>
+						<h4 class="card-title">@course.CourseName</h4>
+						<h5 class="card-subtitle mb-2 text-body-secondary">@course.Owner</h5>
 					</div>
 				</div>
 				<div class="d-flex mx-2">
@@ -36,20 +36,29 @@
 						</a>
 						<ul class="dropdown-menu">
 							<li>
-								@if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+								@if (User.Identity.IsAuthenticated)
 								{
-									<a asp-action="EditInfo" asp-controller="CoursesDashboard" asp-area="Admin" asp-route-id="@course.Id" class="dropdown-item fs-5">
-										<div class="d-flex justify-content-between">
-											Редагувати
-											<i class="fa-solid fa-pen-to-square"></i>
-										</div>
-									</a>
+									@if (User.IsInRole("Admin") || User.IsInRole("Teacher"))
+									{
+										<a asp-action="EditInfo" asp-controller="Course" asp-route-id="@course.Id" asp-area="" class="dropdown-item fs-5">
+											<div class="d-flex align-items-baseline justify-content-between">
+												<p class="m-0 mx-2">Інформація</p>
+												<i class="fa-solid fa-pen-to-square"></i>
+											</div>
+										</a>
+										<a asp-action="EditContent" asp-controller="TeachCourse" asp-route-id="@course.Id" asp-area="Teach" class="dropdown-item fs-5">
+											<div class="d-flex align-items-baseline justify-content-between">
+												<p class="m-0 mx-2">Зміст</p>
+												<i class="fa-solid fa-pen-to-square"></i>
+											</div>
+										</a>
+									}
 								}
 							</li>
 							<li>
-								<a class="dropdown-item fs-5" data-delete-course-id="@course.Id">
-									<div class="d-flex justify-content-between">
-										Видалити
+								<a class="dropdown-item fs-5 gj-cursor-pointer" data-delete-course-id="@course.Id">
+									<div class="d-flex align-items-baseline justify-content-between">
+										<p class="m-0 mx-2">Видалити</p>
 										<i class="fa-solid fa-trash"></i>
 									</div>
 									
@@ -62,41 +71,52 @@
 		</div>
 	</div>
 }
-<script src="~/js/vendor/jquery-1.12.4.min.js" asp-append-version="true"></script>
 
-<script>
+@section Scripts {
+
+	<script>
 	$(document).ready(function () {
 		$(document).on('click', 'a[data-delete-course-id]', function () {
-			var courseId = $(this).data('delete-course-id');
-			$.ajax({
-				url: "@Url.Action("DeleteCourse", "CoursesDashboard", new { area = "Admin" })",
-				type: 'POST',
-				data: {
-					courseId: courseId,
-				},
-				success: function (response) {
-					$.notify({
+		var courseId = $(this).data('delete-course-id');
+		console.log("ok");
+		showConfirmationDialog(
+			'Ви впевнені?',
+			'Ця дія видаляє модуль. Ви не зможете відновити його!',
+			'Так, видалити!',
+			'Відмінити',
+			() => {
+				$.ajax({
+					url: "@Url.Action("DeleteCourse", "Course", new { area = "" })",
+					type: 'POST',
+					data: {
+						courseId: courseId,
+					},
+					success: function (response) {
+						$.notify({
+							message: response.message
+						}, {
+							type: 'success'
+						});
+						renderCoursesList();
+					},
+					error: function (xhr) {
+						const response = xhr.responseJSON;
+						const errorMessage = response && response.message ? response.message : "An unexpected error occurred.";
+						$.notify({
 						message: response.message
-					}, {
-						type: 'success'
-					});
-					renderCoursesList();
-				},
-				error: function (xhr) {
-					const response = xhr.responseJSON;
-					const errorMessage = response && response.message ? response.message : "An unexpected error occurred.";
-					$.notify({
-						message: response.message
-					}, {
-						type: 'danger'
-					});
-				}
-			});
-		});
+						}, {
+							type: 'danger'
+						});
+					}
+				});
+			}
+		);
+	});
+
 
 		function renderCoursesList() {
 			$.ajax({
-				url: "@Url.Action("RenderCoursesList", "CoursesDashboard", new { area = "Admin" })",  // The action URL in your controller
+				url: "@Url.Action("RenderCoursesList", "Course", new { area = "" })",
 				type: 'GET',
 				data: { },
 				success: function (response) {
@@ -109,3 +129,4 @@
 		}
 	});
 </script>
+}

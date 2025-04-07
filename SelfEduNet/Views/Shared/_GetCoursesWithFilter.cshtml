@@ -1,11 +1,44 @@
-﻿@model IEnumerable<Course>
-
-@if (!Model.Any())
+﻿@model SelfEduNet.ViewModels.CourseCatalogViewModel
+@if (!Model.Courses.Any())
 {
 	<p class="text-center fs-2 fw-bold">Нічого не знайдено</p>
 }
+@if (Model.TotalPages > 1)
+{
+	<nav class="me-5 mb-2">
+		<ul class="pagination justify-content-end">
+			@if (Model.Filter.Page > 1)
+			{
+				<li class="page-item">
+					<a class="page-link page-link-ajax" href="?Page=@(Model.Filter.Page - 1)" data-page="@(Model.Filter.Page - 1)">
+						<span aria-hidden="true">&laquo;</span> <!-- Стрілочка "Назад" -->
+					</a>
+				</li>
+			}
 
-@foreach (var course in Model)
+			@for (int i = 1; i <= Model.TotalPages; i++)
+			{
+				<li class="page-item @(i == Model.Filter.Page ? "active" : "")">
+					<a class="page-link page-link-ajax"
+					   href="?Page=@i"
+					   data-page="@i">
+						@i
+					</a>
+				</li>
+			}
+
+			@if (Model.Filter.Page < Model.TotalPages)
+			{
+				<li class="page-item">
+					<a class="page-link page-link-ajax" href="?Page=@(Model.Filter.Page + 1)" data-page="@(Model.Filter.Page + 1)">
+						<span aria-hidden="true">&raquo;</span> <!-- Стрілочка "Вперед" -->
+					</a>
+				</li>
+			}
+		</ul>
+	</nav>
+}
+@foreach (var course in Model.Courses)
 {
 	<a asp-controller="Course" asp-action="Detail" asp-route-id="@course.Id" asp-area="" class="text-decoration-none">
 		<div class="card course-card">
@@ -15,19 +48,23 @@
 					@if (!string.IsNullOrEmpty(course.Preview))
 					{
 						<img src="@course.Preview" alt="@course.CourseName"
-							 class="img-fluid me-3 rounded card-image" />
+						     class="img-fluid me-3 rounded card-image" />
 					}
 					else
 					{
 						<img src="https://dummyimage.com/450x300/dee2e6/6c757d.jpg"
-							 alt="@course.CourseName"
-							 class="img-fluid me-3 rounded card-image" />
+						     alt="@course.CourseName"
+						     class="img-fluid me-3 rounded card-image" />
 					}
 
 					<div>
-						<h5 class="card-title">@course.CourseName</h5>
-						<h6 class="card-subtitle mb-2 text-body-secondary">@course.Owner</h6>
-						<p class="card-text">@course.FullPrice</p>
+						<h2 class="card-title">@course.CourseName</h2>
+						<h5 class="card-subtitle mb-2 text-body-secondary">@course.Owner.FirstName @course.Owner.LastName</h5>
+						@foreach (var author in course.Info.Authors)
+						{
+							<h6 class="card-subtitle mb-2 text-body-secondary"><i class="fa-solid fa-users"></i> @author.FirstName @author.LastName</h6>
+						}
+						<p class="card-text">@(course.FullPrice > 0 ? course.FullPrice : "Безкоштовно")</p>
 					</div>
 				</div>
 			</div>

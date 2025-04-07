@@ -1,9 +1,8 @@
-﻿
-@{
+﻿@{
 	Layout = "_Layout";
 }
 @using Microsoft.AspNetCore.Mvc.TagHelpers
-@model IEnumerable<Course>
+@model SelfEduNet.ViewModels.CourseCatalogViewModel
 
 <div class="marco-layout">
 	<div class="container-fluid">
@@ -26,9 +25,14 @@
 										<i class="fa-solid fa-magnifying-glass"></i>
 									</span>
 									<input type="text" name="Query" placeholder="Пошук..."
-										   class="form-control search-input"
-									> 
-									@* value="@Request.Query["q"]" *@
+										   class="form-control search-input" value="@(Model?.Filter?.Query ?? "")">
+									@* <input type="hidden" name="Difficulty" value="@(Model.Filter?.Difficulty ?? "")" />
+									<input type="hidden" name="MinPrice" value="@Model.Filter?.MinPrice" />
+									<input type="hidden" name="MaxPrice" value="@Model.Filter?.MaxPrice" />
+									<input type="hidden" name="Page" value="@Model.Filter?.Page" />
+									<input type="hidden" name="Language" value="@Model.Filter?.Language" />
+									<input type="hidden" name="HaveCertificate" value="@(Model.Filter?.HaveCertificate ?? false)" />
+									<input type="hidden" name="IsFree" value="@(Model.Filter?.IsFree ?? false)" /> *@
 								</div>
 								<div class="d-none d-md-flex">
 									<button class="button-3 flex-fill me-3">Пошук</button>
@@ -62,7 +66,7 @@
 </div>
 
 <div class="offcanvas offcanvas-start" data-bs-scroll="true" tabindex="-1" id="offcanvasWithBothOptions"
-	 aria-labelledby="offcanvasWithBothOptionsLabel">
+     aria-labelledby="offcanvasWithBothOptionsLabel">
 	<div class="offcanvas-header">
 		<h5 class="offcanvas-title" id="offcanvasWithBothOptionsLabel">Фільтри</h5>
 		<button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
@@ -71,4 +75,155 @@
 		@Html.Partial("_FiltersForm", new { form_type = "mobile" })
 	</div>
 </div>
+@section Scripts {
+	<script>
 
+	$(document).ready(function () {
+		const $filterForms = $('#catalog-search-form-main, #catalog-search-form-desktop, #catalog-search-form-mobile');
+
+		function getParamsFromForms() {
+			const formData = $filterForms.serializeArray();
+			const params = new URLSearchParams();
+
+			formData.forEach(({ name, value }) => {
+				if (value && value !== '0') {
+					params.set(name, value);
+				}
+			});
+
+			// Чекбоксы
+			$filterForms.find('input[type="checkbox"]').each(function () {
+				if (this.checked && !params.has(this.name)) {
+					params.set(this.name, this.value);
+				}
+			});
+
+			return params;
+		}
+
+		function applyFilters(params, shouldSync = true) {
+			const url = '/Catalog/GetCoursesWithFilter';
+
+			$.ajax({
+				url: url,
+				data: params.toString(),
+				method: 'GET',
+				success: function (html) {
+					$('.courses-list').html(html);
+					updateActiveFilters(params);
+					updateBrowserUrl(params);
+					if (shouldSync) {
+						syncFormsWithParams(params); // вызываем только если надо
+					}
+				},
+				error: function () {
+					alert('Помилка при завантаженні курсів.');
+				}
+			});
+		}
+
+		function syncFormsWithParams(params) {
+			$filterForms.each(function () {
+				const $form = $(this);
+
+				// Очистить все поля (text, select)
+				$form.find('input[type="text"]').val('');
+				$form.find('input[type="number"]').val('');
+				$form.find('select').val('');
+				$form.find('input[type="checkbox"]').prop('checked', false);
+
+				// Применить значения из params
+				params.forEach((value, key) => {
+					const $input = $form.find(`[name="${key}"]`);
+
+					if ($input.length > 0) {
+						if ($input.attr('type') === 'checkbox') {
+							$input.each(function () {
+								if ($(this).val() == value) {
+									$(this).prop('checked', true);
+								}
+							});
+						} else {
+							$input.val(value);
+						}
+					}
+				});
+			});
+		}
+
+		function updateActiveFilters(params) {
+			const $container = $('.active-filters');
+			$container.empty();
+
+			params.forEach((value, key) => {
+				if (key === 'Page') return;
+
+				if (!value || value.trim() === '' || value === '0') {
+					return;
+				}
+
+				const $input = $filterForms.find(`[name="${key}"]`);
+				if ($input.length === 0) return;
+
+				let label = '';
+
+				// Специальная обработка селектов
+				if ($input.is('select')) {
+					const selectedText = $input.find(`option[value="${value}"]`).first().text().trim();
+					label = selectedText;
+				}
+				// Ценовые фильтры
+				else if (key === 'MinPrice' || key === 'MaxPrice') {
+					const labelPrefix = $input.data('btn-label') || (key === 'MinPrice' ? 'Ціна від' : 'Ціна до');
+					label = `${labelPrefix}: ${value}`;
+				}
+				// Все остальные
+				else {
+					label = $input.data('btn-label') || value;
+				}
+
+				const $btn = $(`<button class="button-4 m-0 me-2 mb-2" style="height: 38px">${label} ✕</button>`);
+				$btn.on('click', function () {
+					params.delete(key);
+					params.set('Page', 1);
+					applyFilters(params);
+				});
+
+				$container.append($btn);
+			});
+		}
+
+
+
+		function updateBrowserUrl(params) {
+			const newUrl = `${window.location.pathname}?${params.toString()}`;
+			window.history.replaceState({}, '', newUrl);
+		}
+
+		// Обработка форм
+		$filterForms.on('submit change', function (e) {
+			e.preventDefault();
+			const params = getParamsFromForms();
+			params.set('Page', 1);
+			applyFilters(params, false); // ← НЕ синхронизируем форму!
+		});
+
+		// Пагинация
+		$(document).on('click', '.pagination a', function (e) {
+			e.preventDefault();
+			const page = $(this).text().trim();
+			const params = new URLSearchParams(window.location.search);
+			params.set('Page', page);
+			applyFilters(params);
+		});
+
+		// Инициализация при загрузке
+		const initialParams = new URLSearchParams(window.location.search);
+		updateActiveFilters(initialParams);
+		syncFormsWithParams(initialParams);
+		applyFilters(initialParams);
+
+
+	});
+</script>
+}

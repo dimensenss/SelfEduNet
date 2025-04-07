@@ -4,29 +4,20 @@
 @model Course
 
 <div class="course-detail-header">
-    <div class="d-flex page-fragment">
+    <div class="d-flex container-xl">
         <div class="d-flex flex-column text-white">
             <div class="row">
                 <div class="col-md-8">
                     <h1 class="course-detail-header-title">@Model.CourseName</h1>
                     <div class="course-detail-header-summary">
                         <div>
-                            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Atque enim explicabo maiores
-                            nihil non quam quisquam quos suscipit tempora unde! Accusantium consectetur doloremque
-                            ipsam non quae quisquam repellat rerum temporibus!
-                        </div>
-                        <div>
-                            Alias assumenda at consectetur consequuntur ea eaque, est explicabo fuga illo iste odio
-                            optio quisquam, quo repellat sunt veritatis vitae. Cum cupiditate itaque laudantium
-                            natus neque quod repellendus sed vero?
+                            @Model.Description
                         </div>
                     </div>
-
-
                 </div>
                 <div class="col-md-4 text-center ">
-                    @if (Model.Preview.Length > 0)
-                    {
+	                @if (Model.Preview == null || Model.Preview.Length > 0)
+	                {
                         <img src="@Model.Preview" alt="@Model.CourseName" class="img-fluid rounded"
 	                         style="height: 200px;">
                     }
@@ -45,7 +36,7 @@
                             <i class="fa-solid fa-signal"></i> @Model.Difficulty
                         </span>
                         <span class="me-3">
-	                        <i class="fa-regular fa-clock"></i> 10 часов в неделю
+                            <i class="fa-regular fa-clock"></i> @Model.Info.Workload
                         </span>
                         @if (Model.HaveCertificate)
                         {
@@ -68,32 +59,48 @@
     </div>
 </div>
 <div class="course-detail-main">
-    <div class="page-fragment">
+    <div class="container-xl">
         <div class="row">
             <div class="col-md-8">
-                <h3>Про курс</h3>
-                <p class="license">✔ Образовательная лицензия № Л035-01233-15/01102936</p>
-                <p>
-                    Курс продолжает линейку курсов "Поколение Python", адресован знающим базовые конструкции и типы
-                    данных языка Python. Знакомит с концепцией объектно-ориентированного программирования.
-                </p>
-                <ul>
-                    <li>Атрибуты, методы, свойства</li>
-                    <li>Магические методы</li>
-                    <li>Наследование, полиморфизм, декораторы классов</li>
-                </ul>
+	            <div id="coursePromoText" class="ck-content border rounded ms-3 p-4" style="max-width:1000px;">
+		            @if (@Model.PromoText.Length > 0 && @Model.PromoText != null)
+		            {
+			            @Html.Raw(Model.PromoText)
+		            }
+	            </div>
             </div>
-            <div class="col-md-4 price-section">
-                <div>
-                    <span class="price">5 900 грн</span>
-                    <span class="old-price">6 900 грн</span>
-                    <p>При оплате до 16 вересня</p>
-                </div>
-                <button class="btn btn-buy btn-lg btn-block">Придбати</button>
-                <button class="btn btn-outline-success btn-lg btn-block">Спробувати безкоштовно</button>
-                <p class="mt-3">
-                    <a href="#">Add to Wishlist</a> @* TODO *@
-                </p>
+            <div class="col-md-4 price-section d-flex flex-column">
+	            <div>
+		            <div>
+			            <span class="price fs-2 mb-2">@(Model.FullPrice > 0 ? Model.FullPrice : "Безкоштовно")</span>
+		            </div>
+		            <button class="btn btn-buy btn-lg btn-block fs-3 disabled">Придбати</button>
+		            <a asp-action="SignUpToCourse" asp-controller="Course" asp-route-id="@Model.Id" class="btn btn-outline-success btn-lg btn-block fs-3">
+			            Спробувати безкоштовно
+		            </a>
+		            <p class="mt-3">
+			            <a href="#">Add to Wishlist</a> @* TODO *@
+		            </p>
+	            </div>
+	            <div>
+		            <h2>Програма курсу</h2>
+		            <div class="d-flex flex-column">
+			            <ol class="list-group list-group-numbered">
+                            @foreach (var module in @Model.Modules)
+                            {
+	                            <li class="list-group-item d-flex justify-content-between align-items-start">
+		                            <div class="ms-2 me-auto">
+                                        <div class="fw-bold">@module.Title</div>
+                                        <div class="d-inline-block text-truncate" style="max-width: 300px;">
+	                                        @module.Description
+                                        </div>
+		                            </div>
+		                            <span class="badge bg-purple rounded-pill">@module.Lessons.Count()</span>
+	                            </li>
+                            }
+			            </ol>
+		            </div>
+	            </div>
             </div>
         </div>
     </div>
