@@ -1,0 +1,169 @@
+﻿@model SelfEduNet.ViewModels.EditLessonViewModel
+
+@{
+	Layout = "_AdminLayout";
+	ViewData["Mode"] = "View";
+}
+
+@section Sidebar
+{
+	@await Html.PartialAsync("_TeachSidebar", @Model.Course, ViewData)
+}
+
+<div class="row">
+
+	<div class="d-flex pt-2 pb-4 flex-column" id="lesson-container" style="max-width:1000px;">
+		@await Html.PartialAsync("ViewLessonMode/_ViewLessonContent", @Model)
+	</div>
+</div>
+
+
+@section Scripts
+{
+	<script src="~/js/youtubePlayer.js" asp-append-version="true"></script>
+	<script>
+		$(document).ready(function () {
+				$(document).on("click", ".view-step", function (event) {
+					event.preventDefault();
+					var stepId = $(this).data("step-id");
+					var isCompleted = $(this).data("step-is-completed");
+					var isStepList = $(this).data("is-step-list");
+					var url = $(this).attr("href");
+					if(isStepList)
+					{
+						viewStep(url);
+					}
+					else
+					{
+					//validation logic
+					//asparagus
+
+					checkViewedStep(stepId, function(isTextRead) {
+						if (!isTextRead) {
+							showConfirmationDialog(
+							'Ви впевнені?',
+							'Ви хочете завершити крок, який ще не пройшли.',
+							'Так!',
+							'Відмінити',
+							() => {
+							if(isCompleted === "False")
+							{
+								submitStep(stepId);
+							}
+								viewStep(url);
+								// Найти кнопку с этим шагом и добавить класс "completed"
+							$(".view-step[data-step-id='" + stepId + "']").addClass("completed");
+
+							// Обновить атрибут data-step-is-completed
+							$(".view-step[data-step-id='" + stepId + "']").attr("data-step-is-completed", "True");
+							console.log(stepId + " completed");
+							}
+						);
+						} 
+						else 
+						{
+							if(isCompleted === "False")
+						{
+							submitStep(stepId);
+						}
+						viewStep(url);
+						// Найти кнопку с этим шагом и добавить класс "completed"
+							$(".view-step[data-step-id='" + stepId + "']").addClass("completed");
+
+							// Обновить атрибут data-step-is-completed
+							$(".view-step[data-step-id='" + stepId + "']").attr("data-step-is-completed", "True");
+						}
+					});
+				}
+				});
+				window.onpopstate = function () {
+					location.reload();
+				};
+
+				//view step
+
+				$(window).on("scroll", function () {
+					let scrollTop = $(window).scrollTop();
+					let windowHeight = $(window).height();
+					let documentHeight = $(document).height();
+					var urlParams = new URLSearchParams(window.location.search);
+
+					if (scrollTop + windowHeight >= documentHeight - 10) {
+						var stepId = urlParams.get('stepId');
+						setTextViewed(stepId);
+						$(window).off("scroll");
+					}
+				});
+
+
+				function viewStep(url){
+					$.ajax({
+						url: url,
+						type: "GET",
+						success: function (response) {
+							$("#lesson-container").html(response);
+							history.pushState(null, "", url);
+						},
+						error: function () {
+							$("#lesson-container").html("<p class='text-danger'>Ошибка загрузки данных.</p>");
+						}
+					});
+				}
+				function checkViewedStep(stepId, callback) {
+					$.ajax({
+						url: "@Url.Action("CheckViewedStep", "Step", new { area = "Teach" })",
+						type: "POST",
+						data: { id: stepId },
+						success: function (response) {
+							callback(true);
+						},
+						error: function () {
+							callback(false);
+						}
+					});
+				}
+
+				function setTextViewed(stepId){
+					$.ajax({
+						url: "@Url.Action("SetViewedStep", "Step", new { area = "Teach" })",
+						type: "POST",
+						data: {
+							id: stepId,
+						},
+						success: function (response) {
+							return true;
+						},
+						error: function (xhr) {
+							console.log(xhr);
+						}
+					});
+				}
+				// Функция для отправки шага через AJAX
+				function submitStep(stepId) {
+					$.ajax({
+						url: "@Url.Action("SubmitStep", "Step", new { area = "Teach" })",
+						type: "POST",
+						data: {
+							id: stepId,
+						},
+						success: function (response) {
+							$.notify({
+								message: response.message
+							}, {
+								type: 'success'
+							});
+				
+						},
+						error: function (xhr) {
+							$.notify({
+								message: xhr.responseText || "Помилка під час відправлення!"
+							}, {
+								type: 'danger'
+							});
+							console.log(xhr);
+						}
+					});
+				}
+		});
+	</script>
+}

@@ -1,0 +1,22 @@
+﻿@model Step
+@{
+	var videoTitle = await YouTubeHelper.GetYouTubeVideoTitleAsync(Model.VideoUrl);
+}
+<div class="step-text-wrapper">
+	<h2 id="video-title">@videoTitle</h2>
+	<div id="video-box"
+		 class="upload-box @(string.IsNullOrEmpty(Model.VideoUrl) ? "upload-box-border mb-3" : "mb-3")">
+		@if (!string.IsNullOrEmpty(Model.VideoUrl))
+		{
+			<iframe id="youtubePlayer" width="100%" height="315"
+					src=@YouTubeHelper.GetYouTubeEmbedUrl(Model.VideoUrl)
+			        frameborder="0"
+			        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+			        allowfullscreen></iframe>
+		}
+		else
+		{
+			<span class="upload-video-placeholder d-block">🎥</span>
+		}
+	</div>
+</div>

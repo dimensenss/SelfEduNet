@@ -1,0 +1,16 @@
+﻿@using SelfEduNet.Data.Enum
+@model Step
+
+
+<div class="row">
+	@switch (@Model.StepType)
+	{
+		case StepType.Text:
+			@await Html.PartialAsync("ViewLessonMode/_ViewTextStep")
+			break;
+
+		case StepType.Video:
+			@await Html.PartialAsync("ViewLessonMode/_ViewVideoStep")
+			break;
+	}
+</div>

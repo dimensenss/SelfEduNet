@@ -1,0 +1,12 @@
+﻿@model Step
+<link rel="stylesheet" href="~/css/ckeditor.css" />
+
+<div class="row">
+	@* @Model.IsCompleted *@
+	<div id="lessonText" class="ck-content border rounded ms-3" style="max-width:1000px;">
+		@if (@Model.Content.Length > 0 && @Model.Content != null)
+		{
+			@Html.Raw(Model.Content)
+		}
+	</div>
+</div>

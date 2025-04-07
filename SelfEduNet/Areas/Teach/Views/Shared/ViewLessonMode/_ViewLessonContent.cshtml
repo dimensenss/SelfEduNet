@@ -1,0 +1,23 @@
+﻿@model SelfEduNet.ViewModels.EditLessonViewModel
+
+@{
+	var currentStep = ViewData["Step"] as Step;
+}
+@if (@Model.Lesson != null)
+{
+	<div class="row">
+		<h4>@(Model.Lesson.Title.Length > 0 && Model.Lesson.Title.Length != null ? Model.Lesson.Title : "Урок без назви")</h4>
+	</div>
+	@await Html.PartialAsync("ViewLessonMode/_ViewStepList", @Model)
+	@await Html.PartialAsync("ViewLessonMode/_ViewStepBase", currentStep)
+
+	@if (User.IsInRole("Admin") || User.IsInRole("Teacher"))
+	{
+		<a asp-action="EditLesson" asp-controller="Lesson" asp-area="Teach"
+		   asp-route-courseId="@Model.Course.Id"
+		   asp-route-lessonId="@Model.Lesson.Id"
+		   asp-route-stepId="@currentStep.Id">
+			Повернутися до редагування <i class="fa-solid fa-pen-to-square"></i>
+		</a>
+	}
+}

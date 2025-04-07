@@ -1,0 +1,90 @@
+﻿@model SelfEduNet.ViewModels.EditLessonViewModel
+
+@{
+	var currentStep = ViewData["Step"] as Step;
+	var currentUserStep = currentStep.UserSteps.FirstOrDefault();
+	var userLesson = Model.Lesson.UserLessons.FirstOrDefault();
+}
+
+<div class="row">
+	<div class="col-md-9">
+		<ul class="nav nav-pills align-items-baseline">
+			@for (int i = 0; i < Model.Steps.Count; i++)
+			{
+			var step = Model.Steps[i];
+			var userStep = Model.Steps[i].UserSteps.FirstOrDefault(us => us.StepId == step.Id);
+			var routeData = new Dictionary<string, string>
+			{
+			{ "courseId", Model.Course.Id.ToString() },
+			{ "lessonId", Model.Lesson.Id.ToString() },
+			{ "stepId", step.Id.ToString() }
+			};
+			<li class="nav-item">
+					<a class="step-btn shadow p-3 mb-5 view-step @(userStep.IsCompleted ? "completed" : "") @(step.Id == currentStep?.Id ? "active" : "")"
+				   aria-current="page"
+				   asp-action="ViewLesson"
+				   asp-controller="Lesson"
+				   asp-area="Teach"
+				   asp-all-route-data="routeData"
+				   data-step-id="@step.Id"
+				   data-is-step-list=true
+				   data-step-is-completed="@userStep.IsCompleted">
+					@(i + 1)
+				</a>
+			</li>
+			}
+		</ul>
+
+	</div>
+	<div class="col-md-3 d-flex justify-content-end">
+			@{
+				var currentIndex = Model.Steps.FindIndex(s => s.Id == currentStep.Id);
+				var isLastStep = currentIndex == Model.Steps.Count - 1;
+				var nextStep = !isLastStep ? Model.Steps[currentIndex + 1] : null;
+			
+			}
+
+			@if (!isLastStep)
+			{
+			<a class="btn btn-success shadow fw-4 view-step" style="height:40px;"
+			   asp-action="ViewLesson"
+			   asp-controller="Lesson"
+			   asp-area="Teach"
+			   asp-route-courseId="@Model.Course.Id"
+			   asp-route-lessonId="@Model.Lesson.Id"
+			   asp-route-stepId="@nextStep.Id"
+			   data-step-id="@currentStep.Id"
+			   data-step-is-completed="@currentUserStep.IsCompleted">
+				Наступний крок
+			</a>
+			}
+			else
+			{
+				if (userLesson != null && userLesson.IsCompleted)
+				{
+					<a class="btn btn-success shadow fw-4 disabled" style="height:40px;"
+					   asp-action="CompleteLesson"
+					   asp-controller="Lesson"
+					   asp-area="Teach"
+					   asp-route-courseId="@Model.Course.Id"
+					   asp-route-lessonId="@Model.Lesson.Id"
+					   asp-route-stepId="@currentStep.Id">
+						Урок завершено
+					</a>
+				}
+				else
+				{
+					<a class="btn btn-success shadow fw-4" style="height:40px;"
+					   asp-action="CompleteLesson"
+					   asp-controller="Lesson"
+					   asp-area="Teach"
+					   asp-route-courseId="@Model.Course.Id"
+					   asp-route-lessonId="@Model.Lesson.Id"
+					   asp-route-stepId="@currentStep.Id">
+						Завершити урок
+					</a>
+				}
+				
+			}
+	</div>
+</div>
