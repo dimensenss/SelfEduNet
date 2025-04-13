@@ -1,0 +1,55 @@
+﻿services:
+  selfedunet:
+    image: ${DOCKER_REGISTRY-}selfedunet
+    container_name: selfedunet
+    build:
+      context: .
+      dockerfile: SelfEduNet/Dockerfile
+    ports:
+      - "5000:5000"
+      - "5001:5001"
+    depends_on:
+      - selfedunet.database
+      - redis
+
+  selfedunet.database:
+    image: postgres:latest
+    container_name: selfedunet.database
+    restart: always
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - ./.containers/selfedu-db:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: selfedunet.pgadmin
+    restart: always
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+      - "5050:80"
+    depends_on:
+      - selfedunet.database
+
+  redis:
+    image: redis:latest
+    container_name: selfedunet.redis
+    restart: always
+    ports:
+      - "6379:6379"
+  worker:
+    image: ${DOCKER_REGISTRY-}selfedunet
+    container_name: selfedunet.worker
+    build:
+      context: .
+      dockerfile: Worker/Dockerfile
+    depends_on:
+      - redis
+    entrypoint: ["dotnet", "Worker.dll"]
+    

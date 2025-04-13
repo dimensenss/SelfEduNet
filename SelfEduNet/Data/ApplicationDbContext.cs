@@ -21,6 +21,7 @@ namespace SelfEduNet.Data
 		public DbSet<Category> Categories { get; set; }
 		public DbSet<UserStep> UserSteps { get; set; }
 		public DbSet<UserLesson> UserLessons { get; set; }
+		public DbSet<UserCourse> UserCourses { get; set; }
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			base.OnModelCreating(modelBuilder);

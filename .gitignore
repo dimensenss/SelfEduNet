@@ -127,3 +127,4 @@ src/.vs/config/applicationhost.config
 /SelfEduNet/appsettings.Production.json
 /Worker/appsettings.Development.json
 /.containers/selfedu-db
+/.env

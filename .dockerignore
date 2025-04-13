@@ -2,6 +2,7 @@
 **/.dockerignore
 **/.env
 **/.git
+**/.vs
 **/.gitignore
 **/.project
 **/.settings
@@ -28,3 +29,10 @@ README.md
 !.git/config
 !.git/packed-refs
 !.git/refs/heads/**
+.vs
+.git
+*.user
+*.suo
+*.vscode
+bin
+obj
