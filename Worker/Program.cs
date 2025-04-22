@@ -11,7 +11,6 @@ var environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "P
 builder.Configuration
 	.SetBasePath(Directory.GetCurrentDirectory())
 	.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-	.AddJsonFile("appsettings.Development.json", optional: false, reloadOnChange: true)
 	.AddJsonFile($"appsettings.{environment}.json", optional: true, reloadOnChange: true)
 	.AddEnvironmentVariables();
 
@@ -22,7 +21,7 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 builder.Services.AddOptionsInjection(builder.Configuration);
 
 builder.Services.AddScoped<IAudioClientFactory, AudioClientFactory>();
-builder.Services.AddScoped<IYoutubeClientService, YoutubeClientService>();
+builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddScoped<IVideoProcessor, VideoProcessor>();
 
 builder.Services.AddHostedService<Worker.Worker>();

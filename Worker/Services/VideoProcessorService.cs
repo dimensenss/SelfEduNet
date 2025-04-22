@@ -121,12 +121,9 @@ namespace Worker.Services
 				ResponseFormat = AudioTranscriptionFormat.Verbose,
 				TimestampGranularities = AudioTimestampGranularities.Word | AudioTimestampGranularities.Segment,
 			};
-
 			AudioTranscription transcription = await _audioClient.TranscribeAudioAsync(audioPath, options);
-			return transcription.Text;
 
-			//await Task.Delay(TimeSpan.FromSeconds(1));
-			//return "Test Transcription";
+			return transcription.Text;
 		}
 		private async Task<TimeSpan> GetAudioDurationAsync(string filePath)
 		{

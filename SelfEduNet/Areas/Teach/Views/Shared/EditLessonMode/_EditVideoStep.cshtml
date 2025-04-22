@@ -1,48 +1,108 @@
 ﻿@model Step
+@{
+	bool isYoutubeVideo = (!string.IsNullOrEmpty(Model.VideoUrl) && YouTubeHelper.IsYouTubeUrl(Model.VideoUrl));
+}
 
-<div class="step-text-wrapper">
-	<div class="video-uploader__section">
-		<p>Прив'язувати відео можна тільки з YouTube, посилання з інших сервісів зберігатися не будуть</p>
-        
-		<div role="radiogroup" id="uploadOptions" class="radio-button-group video-uploader__select">
-			<input type="radio" class="btn-check" name="uploadType" id="linkOption" autocomplete="off" checked>
-			<label class="btn" for="linkOption">Зовнішне посилання</label>
+<div class="accordion accordion-flush mb-3" id="accordionFlushExample">
+	<div class="accordion-item">
+		<h2 class="accordion-header" id="flush-headingOne">
+			<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
+				Завантаження відео
+			</button>
+		</h2>
+		<div id="flush-collapseOne" class="accordion-collapse collapse" aria-labelledby="flush-headingOne" data-bs-parent="#accordionFlushExample">
+			<div class="accordion-body">
+				<div class="video-uploader__section mb-3">
+					<p class="text-muted">*Для власних відео завантажених через файл доступна опція генерації контексту</p>
 
-			<input type="radio" class="btn-check" name="uploadType" id="fileOption" autocomplete="off" disabled>
-			<label class="btn" for="fileOption">Завантажити файл</label>
+					<div role="radiogroup" id="uploadOptions" class="radio-button-group video-uploader__select ">
+						<input type="radio" class="btn-check" name="uploadType" id="linkOption" autocomplete="off">
+						<label class="btn" for="linkOption">Зовнішне посилання</label>
+
+						<input type="radio" class="btn-check" name="uploadType" id="fileOption" autocomplete="off" checked>
+						<label class="btn" for="fileOption">Завантажити файл</label>
+					</div>
+				</div>
+
+				<!-- File Upload Form -->
+				<form asp-controller="Step" asp-action="UploadVideo" method="post" enctype="multipart/form-data" id="fileUploadSection" data-step-id="@Model.Id">
+					<div class="mb-3 d-flex justify-content-between">
+						<input id="fileInput" class="form-control" name="videoFile" accept="video/mp4,video/x-m4v,video/*" type="file">
+					</div>
+					<button type="submit" class="btn btn-success">Завантажити</button>
+
+				</form>
+
+				<!-- URL Submission Form -->
+				<form asp-controller="Step" asp-action="UploadVideo" method="post" id="linkUploadSection" data-step-id="@Model.Id">
+					<p>Прив'язувати відео можна тільки з YouTube, посилання з інших сервісів зберігатися не будуть</p>
+					<div>
+						@{
+							var videoUrl = isYoutubeVideo ? Model.VideoUrl : "";
+						}
+						<input type="url" class="form-control my-3" name="videoUrl" placeholder="Вставьте посилання на відео" required
+							   value="@(videoUrl != null ? videoUrl : "")">
+						<button type="submit" class="btn btn-success">Прив'язати відео</button>
+					</div>
+				</form>
+			</div>
 		</div>
 	</div>
-
-	<!-- File Upload Form -->
-	@* <form asp-controller="Step" asp-action="UploadFile" method="post" enctype="multipart/form-data" id="fileUploadSection">
-		<div class="video-uploader__actions">
-			<label for="fileInput" class="btn btn-primary">Choose file</label>
-			<input id="fileInput" class="file-upload__input" name="videoFile" accept="video/mp4,video/x-m4v,video/*" type="file">
-			<button type="submit" class="btn btn-success">Upload</button>
+	<div class="accordion-item">
+		<h2 class="accordion-header" id="flush-headingTwo">
+			<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseTwo" aria-expanded="false" aria-controls="flush-collapseTwo">
+				Контекст
+			</button>
+		</h2>
+		<div id="flush-collapseTwo" class="accordion-collapse collapse" aria-labelledby="flush-headingTwo" data-bs-parent="#accordionFlushExample">
+			<div class="accordion-body">
+				@if (!isYoutubeVideo && Model.VideoUrl != null && Model.VideoUrl.Length > 0)
+				{
+					<button type="button" name="generateContext" data-step-id="@Model.Id" class="btn btn-success">Згенерувати контекст</button>
+				}
+				<div class="form-floating">
+					<textarea class="form-control" placeholder="Напишіть контекс для уроку" id="step-context"></textarea>
+					<label for="step-context">Контекст</label>
+				</div>
+			</div>
 		</div>
-	</form> *@
+	</div>
+</div>
 
-	<!-- URL Submission Form -->
-	<form asp-controller="Step" asp-action="UploadVideo" method="post" id="linkUploadSection" data-step-id="@Model.Id">
-		<div>
-			<input type="url" class="form-control my-3" name="videoUrl" placeholder="Вставьте посилання на відео" required 
-			       value="@(Model.VideoUrl != null ? Model.VideoUrl : "")">
-			<button type="submit" class="btn btn-success">Прив'язати відео</button>
+
+<div class="step-text-wrapper">
+	<div id="loader" class="d-flex justify-content-center align-items-center position-relative d-none" style="height: 200px;">
+		<div class="spinner-border text-primary" role="status">
+			<span class="visually-hidden">Загружається...</span>
 		</div>
-	</form>
+	</div>
 	<div id="video-box"
-		 class="upload-box @(string.IsNullOrEmpty(Model.VideoUrl) ? "upload-box-border mb-3" : "mb-3")">
-		@if (!string.IsNullOrEmpty(Model.VideoUrl))
+	     class="upload-box @(string.IsNullOrEmpty(Model.VideoUrl) ? "upload-box-border mb-3" : "mb-3")">
+		@if (isYoutubeVideo)
 		{
 			<iframe id="youtubePlayer" width="100%" height="315"
-					src=@YouTubeHelper.GetYouTubeEmbedUrl(Model.VideoUrl)
+			        src=@YouTubeHelper.GetYouTubeEmbedUrl(Model.VideoUrl)
 			        frameborder="0"
 			        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
 			        allowfullscreen></iframe>
+		}
+		else if (!string.IsNullOrEmpty(Model.VideoUrl))
+		{
+			<video id="videoPlayer" class="video-js vjs-big-play-centered" controls preload="auto" width="640" height="360"
+			       poster="thumbnail.jpg" data-setup="{}">
+				<source src="@Model.VideoUrl" type="video/mp4"/>
+				<p class="vjs-no-js">
+					To view this video please enable JavaScript, and consider upgrading to a web browser that
+					supports HTML5 video
+				</p>
+			</video>
 		}
 		else
 		{
 			<span class="upload-video-placeholder d-block">🎥</span>
 		}
+
 	</div>
+
+
 </div>

@@ -1,4 +1,6 @@
-﻿using EduProject.Services;
+﻿using System.Reflection.Metadata.Ecma335;
+using CloudinaryDotNet;
+using EduProject.Services;
 using Ganss.Xss;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -7,17 +9,20 @@ using SelfEduNet.Extensions;
 using SelfEduNet.Models;
 using SelfEduNet.Services;
 using System.Text.RegularExpressions;
+using SelfEduNet.Data.Regex;
+using System.Threading.Tasks;
 
 namespace SelfEduNet.Areas.Teach.Controllers
 {
 	[Area("Teach")]
-	public class StepController(IStepService stepService, IPhotoService photoService, IHtmlSanitizer sanitizer, IUserStepService userStepService) : Controller
+	public class StepController(IStepService stepService, IPhotoService photoService, IHtmlSanitizer sanitizer, 
+		IUserStepService userStepService, ITranscriptionService transcriptionService) : Controller
 	{
 		private readonly IStepService _stepService = stepService;
 		private readonly IPhotoService _photoService = photoService;
 		private readonly IHtmlSanitizer _sanitizer = sanitizer;
 		private readonly IUserStepService _userStepService = userStepService;
-
+		private readonly ITranscriptionService _transcriptionService = transcriptionService;
 
 		[HttpPost]
 		public async Task<IActionResult> UpdateStepContent(int id, [FromBody] string content)
@@ -86,7 +91,7 @@ namespace SelfEduNet.Areas.Teach.Controllers
 			}
 		}
 
-		public async Task<IActionResult> UploadVideo(int id, IFormFile? upload, string? videoUrl)
+		public async Task<IActionResult> UploadVideo(int id, IFormFile? videoFile, string? videoUrl)
 		{
 			var step = await _stepService.GetStepByIdAsync(id, null);
 			if (step == null)
@@ -94,7 +99,7 @@ namespace SelfEduNet.Areas.Teach.Controllers
 				return NotFound(new { message = "Крок не знайдено" });
 			}
 
-			if (upload == null && string.IsNullOrEmpty(videoUrl))
+			if (videoFile == null && string.IsNullOrEmpty(videoUrl))
 			{
 				return BadRequest(new { uploaded = false, message = "Необхідно завантажити файл або вказати посилання." });
 			}
@@ -102,9 +107,26 @@ namespace SelfEduNet.Areas.Teach.Controllers
 			try
 			{
 				string? videoUrlResult = null;
-				if (upload != null && upload.Length > 0)
+
+				//delete existing video
+				if (step.VideoUrl != null && !CommonRegex.YoutubeRegex.IsMatch(step.VideoUrl))
 				{
-					var uploadResult = await _photoService.AddVideoAsync(upload);
+					try
+					{
+						var fileInfo = new FileInfo(step.VideoUrl);
+						string publicId = Path.GetFileNameWithoutExtension(fileInfo.Name);
+						await _photoService.DeleteFileAsync(publicId);
+					}
+					catch
+					{
+						//TODO log
+					}
+				}
+
+				//file upload
+				if (videoFile is { Length: > 0 })
+				{
+					var uploadResult = await _photoService.AddVideoAsync(videoFile);
 
 					if (uploadResult != null && !string.IsNullOrEmpty(uploadResult.Url?.ToString()))
 					{
@@ -116,11 +138,10 @@ namespace SelfEduNet.Areas.Teach.Controllers
 					}
 				}
 
-				if (!string.IsNullOrEmpty(videoUrl))
+				//url upload
+				else if (!string.IsNullOrEmpty(videoUrl))
 				{
-					var youtubeRegex = new Regex(@"^(https?://)?(www\.)?(youtube|youtu|youtube-nocookie)\.(com|be|fr|co\.uk)/.*$", RegexOptions.IgnoreCase);
-
-					if (!youtubeRegex.IsMatch(videoUrl))
+					if (!CommonRegex.YoutubeRegex.IsMatch(videoUrl))
 					{
 						return BadRequest(new { uploaded = false, message = "Некоректна URL-адреса" });
 					}
@@ -133,15 +154,73 @@ namespace SelfEduNet.Areas.Teach.Controllers
 				bool result = _stepService.Update(step);
 
 				return result
-					? Ok(new { message = "Відео прив'язано" })
+					? Ok(new { message = "Відео прив'язано", videoUrl = step.VideoUrl })
 					: BadRequest(new { message = "Помилка завантаження файлу" });
 			}
 			catch (Exception ex)
 			{
-				return Json(new { uploaded = false, message = "Помилка завантаження файлу: {ex.Message}" });
+				return BadRequest(new { uploaded = false, message = "Помилка завантаження файлу: {ex.Message}" });
 			}
 
 			return BadRequest(new { uploaded = false, message = "Невідома помилка." });
+		}
+		public async Task<IActionResult> GenerateContext(int id)
+		{
+			var step = await _stepService.GetStepByIdAsync(id, null);
+			if (step == null)
+			{
+				return NotFound(new { message = "Крок не знайдено" });
+			}
+
+			string url = step.VideoUrl;
+
+			if (url == null || url.Length < 0)
+			{
+				return BadRequest(new { message = "Відео не знайдено" });
+			}
+			try
+			{
+				string taskId = await _transcriptionService.AddURLToQueue(url);
+
+				return Ok(new { taskId = taskId, message = "Запит на контекст створено" });
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(new { message = ex.Message });
+			}
+		}
+
+		public async Task<IActionResult> GetContext(int id, string taskId)
+		{
+
+			if (taskId.Length < 0)
+			{
+				return BadRequest(new { message = "Помилка при отриманні контексту" });
+			}
+			try
+			{
+				TranscriptionResult result = await _transcriptionService.GetContentByTaskId(taskId);
+
+				if (result.IsEnd)
+				{
+					var step = await _stepService.GetStepByIdAsync(id, null);
+					if (step == null)
+					{
+						return NotFound(new { message = "Крок не знайдено" });
+					}
+					
+					step.Context = result.Content;
+					step.UpdatedAt = DateTime.UtcNow;
+					_stepService.Update(step);
+				}
+				return result.Content.Length > 0
+					? Ok(new { isSuccess = true, isEnd = result.IsEnd, content = result.Content })
+					: BadRequest(new { isSuccess = false, message = "Помилка при отриманні контексту" });
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(new { message = ex.Message });
+			}
 		}
 		public async Task<IActionResult> SubmitStep(int id)
 		{
@@ -186,5 +265,6 @@ namespace SelfEduNet.Areas.Teach.Controllers
 				? Ok(new { message = "Крок переглянуто" })
 				: BadRequest(new { message = "Помилка при перегляді кроку" });
 		}
+
 	}
 }

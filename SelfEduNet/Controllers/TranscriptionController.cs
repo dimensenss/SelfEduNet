@@ -35,16 +35,35 @@ public class TranscriptionController(IConnectionMultiplexer redis, ILogger<Trans
 		var messages = _redisQueue.ListRange("transcription_queue", 0, -1).Select(m => m.ToString()).ToList();
 		return Ok(messages);
 	}
+	[HttpGet("queue/{taskId}")]
+	public async Task<IActionResult> GetTranscription(string taskId)
+	{
+		string listKey = $"{QueueKeys.TranscriptionResultPrefix}{taskId}";
+		var segments = await _redisQueue.ListRangeAsync(listKey, 0, -1);
+
+		if (segments == null || segments.Length == 0)
+			return NotFound("No transcription segments found.");
+
+		var fullTranscript = string.Join(" ", segments.Select(x => x.ToString()));
+
+		return Ok(new { TaskId = taskId, Transcript = fullTranscript });
+	}
 }
 
 
 public class TranscriptionTask
 {
 	public string Id { get; set; }
-	public string Url { get; set; }
+	public string? Url { get; set; }
+	public IFormFile? File { get; set; } = default;
 	public string Status { get; set; }
 }
 
+public class TranscriptionResult
+{
+	public string? Content { get; set; }
+	public bool IsEnd { get; set; }
+}
 //TODO : Implement the GetTranscription method to fetch the transcription results from Redis
 //[ApiController]
 //[Route("api/transcription")]

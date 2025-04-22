@@ -14,6 +14,9 @@ namespace SelfEduNet.Models
 		public StepType StepType { get; set; }
 		[MaxLength(5000)]
 		public string? Content { get; set; }
+
+		[MaxLength(5000)] 
+		public string Context { get; set; } = string.Empty;
 		[Url]
 		public string? VideoUrl { get; set; }
 		public bool Required { get; set; } = false;

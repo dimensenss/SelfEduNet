@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AngleSharp" Version="0.17.1" />
+    <PackageReference Include="AngleSharp" Version="1.2.0" />
     <PackageReference Include="AngleSharp.Css" Version="0.17.0" />
     <PackageReference Include="EntityFrameworkCore.Diagrams" Version="0.4.2" />
     <PackageReference Include="HtmlSanitizer" Version="9.0.876" />
@@ -19,7 +19,7 @@
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.2" />
     <PackageReference Include="OpenAI" Version="2.1.0" />
     <PackageReference Include="StackExchange.Redis" Version="2.8.31" />
-    <PackageReference Include="YoutubeExplode" Version="6.1.0" />
+    <PackageReference Include="YoutubeExplode" Version="6.5.4" />
   </ItemGroup>
 
   <ItemGroup>

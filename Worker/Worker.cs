@@ -9,13 +9,6 @@ using YoutubeExplode.Videos.Streams;
 
 namespace Worker;
 
-public class TranscriptionTask
-{
-	public string? Id { get; set; }
-	public string? Url { get; set; }
-	public string? Status { get; set; }
-}
-
 //public class Worker(IConnectionMultiplexer redis, IAudioClientFactory audioClientFactory, ILogger<Worker> logger) : BackgroundService
 //{
 //	private readonly IDatabase _redisDb = redis.GetDatabase();
@@ -114,7 +107,7 @@ public class TranscriptionTask
 //}
 public class Worker(
 	IConnectionMultiplexer redis,
-	IYoutubeClientService youtubeClient,
+	IFileService file,
 	IVideoProcessor videoProcessor,
 	ILogger<Worker> logger) : BackgroundService
 {
@@ -126,18 +119,30 @@ public class Worker(
 		while (!stoppingToken.IsCancellationRequested)
 		{
 			string? taskJson = await _redisDb.ListLeftPopAsync(QueueKeys.TranscriptionQueue);
-
-			if (!string.IsNullOrEmpty(taskJson))
+			try
 			{
-				var task = JsonSerializer.Deserialize<TranscriptionTask>(taskJson);
-				if (task != null)
+				if (!string.IsNullOrEmpty(taskJson))
 				{
-					logger.LogInformation($"Start processing task {task.Id}");
-					await ProcessTaskAsync(task, stoppingToken);
-					logger.LogInformation($"End processing task {task.Id}");
+					var task = JsonSerializer.Deserialize<TranscriptionTask>(taskJson);
+					if (task != null)
+					{
+						logger.LogInformation($"Start processing task {task.Id}");
+						await ProcessTaskAsync(task, stoppingToken);
+						logger.LogInformation($"End processing task {task.Id}");
+					}
 				}
 			}
-
+			catch(Exception ex)
+			{
+				logger.LogError($"Error processing task: {ex.Message}");
+			}
+			finally
+			{
+				if (_semaphore.CurrentCount == 0)
+				{
+					_semaphore.Release();
+				}
+			}
 			await Task.Delay(TimeSpan.FromSeconds(1), stoppingToken);
 		}
 	}
@@ -149,11 +154,15 @@ public class Worker(
 			await _semaphore.WaitAsync(token);
 			logger.LogInformation($"Remaining threads in semaphore {_semaphore.CurrentCount}");
 
-			logger.LogInformation($"Start downloading video from {task.Url}");
-
-			string audioPath = await youtubeClient.DownloadAudioAsync(task.Url);
-
-			logger.LogInformation($"End downloading video from {task.Url}");
+			string audioPath = null;
+			if (task.File != null && task.File.Length > 0)
+			{
+				audioPath = await file.DownloadAudioFromFileAsync(task.File);
+			}
+			else if(task.Url != null && task.Url.Length > 0) 
+			{
+				audioPath = await file.DownloadAudioFromURLAsync(task.Url);
+			}
 
 			logger.LogInformation($"Start trim silence from {audioPath}");
 
@@ -163,20 +172,21 @@ public class Worker(
 
 			logger.LogInformation($"Start processing audio {processedAudioPath}");
 
+			string segmentKey = $"{QueueKeys.TranscriptionResultPrefix}{task.Id}";
 			await foreach (var transcript in videoProcessor.SplitAndTranscribeAudioAsync(processedAudioPath, TimeSpan.FromSeconds(30)))
 			{
 				// Save each part of the transcription to Redis (streaming approach)
-				string segmentKey = $"{QueueKeys.TranscriptionResultPrefix}{task.Id}_part{Guid.NewGuid()}";
-				await _redisDb.StringSetAsync(segmentKey, transcript);
+				
+				await _redisDb.ListRightPushAsync(segmentKey, transcript);
 
 				logger.LogInformation($"Saved transcript segment: {segmentKey}");
 			}
-
+			await _redisDb.ListRightPushAsync(segmentKey, "__END__");
 			logger.LogInformation($"End processing audio {processedAudioPath}");
 		}
 		catch (Exception ex)
 		{
-			Console.WriteLine($"Ошибка обработки задачи {task.Id}: {ex.Message}");
+			Console.WriteLine($"Error during task processing {task.Id}: {ex.Message}");
 		}
 		finally
 		{

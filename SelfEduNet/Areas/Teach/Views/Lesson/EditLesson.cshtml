@@ -5,7 +5,7 @@
 	var currentStep = ViewData["Step"] as Step;
 	ViewData["Mode"] = "Edit";
 }
-
+<link href="//vjs.zencdn.net/8.23.0/video-js.min.css" rel="stylesheet">
 @section Sidebar
 {
 	@await Html.PartialAsync("_TeachSidebar", @Model.Course, ViewData)
@@ -128,121 +128,206 @@
 
 @section Scripts
 {
+	<script src="//vjs.zencdn.net/8.23.0/video.min.js"></script>
 	<script src="~/js/youtubePlayer.js" asp-append-version="true"></script>
 	<script src="~/js/ckeditorLessonContent.js" asp-append-version="true"></script>
+	<script src="~/js/transcriptionPolling.js" asp-append-version="true"></script>
 	<script>
-		$(document).on("change", 'input[name="uploadType"]', function (event) {
-			if ($("#fileOption").is(":checked")) {
-				$("#fileUploadSection").show();
-				$("#linkUploadSection").hide();
-			} else if ($("#linkOption").is(":checked")) {
-				$("#fileUploadSection").hide();
-				$("#linkUploadSection").show();
-			}
+		$(document).ready(function() {
+		// Изначально показываем только выбранную секцию
+		toggleUploadSections();
+
+		// Обработчик переключения вариантов
+		$('input[name="uploadType"]').change(function() {
+			toggleUploadSections();
 		});
 
-		$(document).on("submit", "#linkUploadSection", function (event) {
-			event.preventDefault();
+		function toggleUploadSections() {
+			if ($('#fileOption').is(':checked')) {
+			$('#fileUploadSection').show();
+			$('#linkUploadSection').hide();
+			} else if ($('#linkOption').is(':checked')) {
+			$('#fileUploadSection').hide();
+			$('#linkUploadSection').show();
+			}
+		}
+		});
 
-			let form = $(this);
-			let videoUrl = form.find('input[name="videoUrl"]').val();
-			let stepId = form.data("step-id");
+	$(document).on("submit", "#fileUploadSection", function (event) {
+		  event.preventDefault();
+
+		  let form = $(this)[0]; // native DOM-элемент формы
+		  let stepId = $(this).data("step-id");
+		  let $loader = $("#loader"); // выбираем лоадер
+		  let videoPlayer = $("#videoPlayer")[0];
+		let youtuberVideoPlayer = $("#video-box")[0];
+
+		  // Показываем лоадер
+		  $(videoPlayer).addClass('d-none');
+			  $(youtuberVideoPlayer).addClass('d-none');
+		  $loader.removeClass('d-none'); // показать
+
+		  let formData = new FormData(form);
+		  formData.append("id", stepId);
+
+		// 		  let generateContextCheckbox = $("#generateContext");
+		// let generateContextValue = generateContextCheckbox.is(":checked") ? "true" : "false";
+		// formData.append("generateContext", generateContextValue);
+			  
+
+		  $.ajax({
+			url: "@Url.Action("UploadVideo", "Step", new { area = "Teach" })",
+			type: 'POST',
+			data: formData,
+			processData: false,
+			contentType: false,
+			success: function (response) {
+			  const videoUrl = response.videoUrl;
+
+			  // Обновляем плеер
+			  let source = $(videoPlayer).find("source");
+			  source.attr("src", videoUrl);
+			  $(videoPlayer).removeClass('d-none');
+				  $(youtuberVideoPlayer).removeClass('d-none');
+			  videoPlayer.load();
+			  videoPlayer.play();
+
+			  // Скрываем лоадер
+			  $loader.addClass('d-none'); // скрыть
+			  // уведомление
+			  $.notify({ message: response.message }, { type: 'success' });
+			},
+			error: function (xhr) {
+			  const response = xhr.responseJSON;
+			  // скрываем лоадер
+				  $loader.addClass('d-none');
+					  $(videoPlayer).removeClass('d-none');
+					  $(youtuberVideoPlayer).removeClass('d-none');
+			  $.notify({ message: response?.message || "Upload failed" }, { type: 'danger' });
+			}
+		  });
+		});
+			  $(document).on("submit", "#linkUploadSection", function (event) {
+				  event.preventDefault();
+
+				  let form = $(this);
+				  let videoUrl = form.find('input[name="videoUrl"]').val();
+				  let stepId = form.data("step-id");
+
+				  $.ajax({
+					  url: "@Url.Action("UploadVideo", "Step", new { area = "Teach" })",
+					  type: 'POST',
+					  data: {
+						  id: stepId,
+						  videoUrl: videoUrl,
+					  },
+					  success: function (response) {
+						  updateYouTubePlayer(videoUrl);
+						  $.notify({
+							  message: response.message
+						  }, {
+							  type: 'success'
+						  });
+					  },
+					  error: function (xhr, status, error) {
+						  const response = xhr.responseJSON;
+						  $.notify({
+							  message: response.message
+						  }, {
+							  type: 'danger'
+						  });
+					  }
+				  });
+			  });
+		$(document).on("click", 'button[name^="generateContext"]', function (event) {
+			event.preventDefault();
+			
+				let stepId = $(this).data("step-id");
 
 			$.ajax({
-				url: "@Url.Action("UploadVideo", "Step", new { area = "Teach" })",
+				url: "@Url.Action("GenerateContext", "Step", new { area = "Teach" })",
 				type: 'POST',
-				data: {
-					id: stepId,
-					videoUrl: videoUrl,
-				},
+				data: { id: stepId },
 				success: function (response) {
-					updateYouTubePlayer(videoUrl);
-					$.notify({
-						message: response.message
-					}, {
-						type: 'success'
-					});
+					$.notify({ message: response.message }, { type: 'success' });
+					ctxTaskId = response.taskId;
+					if (ctxTaskId) startPollingContext(stepId, ctxTaskId);
 				},
 				error: function (xhr, status, error) {
 					const response = xhr.responseJSON;
-					$.notify({
-						message: response.message
-					}, {
-						type: 'danger'
-					});
+					$.notify({ message: response.message }, { type: 'danger' });
 				}
 			});
 		});
 
+			  $(document).on("click", 'button[name^="update-lesson-"]', function (event) {
+				  event.preventDefault();
+				  const formId = $(this).data('lesson-form-id').toString();
+				  const moduleId = $(this).data('module-id').toString();
 
-		$(document).on("click", 'button[name^="update-lesson-"]', function (event) {
-			event.preventDefault();
-			const formId = $(this).data('lesson-form-id').toString();
-			const moduleId = $(this).data('module-id').toString();
+				  var form = $('#update-lesson-form-' + formId);
+				  var title = form.find("input[name='Title']").val();
+				  const lessonId = form.find("input[name='LessonId']").val() || null;
 
-			var form = $('#update-lesson-form-' + formId);
-			var title = form.find("input[name='Title']").val();
-			const lessonId = form.find("input[name='LessonId']").val() || null;
+				  $.ajax({
+					  url: "@Url.Action("CreateUpdateLesson", "TeachCourse", new { area = "Teach" })",
+					  type: "POST",
+					  data: {
+						  moduleId: moduleId,
+						  lessonId: lessonId,
+						  title: title,
+					  },
+					  success: function (response) {
+						  $.notify({
+							  message: response.message
+						  }, {
+							  type: 'success'
+						  });
+						  renderModulesList();
+					  },
+					  error: function (xhr) {
+						  const response = xhr.responseJSON;
+						  $.notify({
+							  message: response.message
+						  }, {
+							  type: 'danger'
+						  });
+						  console.log(xhr);
+					  }
+				  });
+			  });
 
-			$.ajax({
-				url: "@Url.Action("CreateUpdateLesson", "TeachCourse", new { area = "Teach" })",
-				type: "POST",
-				data: {
-					moduleId: moduleId,
-					lessonId: lessonId,
-					title: title,
-				},
-				success: function (response) {
-					$.notify({
-						message: response.message
-					}, {
-						type: 'success'
-					});
-					renderModulesList();
-				},
-				error: function (xhr) {
-					const response = xhr.responseJSON;
-					$.notify({
-						message: response.message
-					}, {
-						type: 'danger'
-					});
-					console.log(xhr);
-				}
-			});
-		});
-
-		$(document).on("click", 'li[name^="add-step-"]', function (event) {
-			event.preventDefault();
-			const lessonId = $(this).data('lesson-id').toString();
-			const stepType = $(this).data('step-type').toString();
-			$.ajax({
-				url: "@Url.Action("AddStep", "Lesson", new { area = "Teach" })",
-				type: "POST",
-				data: {
-					lessonId: lessonId,
-					stepType: stepType,
-				},
-				success: function (response) {
-					const redirectUrl = `/EditLesson/@Model.Course.Id/${lessonId}?stepId=${response.stepId}`;
-					window.location.href = redirectUrl;
-					$.notify({
-						message: response.message
-					}, {
-						type: 'success'
-					});
-				},
-				error: function (xhr) {
-					const response = xhr.responseJSON;
-					$.notify({
-						message: response.message
-					}, {
-						type: 'danger'
-					});
-					console.log(xhr);
-				}
-			});
-		});
+			  $(document).on("click", 'li[name^="add-step-"]', function (event) {
+				  event.preventDefault();
+				  const lessonId = $(this).data('lesson-id').toString();
+				  const stepType = $(this).data('step-type').toString();
+				  $.ajax({
+					  url: "@Url.Action("AddStep", "Lesson", new { area = "Teach" })",
+					  type: "POST",
+					  data: {
+						  lessonId: lessonId,
+						  stepType: stepType,
+					  },
+					  success: function (response) {
+						  const redirectUrl = `/EditLesson/@Model.Course.Id/${lessonId}?stepId=${response.stepId}`;
+						  window.location.href = redirectUrl;
+						  $.notify({
+							  message: response.message
+						  }, {
+							  type: 'success'
+						  });
+					  },
+					  error: function (xhr) {
+						  const response = xhr.responseJSON;
+						  $.notify({
+							  message: response.message
+						  }, {
+							  type: 'danger'
+						  });
+						  console.log(xhr);
+					  }
+				  });
+			  });
 
 	</script>
 }

@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using EduProject.Helpers;
 using Microsoft.AspNetCore.Localization;
 using SelfEduNet.Configurations;
 
@@ -11,6 +12,7 @@ namespace SelfEduNet.Extensions
 			services.AddLocalization(options => options.ResourcesPath = "Resources");
 			return services
 				.Configure<EmailSMTPSettings>(configuration.GetSection(nameof(EmailSMTPSettings)))
+				.Configure<CloudinarySettings>(configuration.GetSection("CloudinarySettings"))
 				.Configure<RequestLocalizationOptions>(options =>
 				{
 					var supportedCultures = new[] { new CultureInfo("uk-UA") };
@@ -18,9 +20,6 @@ namespace SelfEduNet.Extensions
 					options.SupportedCultures = supportedCultures;
 					options.SupportedUICultures = supportedCultures;
 				});
-
-                
-
 		}
 	}
 }

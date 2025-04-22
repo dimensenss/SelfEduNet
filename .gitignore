@@ -128,3 +128,4 @@ src/.vs/config/applicationhost.config
 /Worker/appsettings.Development.json
 /.containers/selfedu-db
 /.env
+/Worker/appsettings.Production.json

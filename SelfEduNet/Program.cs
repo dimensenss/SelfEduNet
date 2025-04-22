@@ -26,21 +26,7 @@ builder.Configuration
 	.AddJsonFile($"appsettings.{environment}.json", optional: true, reloadOnChange: true)
 	.AddEnvironmentVariables();
 
-builder.Services.AddScoped<IEmailSender, EmailSenderService>();
-builder.Services.AddScoped<ICourseRepository, CourseRepository>();
-builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-builder.Services.AddScoped<IStepRepository, StepRepository>();
-builder.Services.AddScoped<IUserStepRepository, UserStepRepository>();
-builder.Services.AddScoped<IPhotoService, PhotoService>();
-builder.Services.AddScoped<ICourseService, CourseService>();
-builder.Services.AddScoped<ICategoryService, CategoryService>();
-builder.Services.AddScoped<IStepService, StepService>();
-builder.Services.AddScoped<IUserStepService, UserStepService>();
-builder.Services.AddScoped<IUserLessonService, UserLessonService>();
-builder.Services.AddScoped<IUserLessonRepository, UserLessonRepository>();
-builder.Services.AddSingleton<IHtmlSanitizer, HtmlSanitizer>();
-builder.Services.AddTransient<Seeder>();
-builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
+builder.Services.InjectDependencies();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 	options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -110,12 +96,10 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
-    builder.AddEfDiagrams<ApplicationDbContext>();
-
 }
 if (app.Environment.IsDevelopment())
 {
-	app.ApplyMigrations();
+    //app.ApplyMigrations();
 
     using (var scope = app.Services.CreateScope())
     {

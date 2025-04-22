@@ -4,7 +4,7 @@
       "commandName": "DockerCompose",
       "commandVersion": "1.0",
       "serviceActions": {
-        "selfedunet": "StartDebugging",
+        "app": "StartDebugging",
         "pgadmin": "StartWithoutDebugging",
         "redis": "StartWithoutDebugging",
         "selfedunet.database": "StartWithoutDebugging",

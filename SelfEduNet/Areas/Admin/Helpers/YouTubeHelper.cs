@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text.RegularExpressions;
+using SelfEduNet.Data.Regex;
 
 public static class YouTubeHelper
 {
@@ -9,8 +10,14 @@ public static class YouTubeHelper
         var match = Regex.Match(url, pattern);
         return match.Success ? match.Groups[1].Value : null;
     }
+    public static bool IsYouTubeUrl(string url)
+    {
+	    if (string.IsNullOrEmpty(url))
+		    return false;
 
-    public static string GetYouTubeEmbedUrl(string youtubeUrl)
+	    return CommonRegex.YoutubeRegex.IsMatch(url);
+    }
+	public static string GetYouTubeEmbedUrl(string youtubeUrl)
     {
         var videoId = GetYouTubeVideoId(youtubeUrl);
         return videoId != null ? $"https://www.youtube.com/embed/{videoId}" : null;
