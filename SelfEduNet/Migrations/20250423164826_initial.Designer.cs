@@ -12,8 +12,8 @@ using SelfEduNet.Data;
 namespace SelfEduNet.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250202155241_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250423164826_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -310,6 +310,10 @@ namespace SelfEduNet.Migrations
                     b.Property<string>("Preview")
                         .HasColumnType("text");
 
+                    b.Property<string>("PromoText")
+                        .HasMaxLength(5000)
+                        .HasColumnType("character varying(5000)");
+
                     b.Property<decimal>("Rating")
                         .HasColumnType("numeric");
 
@@ -385,7 +389,84 @@ namespace SelfEduNet.Migrations
                     b.ToTable("CourseModules");
                 });
 
-            modelBuilder.Entity("SelfEduNet.Models.CourseUserRelation", b =>
+            modelBuilder.Entity("SelfEduNet.Models.Lesson", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CourseModuleId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseModuleId");
+
+                    b.ToTable("Lessons");
+                });
+
+            modelBuilder.Entity("SelfEduNet.Models.Step", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Content")
+                        .HasMaxLength(5000)
+                        .HasColumnType("character varying(5000)");
+
+                    b.Property<string>("Context")
+                        .IsRequired()
+                        .HasMaxLength(5000)
+                        .HasColumnType("character varying(5000)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("LessonId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("Required")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("StepType")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("VideoUrl")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LessonId");
+
+                    b.ToTable("Steps");
+                });
+
+            modelBuilder.Entity("SelfEduNet.Models.UserCourse", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -415,76 +496,58 @@ namespace SelfEduNet.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("CourseUserRelation");
+                    b.ToTable("UserCourses");
                 });
 
-            modelBuilder.Entity("SelfEduNet.Models.Lesson", b =>
+            modelBuilder.Entity("SelfEduNet.Models.UserLesson", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<string>("UserId")
+                        .HasColumnType("text");
+
+                    b.Property<int>("LessonId")
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CourseModuleId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CourseModuleId");
-
-                    b.ToTable("Lessons");
-                });
-
-            modelBuilder.Entity("SelfEduNet.Models.Step", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Content")
-                        .HasMaxLength(5000)
-                        .HasColumnType("character varying(5000)");
-
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTime?>("CompletedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsCompleted")
                         .HasColumnType("boolean");
 
-                    b.Property<int>("LessonId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Order")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("StepType")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("UpdatedAt")
+                    b.Property<DateTime?>("StartedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("VideoUrl")
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
+                    b.HasKey("UserId", "LessonId");
 
                     b.HasIndex("LessonId");
 
-                    b.ToTable("Steps");
+                    b.ToTable("UserLessons");
+                });
+
+            modelBuilder.Entity("SelfEduNet.Models.UserStep", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("text");
+
+                    b.Property<int>("StepId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsViewed")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("ViewedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("UserId", "StepId");
+
+                    b.HasIndex("StepId");
+
+                    b.ToTable("UserSteps");
                 });
 
             modelBuilder.Entity("CourseInfoAuthor", b =>
@@ -602,25 +665,6 @@ namespace SelfEduNet.Migrations
                     b.Navigation("Course");
                 });
 
-            modelBuilder.Entity("SelfEduNet.Models.CourseUserRelation", b =>
-                {
-                    b.HasOne("SelfEduNet.Models.Course", "Course")
-                        .WithMany()
-                        .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("SelfEduNet.Models.AppUser", "User")
-                        .WithMany("CourseRelations")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Course");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("SelfEduNet.Models.Lesson", b =>
                 {
                     b.HasOne("SelfEduNet.Models.CourseModules", "CourseModule")
@@ -643,11 +687,72 @@ namespace SelfEduNet.Migrations
                     b.Navigation("Lesson");
                 });
 
+            modelBuilder.Entity("SelfEduNet.Models.UserCourse", b =>
+                {
+                    b.HasOne("SelfEduNet.Models.Course", "Course")
+                        .WithMany()
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("SelfEduNet.Models.AppUser", "User")
+                        .WithMany("UserCourses")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SelfEduNet.Models.UserLesson", b =>
+                {
+                    b.HasOne("SelfEduNet.Models.Lesson", "Lesson")
+                        .WithMany("UserLessons")
+                        .HasForeignKey("LessonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SelfEduNet.Models.AppUser", "User")
+                        .WithMany("UserLessons")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Lesson");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SelfEduNet.Models.UserStep", b =>
+                {
+                    b.HasOne("SelfEduNet.Models.Step", "Step")
+                        .WithMany("UserSteps")
+                        .HasForeignKey("StepId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SelfEduNet.Models.AppUser", "User")
+                        .WithMany("UserSteps")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Step");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("SelfEduNet.Models.AppUser", b =>
                 {
-                    b.Navigation("CourseRelations");
-
                     b.Navigation("OwnedCourses");
+
+                    b.Navigation("UserCourses");
+
+                    b.Navigation("UserLessons");
+
+                    b.Navigation("UserSteps");
                 });
 
             modelBuilder.Entity("SelfEduNet.Models.Category", b =>
@@ -671,6 +776,13 @@ namespace SelfEduNet.Migrations
             modelBuilder.Entity("SelfEduNet.Models.Lesson", b =>
                 {
                     b.Navigation("Steps");
+
+                    b.Navigation("UserLessons");
+                });
+
+            modelBuilder.Entity("SelfEduNet.Models.Step", b =>
+                {
+                    b.Navigation("UserSteps");
                 });
 #pragma warning restore 612, 618
         }

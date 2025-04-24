@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace SelfEduNet.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -188,6 +188,7 @@ namespace SelfEduNet.Migrations
                     OwnerId = table.Column<string>(type: "text", nullable: false),
                     CourseName = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     Description = table.Column<string>(type: "character varying(1024)", maxLength: 1024, nullable: true),
+                    PromoText = table.Column<string>(type: "character varying(5000)", maxLength: 5000, nullable: true),
                     CategoryId = table.Column<int>(type: "integer", nullable: true),
                     FullPrice = table.Column<int>(type: "integer", nullable: false),
                     Language = table.Column<int>(type: "integer", nullable: false),
@@ -261,7 +262,7 @@ namespace SelfEduNet.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserCourse",
+                name: "UserCourses",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -274,15 +275,15 @@ namespace SelfEduNet.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CourseUserRelation", x => x.Id);
+                    table.PrimaryKey("PK_UserCourses", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_CourseUserRelation_AspNetUsers_UserId",
+                        name: "FK_UserCourses_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_CourseUserRelation_Courses_CourseId",
+                        name: "FK_UserCourses_Courses_CourseId",
                         column: x => x.CourseId,
                         principalTable: "Courses",
                         principalColumn: "Id",
@@ -321,6 +322,7 @@ namespace SelfEduNet.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     CourseModuleId = table.Column<int>(type: "integer", nullable: false),
                     Title = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    Order = table.Column<int>(type: "integer", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
@@ -345,8 +347,9 @@ namespace SelfEduNet.Migrations
                     Order = table.Column<int>(type: "integer", nullable: false),
                     StepType = table.Column<int>(type: "integer", nullable: false),
                     Content = table.Column<string>(type: "character varying(5000)", maxLength: 5000, nullable: true),
+                    Context = table.Column<string>(type: "character varying(5000)", maxLength: 5000, nullable: false),
                     VideoUrl = table.Column<string>(type: "text", nullable: true),
-                    IsCompleted = table.Column<bool>(type: "boolean", nullable: false),
+                    Required = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
@@ -357,6 +360,61 @@ namespace SelfEduNet.Migrations
                         name: "FK_Steps_Lessons_LessonId",
                         column: x => x.LessonId,
                         principalTable: "Lessons",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserLessons",
+                columns: table => new
+                {
+                    UserId = table.Column<string>(type: "text", nullable: false),
+                    LessonId = table.Column<int>(type: "integer", nullable: false),
+                    IsCompleted = table.Column<bool>(type: "boolean", nullable: false),
+                    StartedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CompletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserLessons", x => new { x.UserId, x.LessonId });
+                    table.ForeignKey(
+                        name: "FK_UserLessons_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserLessons_Lessons_LessonId",
+                        column: x => x.LessonId,
+                        principalTable: "Lessons",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserSteps",
+                columns: table => new
+                {
+                    UserId = table.Column<string>(type: "text", nullable: false),
+                    StepId = table.Column<int>(type: "integer", nullable: false),
+                    IsCompleted = table.Column<bool>(type: "boolean", nullable: false),
+                    IsViewed = table.Column<bool>(type: "boolean", nullable: false),
+                    ViewedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CompletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserSteps", x => new { x.UserId, x.StepId });
+                    table.ForeignKey(
+                        name: "FK_UserSteps_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserSteps_Steps_StepId",
+                        column: x => x.StepId,
+                        principalTable: "Steps",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -430,16 +488,6 @@ namespace SelfEduNet.Migrations
                 column: "OwnerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CourseUserRelation_CourseId",
-                table: "UserCourse",
-                column: "CourseId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_CourseUserRelation_UserId",
-                table: "UserCourse",
-                column: "UserId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Lessons_CourseModuleId",
                 table: "Lessons",
                 column: "CourseModuleId");
@@ -448,6 +496,26 @@ namespace SelfEduNet.Migrations
                 name: "IX_Steps_LessonId",
                 table: "Steps",
                 column: "LessonId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserCourses_CourseId",
+                table: "UserCourses",
+                column: "CourseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserCourses_UserId",
+                table: "UserCourses",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserLessons_LessonId",
+                table: "UserLessons",
+                column: "LessonId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserSteps_StepId",
+                table: "UserSteps",
+                column: "StepId");
         }
 
         /// <inheritdoc />
@@ -472,16 +540,22 @@ namespace SelfEduNet.Migrations
                 name: "CourseInfoAuthor");
 
             migrationBuilder.DropTable(
-                name: "UserCourse");
+                name: "UserCourses");
 
             migrationBuilder.DropTable(
-                name: "Steps");
+                name: "UserLessons");
+
+            migrationBuilder.DropTable(
+                name: "UserSteps");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "CourseInfos");
+
+            migrationBuilder.DropTable(
+                name: "Steps");
 
             migrationBuilder.DropTable(
                 name: "Lessons");

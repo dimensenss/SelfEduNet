@@ -1,22 +1,38 @@
 ﻿@model Step
 @{
-	var videoTitle = await YouTubeHelper.GetYouTubeVideoTitleAsync(Model.VideoUrl);
+	var videoTitle = await YouTubeHelper.GetYouTubeVideoTitleAsync(Model.VideoUrl ?? "");
+	bool isYoutubeVideo = (!string.IsNullOrEmpty(Model.VideoUrl) && YouTubeHelper.IsYouTubeUrl(Model.VideoUrl));
 }
 <div class="step-text-wrapper">
 	<h2 id="video-title">@videoTitle</h2>
 	<div id="video-box"
-		 class="upload-box @(string.IsNullOrEmpty(Model.VideoUrl) ? "upload-box-border mb-3" : "mb-3")">
-		@if (!string.IsNullOrEmpty(Model.VideoUrl))
+		 class="upload-box mb-3">
+		@if (isYoutubeVideo)
 		{
 			<iframe id="youtubePlayer" width="100%" height="315"
-					src=@YouTubeHelper.GetYouTubeEmbedUrl(Model.VideoUrl)
+			        src=@YouTubeHelper.GetYouTubeEmbedUrl(Model.VideoUrl)
 			        frameborder="0"
 			        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-			        allowfullscreen></iframe>
+			        allowfullscreen>
+			</iframe>
+		}
+		else if (!string.IsNullOrEmpty(Model.VideoUrl))
+		{
+			<video id="videoPlayer" class="video-js vjs-big-play-centered @(string.IsNullOrEmpty(Model.VideoUrl) ? "d-none" : "")"
+			       controls preload="auto" width="640" height="360"
+			       poster="thumbnail.jpg" data-setup="{}">
+				<source src="@(!string.IsNullOrEmpty(Model.VideoUrl) ? Model.VideoUrl : "")" type="video/mp4" />
+				<p class="vjs-no-js">
+					To view this video please enable JavaScript...
+				</p>
+			</video>
 		}
 		else
 		{
-			<span class="upload-video-placeholder d-block">🎥</span>
+			<div class="d-flex flex-column align-items-center justify-content-center">
+				<img src="~/img/elements/empty_folder.png" class="img-fluid mb-3" style="max-width: 200px;" alt="Порожня папка" />
+				<p class="text-secondary mt-2">Відео не знайдено</p>
+			</div>
 		}
 	</div>
 </div>

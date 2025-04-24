@@ -1,7 +1,9 @@
 ﻿using System.Text.Json;
+using Microsoft.Extensions.Options;
 using OpenAI.Audio;
 using SelfEduNet.Models;
 using StackExchange.Redis;
+using Worker.Configurations;
 using Worker.Helpers;
 using Worker.Services;
 using YoutubeExplode;
@@ -109,10 +111,12 @@ public class Worker(
 	IConnectionMultiplexer redis,
 	IFileService file,
 	IVideoProcessor videoProcessor,
-	ILogger<Worker> logger) : BackgroundService
+	ILogger<Worker> logger,
+	IOptions<TranscriptionSettings> transcriptionSettings) : BackgroundService
 {
 	private readonly IDatabase _redisDb = redis.GetDatabase();
 	private readonly SemaphoreSlim _semaphore = new(1, 4);
+	private readonly IOptions<TranscriptionSettings> _transcriptionSettings = transcriptionSettings;
 
 	protected override async Task ExecuteAsync(CancellationToken stoppingToken)
 	{
@@ -173,10 +177,10 @@ public class Worker(
 			logger.LogInformation($"Start processing audio {processedAudioPath}");
 
 			string segmentKey = $"{QueueKeys.TranscriptionResultPrefix}{task.Id}";
-			await foreach (var transcript in videoProcessor.SplitAndTranscribeAudioAsync(processedAudioPath, TimeSpan.FromSeconds(30)))
+			var segmentDuration = TimeSpan.FromSeconds(_transcriptionSettings.Value.SegmentDuration);
+
+			await foreach (var transcript in videoProcessor.SplitAndTranscribeAudioAsync(processedAudioPath, segmentDuration).WithCancellation(token))
 			{
-				// Save each part of the transcription to Redis (streaming approach)
-				
 				await _redisDb.ListRightPushAsync(segmentKey, transcript);
 
 				logger.LogInformation($"Saved transcript segment: {segmentKey}");

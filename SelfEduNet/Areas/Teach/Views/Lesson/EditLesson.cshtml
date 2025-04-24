@@ -156,25 +156,19 @@
 	$(document).on("submit", "#fileUploadSection", function (event) {
 		  event.preventDefault();
 
-		  let form = $(this)[0]; // native DOM-элемент формы
+		  let form = $(this)[0];
 		  let stepId = $(this).data("step-id");
-		  let $loader = $("#loader"); // выбираем лоадер
+		  let $loader = $("#loader");
 		  let videoPlayer = $("#videoPlayer")[0];
-		let youtuberVideoPlayer = $("#video-box")[0];
+		  let youtuberVideoPlayer = $("#youtubePlayer")[0];
 
 		  // Показываем лоадер
 		  $(videoPlayer).addClass('d-none');
-			  $(youtuberVideoPlayer).addClass('d-none');
-		  $loader.removeClass('d-none'); // показать
+		  $(youtuberVideoPlayer).addClass('d-none');
+		  $loader.removeClass('d-none');
 
 		  let formData = new FormData(form);
 		  formData.append("id", stepId);
-
-		// 		  let generateContextCheckbox = $("#generateContext");
-		// let generateContextValue = generateContextCheckbox.is(":checked") ? "true" : "false";
-		// formData.append("generateContext", generateContextValue);
-			  
-
 		  $.ajax({
 			url: "@Url.Action("UploadVideo", "Step", new { area = "Teach" })",
 			type: 'POST',
@@ -182,19 +176,16 @@
 			processData: false,
 			contentType: false,
 			success: function (response) {
-			  const videoUrl = response.videoUrl;
+			let videoPlayer = $("#videoPlayer")[0];
+			const videoUrl = response.videoUrl;
 
-			  // Обновляем плеер
-			  let source = $(videoPlayer).find("source");
-			  source.attr("src", videoUrl);
-			  $(videoPlayer).removeClass('d-none');
-				  $(youtuberVideoPlayer).removeClass('d-none');
-			  videoPlayer.load();
-			  videoPlayer.play();
+			$loader.addClass('d-none');
 
-			  // Скрываем лоадер
-			  $loader.addClass('d-none'); // скрыть
-			  // уведомление
+			let $source = $(videoPlayer).find("source");
+			$source.attr("src", videoUrl);
+			$(videoPlayer).removeClass("d-none");
+			videoPlayer.load();
+
 			  $.notify({ message: response.message }, { type: 'success' });
 			},
 			error: function (xhr) {
@@ -214,6 +205,15 @@
 				  let videoUrl = form.find('input[name="videoUrl"]').val();
 				  let stepId = form.data("step-id");
 
+				  let $loader = $("#loader");
+				  let videoPlayer = $("#videoPlayer")[0];
+				  let youtuberVideoPlayer = $("#youtubePlayer")[0];
+
+				  // Показываем лоадер
+				  $(videoPlayer).addClass('d-none');
+				  $(youtuberVideoPlayer).addClass('d-none');
+				  $loader.removeClass('d-none');
+
 				  $.ajax({
 					  url: "@Url.Action("UploadVideo", "Step", new { area = "Teach" })",
 					  type: 'POST',
@@ -222,7 +222,9 @@
 						  videoUrl: videoUrl,
 					  },
 					  success: function (response) {
-						  updateYouTubePlayer(videoUrl);
+						$loader.addClass('d-none');
+								$(youtuberVideoPlayer).removeClass("d-none");
+							 updateYouTubePlayer(videoUrl);
 						  $.notify({
 							  message: response.message
 						  }, {
@@ -239,26 +241,100 @@
 					  }
 				  });
 			  });
-		$(document).on("click", 'button[name^="generateContext"]', function (event) {
-			event.preventDefault();
-			
+			$(document).on("click", 'button[name^="generateContext"]', function (event) {
+				event.preventDefault();
 				let stepId = $(this).data("step-id");
-
-			$.ajax({
-				url: "@Url.Action("GenerateContext", "Step", new { area = "Teach" })",
-				type: 'POST',
-				data: { id: stepId },
-				success: function (response) {
-					$.notify({ message: response.message }, { type: 'success' });
-					ctxTaskId = response.taskId;
-					if (ctxTaskId) startPollingContext(stepId, ctxTaskId);
-				},
-				error: function (xhr, status, error) {
-					const response = xhr.responseJSON;
-					$.notify({ message: response.message }, { type: 'danger' });
+				const contextValue = $("#step-context").val().trim();
+				const hasContext = contextValue.length > 0;
+				if (hasContext){
+						showConfirmationDialog(
+						'У вас вже є контекст',
+						'Ця перезапише існуючий контекст. Ви не зможете відновити його!',
+						'Так, згенерувати!',
+						'Відмінити',
+						() => {
+							$.ajax({
+								url: "/Teach/Step/GenerateContext",
+								type: 'POST',
+								data: { id: stepId },
+								success: function (response) {
+									$.notify({ message: response.message }, { type: 'success' });
+									ctxTaskId = response.taskId;
+									if (ctxTaskId) startPollingContext(stepId, ctxTaskId);
+								},
+								error: function (xhr, status, error) {
+									const response = xhr.responseJSON;
+									$.notify({ message: response.message }, { type: 'danger' });
+								}
+							});
+						}
+					);
+				}
+				else
+				{
+					$.ajax({
+						url: "/Teach/Step/GenerateContext",
+						type: 'POST',
+						data: { id: stepId },
+						success: function (response) {
+							$.notify({ message: response.message }, { type: 'success' });
+							ctxTaskId = response.taskId;
+							if (ctxTaskId) startPollingContext(stepId, ctxTaskId);
+						},
+						error: function (xhr, status, error) {
+							const response = xhr.responseJSON;
+							$.notify({ message: response.message }, { type: 'danger' });
+						}
+					});
 				}
 			});
-		});
+			$(document).on("click", 'button[name^="generateResume"]', function (event) {
+				event.preventDefault();
+				let stepId = $(this).data("step-id");
+				const resumeValue = $("#step-resume").val().trim();
+					const hasResume = resumeValue.length > 0;
+					if (Resume){
+						showConfirmationDialog(
+						'У вас вже є резюме',
+						'Ця перезапише існуюче резюме. Ви не зможете відновити його!',
+						'Так, згенерувати!',
+						'Відмінити',
+						() => {
+							$.ajax({
+								url: "/Teach/Step/GenerateResume",
+								type: 'POST',
+								data: { id: stepId },
+								success: function (response) {
+									$.notify({ message: response.message }, { type: 'success' });
+									ctxTaskId = response.taskId;
+									if (ctxTaskId) startPollingResume(stepId, ctxTaskId);
+								},
+								error: function (xhr, status, error) {
+									const response = xhr.responseJSON;
+									$.notify({ message: response.message }, { type: 'danger' });
+								}
+							});
+						}
+					);
+				}
+				else
+				{
+					$.ajax({
+						url: "/Teach/Step/GenerateResume",
+						type: 'POST',
+						data: { id: stepId },
+						success: function (response) {
+							$.notify({ message: response.message }, { type: 'success' });
+							ctxTaskId = response.taskId;
+							if (ctxTaskId) startPollingResume(stepId, ctxTaskId);
+						},
+						error: function (xhr, status, error) {
+							const response = xhr.responseJSON;
+							$.notify({ message: response.message }, { type: 'danger' });
+						}
+					});
+				}
+			});
 
 			  $(document).on("click", 'button[name^="update-lesson-"]', function (event) {
 				  event.preventDefault();

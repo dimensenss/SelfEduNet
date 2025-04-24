@@ -167,6 +167,7 @@ namespace SelfEduNet.Areas.Teach.Controllers
 		public async Task<IActionResult> GenerateContext(int id)
 		{
 			var step = await _stepService.GetStepByIdAsync(id, null);
+			
 			if (step == null)
 			{
 				return NotFound(new { message = "Крок не знайдено" });
@@ -177,6 +178,10 @@ namespace SelfEduNet.Areas.Teach.Controllers
 			if (url == null || url.Length < 0)
 			{
 				return BadRequest(new { message = "Відео не знайдено" });
+			}
+			if (CommonRegex.YoutubeRegex.IsMatch(url))
+			{
+				return BadRequest(new { message = "Неможливо згенерувати контекст для цього відео" });
 			}
 			try
 			{
@@ -216,6 +221,66 @@ namespace SelfEduNet.Areas.Teach.Controllers
 				return result.Content.Length > 0
 					? Ok(new { isSuccess = true, isEnd = result.IsEnd, content = result.Content })
 					: BadRequest(new { isSuccess = false, message = "Помилка при отриманні контексту" });
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(new { message = ex.Message });
+			}
+		}
+		public async Task<IActionResult> GenerateResume(int id)
+		{
+			var step = await _stepService.GetStepByIdAsync(id, null);
+
+			if (step == null)
+			{
+				return NotFound(new { message = "Крок не знайдено" });
+			}
+
+			string context = step.Context;
+
+			if (string.IsNullOrWhiteSpace(context))
+			{
+				return BadRequest(new { message = "Контекст не знайдено." });
+			}
+			
+			try
+			{
+				string taskId = await _transcriptionService.AddURLToQueue(url); //TODO
+
+				return Ok(new { taskId = taskId, message = "Запит на резюме створено" });
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(new { message = ex.Message });
+			}
+		}
+		//TODO
+		public async Task<IActionResult> GetResume(int id, string taskId)
+		{
+
+			if (taskId.Length < 0)
+			{
+				return BadRequest(new { message = "Помилка при отриманні резюме" });
+			}
+			try
+			{
+				TranscriptionResult result = await _transcriptionService.GetContentByTaskId(taskId);
+
+				if (result.IsEnd)
+				{
+					var step = await _stepService.GetStepByIdAsync(id, null);
+					if (step == null)
+					{
+						return NotFound(new { message = "Крок не знайдено" });
+					}
+
+					step.Resume = result.Content;
+					step.UpdatedAt = DateTime.UtcNow;
+					_stepService.Update(step);
+				}
+				return result.Content.Length > 0
+					? Ok(new { isSuccess = true, isEnd = result.IsEnd, content = result.Content })
+					: BadRequest(new { isSuccess = false, message = "Помилка при отриманні резюме" });
 			}
 			catch (Exception ex)
 			{

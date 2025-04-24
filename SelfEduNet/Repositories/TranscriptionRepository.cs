@@ -58,7 +58,7 @@ public class TranscriptionRepository: ITranscriptionRepository
 			Status = "Queued"
 		};
 
-		await _redisQueue.ListRightPopLeftPushAsync(QueueKeys.TranscriptionQueue, JsonSerializer.Serialize(taskData));
+		await _redisQueue.ListRightPushAsync(QueueKeys.TranscriptionQueue, JsonSerializer.Serialize(taskData));
 		_logger.LogInformation($"Added url with length to transcription queue with task ID {taskId}");
 
 		return taskId.ToString();

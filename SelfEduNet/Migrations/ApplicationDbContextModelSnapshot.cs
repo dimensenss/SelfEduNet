@@ -447,6 +447,10 @@ namespace SelfEduNet.Migrations
                     b.Property<bool>("Required")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("Resume")
+                        .HasMaxLength(5000)
+                        .HasColumnType("character varying(5000)");
+
                     b.Property<int>("StepType")
                         .HasColumnType("integer");
 

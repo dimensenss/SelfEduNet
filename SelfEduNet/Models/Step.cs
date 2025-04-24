@@ -14,6 +14,8 @@ namespace SelfEduNet.Models
 		public StepType StepType { get; set; }
 		[MaxLength(5000)]
 		public string? Content { get; set; }
+		[MaxLength(5000)]
+		public string? Resume { get; set; }
 
 		[MaxLength(5000)] 
 		public string Context { get; set; } = string.Empty;

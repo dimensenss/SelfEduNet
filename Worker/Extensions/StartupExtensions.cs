@@ -8,7 +8,8 @@ namespace Worker.Extensions
 		public static IServiceCollection AddOptionsInjection(this IServiceCollection services, IConfiguration configuration)
 		{
 			return services
-				.Configure<OpenAISettings>(configuration.GetSection(nameof(OpenAISettings)));
+				.Configure<OpenAISettings>(configuration.GetSection(nameof(OpenAISettings)))
+				.Configure<TranscriptionSettings>(configuration.GetSection(nameof(TranscriptionSettings)));
 		}
 	}
 }

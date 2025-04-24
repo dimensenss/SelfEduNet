@@ -58,10 +58,10 @@ namespace EduProject.Services
 					var uploadParams = new VideoUploadParams()
 					{
 						File = new FileDescription(file.FileName, stream),
-						Transformation = new Transformation()
-							.Width(1280).Height(720).Crop("limit")
-							.BitRate("800k")
-							.Quality("auto:good")
+						//Transformation = new Transformation()
+						//	.Width(1280).Height(720).Crop("limit")
+						//	.BitRate("800k")
+						//	.Quality("auto:good")
 					};
 					uploadResult = await _cloudinary.UploadAsync(uploadParams);
 				}

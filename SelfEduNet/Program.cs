@@ -99,7 +99,7 @@ if (!app.Environment.IsDevelopment())
 }
 if (app.Environment.IsDevelopment())
 {
-    //app.ApplyMigrations();
+    app.ApplyMigrations();
 
     using (var scope = app.Services.CreateScope())
     {

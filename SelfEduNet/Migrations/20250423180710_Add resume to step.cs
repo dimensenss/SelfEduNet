@@ -5,24 +5,24 @@
 namespace SelfEduNet.Migrations
 {
     /// <inheritdoc />
-    public partial class AddisViewedonStep : Migration
+    public partial class Addresumetostep : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<bool>(
-                name: "IsViewed",
+            migrationBuilder.AddColumn<string>(
+                name: "Resume",
                 table: "Steps",
-                type: "boolean",
-                nullable: false,
-                defaultValue: false);
+                type: "character varying(5000)",
+                maxLength: 5000,
+                nullable: true);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "IsViewed",
+                name: "Resume",
                 table: "Steps");
         }
     }

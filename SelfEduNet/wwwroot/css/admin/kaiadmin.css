@@ -86,9 +86,10 @@ danger-color : #f3545d
 -------------------------------------------------------------------*/
 /*   Typography    */
 body, h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6, p, .navbar, .brand, .btn-simple, .alert, a, .td-name, td, button.close {
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-font-smoothing: antialiased;
-  font-family: 'Public Sans', sans-serif; }
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased;
+    font-family: Mulish, sans-serif;
+}
 
 body, html {
   font-size: 14px;
@@ -2048,20 +2049,21 @@ label {
       font-size: 13px;
       color: grey;
       position: relative; }
-      .card-pricing2 .pricing-content li.disable:before, .card-pricing2 .pricing-content li:before {
-        content: "\f00c";
-        font-family: 'Font Awesome 5 Solid';
-        font-weight: 900;
-        width: 20px;
-        height: 20px;
-        line-height: 20px;
-        border-radius: 50%;
-        background: #98c458;
-        text-align: center;
-        color: #fff;
-        position: absolute;
-        left: -50px;
-        font-size: 9px; }
+        .card-pricing2 .pricing-content li.disable:before, .card-pricing2 .pricing-content li:before {
+            content: "\f00c";
+            font-family: Mulish, sans-serif;
+            font-weight: 900;
+            width: 20px;
+            height: 20px;
+            line-height: 20px;
+            border-radius: 50%;
+            background: #98c458;
+            text-align: center;
+            color: #fff;
+            position: absolute;
+            left: -50px;
+            font-size: 9px;
+        }
       .card-pricing2 .pricing-content li.disable:before {
         content: "\f00d";
         background: #fe6c6c; }
@@ -2408,11 +2410,12 @@ label {
     border-radius: 0 !important; }
     .accordion .card > .card-header > .span-mode {
       margin-left: auto; }
-      .accordion .card > .card-header > .span-mode:before {
-        content: "\f068" !important;
-        font-family: 'Font Awesome 5 Solid';
-        font-weight: 900;
-        font-size: 16px; }
+        .accordion .card > .card-header > .span-mode:before {
+            content: "\f068" !important;
+            font-family: Mulish, sans-serif;
+            font-weight: 900;
+            font-size: 16px;
+        }
     .accordion .card > .card-header.collapsed > .span-mode:before {
       content: "\f067" !important; }
   .accordion .card .card-body {
@@ -2589,37 +2592,40 @@ label {
   cursor: pointer;
   line-height: 22px;
   font-weight: 400; }
-.form-radio [type="radio"]:not(:checked) + .form-radio-sign:before {
-  content: "\f18a";
-  font-size: 22px;
-  font-family: LineAwesome;
-  position: absolute;
-  left: 0;
-  top: auto;
-  background: transparent;
-  line-height: 1;
-  color: #bbb; }
-.form-radio [type="radio"]:checked + .form-radio-sign:before {
-  content: "\f18a";
-  font-size: 22px;
-  font-family: LineAwesome;
-  position: absolute;
-  left: 0;
-  top: auto;
-  background: transparent;
-  line-height: 1;
-  display: none; }
-.form-radio [type="radio"]:not(:checked) + .form-radio-sign:after, .form-radio [type="radio"]:checked + .form-radio-sign:after {
-  content: "\f1bc";
-  position: absolute;
-  left: 0px;
-  top: auto;
-  text-align: center;
-  font-size: 22px;
-  color: #4d7cfe;
-  transition: all 0.2s;
-  line-height: 1;
-  font-family: LineAwesome; }
+    .form-radio [type="radio"]:not(:checked) + .form-radio-sign:before {
+        content: "\f18a";
+        font-size: 22px;
+        font-family: Mulish, sans-serif;
+        position: absolute;
+        left: 0;
+        top: auto;
+        background: transparent;
+        line-height: 1;
+        color: #bbb;
+    }
+    .form-radio [type="radio"]:checked + .form-radio-sign:before {
+        content: "\f18a";
+        font-size: 22px;
+        font-family: Mulish, sans-serif;
+        position: absolute;
+        left: 0;
+        top: auto;
+        background: transparent;
+        line-height: 1;
+        display: none;
+    }
+    .form-radio [type="radio"]:not(:checked) + .form-radio-sign:after, .form-radio [type="radio"]:checked + .form-radio-sign:after {
+        content: "\f1bc";
+        position: absolute;
+        left: 0px;
+        top: auto;
+        text-align: center;
+        font-size: 22px;
+        color: #4d7cfe;
+        transition: all 0.2s;
+        line-height: 1;
+        font-family: Mulish, sans-serif;
+    }
 .form-radio [type="radio"]:not(:checked) + .form-radio-sign:after {
   opacity: 0;
   transform: scale(0); }
@@ -6912,7 +6918,7 @@ body {
 
 /*# sourceMappingURL=kaiadmin.css.map */
 .logo {
-    font-family: 'Courier Prime', monospace !important;
+    font-family: Mulish, sans-serif;
     font-size: 28px !important;
     font-weight: bold !important;
     color: #ffffff !important;

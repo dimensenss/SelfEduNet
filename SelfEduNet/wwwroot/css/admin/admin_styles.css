@@ -1,4 +1,12 @@
-﻿
+﻿body {
+    font-family: Mulish, sans-serif !important; 
+    font-weight: normal;
+    font-style: normal;
+    font-size: 16px;
+    min-width: 320px;
+    height: 100%;
+    margin: 0;
+}
 .course-img {
     width: 200px;
 }
@@ -11,9 +19,8 @@
     width: auto;
     height: auto;
     border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: block;
+    text-align: center;
     transition: border-color 0.3s ease;
 }
 
@@ -115,4 +122,55 @@
     background-color: #c044d8;
     color: white;
 }
-   
+
+/* CSS */
+.button-3 {
+    appearance: none;
+    background-color: #d200ea;
+    border: 1px solid rgba(27, 31, 35, .15);
+    border-radius: 6px;
+    box-shadow: rgba(27, 31, 35, .1) 0 1px 0;
+    box-sizing: border-box;
+    color: #fff;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 20px;
+    padding: 9px 16px;
+    position: relative;
+    text-align: center;
+    text-decoration: none;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    vertical-align: middle;
+    white-space: nowrap;
+    height: 42px;
+}
+
+    .button-3:focus:not(:focus-visible):not(.focus-visible) {
+        box-shadow: none;
+        outline: none;
+    }
+
+    .button-3:hover {
+        background-color: #ee5fff;
+    }
+
+    .button-3:focus {
+        box-shadow: rgb(210, 0, 234) 0 0 0 3px;
+        outline: none;
+    }
+
+    .button-3:disabled {
+        background-color: #f1aff8;
+        border-color: rgba(27, 31, 35, .1);
+        color: rgba(255, 255, 255, .8);
+        cursor: default;
+    }
+
+    .button-3:active {
+        background-color: #a600b9;
+        box-shadow: rgba(20, 70, 32, .2) 0 1px 0 inset;
+    }

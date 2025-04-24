@@ -12,8 +12,8 @@ using SelfEduNet.Data;
 namespace SelfEduNet.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250421180139_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250423180710_Add resume to step")]
+    partial class Addresumetostep
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -449,6 +449,10 @@ namespace SelfEduNet.Migrations
 
                     b.Property<bool>("Required")
                         .HasColumnType("boolean");
+
+                    b.Property<string>("Resume")
+                        .HasMaxLength(5000)
+                        .HasColumnType("character varying(5000)");
 
                     b.Property<int>("StepType")
                         .HasColumnType("integer");
