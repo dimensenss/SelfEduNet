@@ -60,11 +60,17 @@
 				<button type="button" name="generateContext" data-step-id="@Model.Id" class="btn btn-primary mb-3">Згенерувати контекст</button>
 
 				<div class="form-floating">
-					<textarea class="form-control lh-base"
+					<form asp-action="SaveStep" asp-controller="Step" asp-area="Teach">
+						<button type="submit" class="btn btn-success">Зберегти контекст</button>
+						<input type="hidden" asp-for="Id" value="@Model.Id"/>
+						<textarea class="form-control lh-base"
 							  style="max-height:600px; min-height:600px; resize:vertical; overflow:auto;"
 							  placeholder="Напишіть контекст для уроку"
-							  id="step-context">@Model.Context</textarea>
-					<label for="step-context">Контекст</label>
+							  asp-for="Context"
+							  id="step-context">@(Model.Context ?? "")
+						</textarea>
+						<label for="step-context">Контекст</label>
+					</form>
 				</div>
 			</div>
 		</div>
@@ -82,11 +88,17 @@
 				<button type="button" name="generateResume" data-step-id="@Model.Id" class="btn btn-primary mb-3">Згенерувати резюме</button>
 				
 				<div class="form-floating">
-					<textarea class="form-control lh-base"
+					<form asp-action="SaveStep" asp-controller="Step" asp-area="Teach">
+						<button type="submit" class="btn btn-success">Зберегти резюме</button>
+						<input type="hidden" asp-for="Id" value="@Model.Id"/>
+						<textarea class="form-control lh-base"
 							  style="max-height:600px; min-height:600px; resize:vertical; overflow:auto;"
 							  placeholder="Напишіть резюме для уроку"
-							  id="step-resume">@Model.Resume</textarea>
-					<label for="step-resume">Резюме</label>
+							  asp-for="Resume"
+							  id="step-resume">@(Model.Resume ?? "")
+						</textarea>
+						<label for="step-resume">Резюме</label>
+					</form>
 				</div>
 			</div>
 		</div>

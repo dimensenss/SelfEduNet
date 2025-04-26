@@ -12,12 +12,12 @@ namespace SelfEduNet.Models
 		public int Order { get; set; }
 		[Required]
 		public StepType StepType { get; set; }
-		[MaxLength(5000)]
+		[MaxLength(65000)]
 		public string? Content { get; set; }
-		[MaxLength(5000)]
+		[MaxLength(10000)]
 		public string? Resume { get; set; }
 
-		[MaxLength(5000)] 
+		[MaxLength(65000)] 
 		public string Context { get; set; } = string.Empty;
 		[Url]
 		public string? VideoUrl { get; set; }

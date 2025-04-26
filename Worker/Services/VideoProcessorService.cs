@@ -9,16 +9,15 @@ using Worker.Helpers;
 
 namespace Worker.Services
 {
-	public interface IVideoProcessor
+	public interface IVideoProcessorService
 	{
 		IAsyncEnumerable<string> SplitAndTranscribeAudioAsync(string audioPath, TimeSpan segmentDuration);
 		Task<string> RemoveSilenceAsync(string audioPath);
-		Task<string> GenerateSummaryAsync(string fullTranscript);
 	}
 
-	public class VideoProcessor(ILogger<VideoProcessor> logger, IAudioClientFactory audioClientFactory) : IVideoProcessor
+	public class VideoProcessorService(ILogger<VideoProcessorService> logger, IOpenAIClientFactory openAiClientFactory) : IVideoProcessorService
 	{
-		private readonly AudioClient _audioClient = audioClientFactory.CreateAudioClient();
+		private readonly AudioClient _audioClient = openAiClientFactory.CreateAudioClient();
 
 		public async Task<string> RemoveSilenceAsync(string audioPath)
 		{
@@ -150,11 +149,6 @@ namespace Worker.Services
 			}
 
 			return TimeSpan.Zero; // If we can't get duration, return 0
-		}
-		public async Task<string> GenerateSummaryAsync(string fullTranscript)
-		{
-			// Call OpenAI API or another NLP service to generate a summary
-			return "Generated Summary";
 		}
 	}
 

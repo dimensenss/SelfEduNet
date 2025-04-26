@@ -8,9 +8,9 @@ function startPollingContext(stepId, taskId) {
 
     pollingInterval = setInterval(function () {
         $.ajax({
-            url: '/Teach/Step/GetContext',
+            url: '/Teach/Step/GetContent',
             type: 'GET',
-            data: { id: stepId, taskId: taskId },
+            data: { id: stepId, taskId: taskId, keyType: 0 },
             success: function (response) {
                 if (response.isSuccess) {
                     // Если новый текст
@@ -38,9 +38,9 @@ function startPollingResume(stepId, taskId) {
 
     pollingInterval = setInterval(function () {
         $.ajax({
-            url: '/Teach/Step/GetResume',
+            url: '/Teach/Step/GetContent',
             type: 'GET',
-            data: { id: stepId, taskId: taskId },
+            data: { id: stepId, taskId: taskId, keyType: 1 },
             success: function (response) {
                 if (response.isSuccess) {
                     // Если новый текст

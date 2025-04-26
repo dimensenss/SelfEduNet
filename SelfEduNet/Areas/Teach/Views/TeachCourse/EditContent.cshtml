@@ -151,7 +151,7 @@
 
 				console.log(title);
 				$.ajax({
-					url: "@Url.Action("CreateUpdateLesson", "TeachCourse", new { area = "Teach" })",
+					url: "@Url.Action("CreateUpdateLesson", "Lesson", new { area = "Teach" })",
 					type: "POST",
 					data: {
 						moduleId: moduleId,
@@ -185,7 +185,7 @@
 				const lessonId = form.find("input[name='LessonId']").val() || null;
 
 				$.ajax({
-					url: "@Url.Action("CreateUpdateLesson", "TeachCourse", new { area = "Teach" })",
+					url: "@Url.Action("CreateUpdateLesson", "Lesson", new { area = "Teach" })",
 					type: "POST",
 					data: {
 						moduleId: moduleId,
@@ -223,7 +223,7 @@
 					'Відмінити',
 					() => {
 						$.ajax({
-							url: "@Url.Action("DeleteLesson", "TeachCourse", new { area = "Teach" })",
+							url: "@Url.Action("DeleteLesson", "Lesson", new { area = "Teach" })",
 							type: "POST",
 							data: {
 								lessonId: lessonId,

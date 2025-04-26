@@ -11,6 +11,8 @@ using SelfEduNet.Services;
 using System.Text.RegularExpressions;
 using SelfEduNet.Data.Regex;
 using System.Threading.Tasks;
+using SelfEduNet.Data.Enum;
+using SelfEduNet.ViewModels;
 
 namespace SelfEduNet.Areas.Teach.Controllers
 {
@@ -179,7 +181,8 @@ namespace SelfEduNet.Areas.Teach.Controllers
 			{
 				return BadRequest(new { message = "Відео не знайдено" });
 			}
-			if (CommonRegex.YoutubeRegex.IsMatch(url))
+
+			if (CommonRegex.YoutubeRegex.IsMatch(url) && !User.IsInRole("Admin"))
 			{
 				return BadRequest(new { message = "Неможливо згенерувати контекст для цього відео" });
 			}
@@ -195,7 +198,7 @@ namespace SelfEduNet.Areas.Teach.Controllers
 			}
 		}
 
-		public async Task<IActionResult> GetContext(int id, string taskId)
+		public async Task<IActionResult> GetContent(int id, string taskId, WorkerTaskType keyType)
 		{
 
 			if (taskId.Length < 0)
@@ -204,7 +207,7 @@ namespace SelfEduNet.Areas.Teach.Controllers
 			}
 			try
 			{
-				TranscriptionResult result = await _transcriptionService.GetContentByTaskId(taskId);
+				WorkerResult result = await _transcriptionService.GetContentByTaskId(taskId, keyType);
 
 				if (result.IsEnd)
 				{
@@ -213,8 +216,13 @@ namespace SelfEduNet.Areas.Teach.Controllers
 					{
 						return NotFound(new { message = "Крок не знайдено" });
 					}
+					string queueKey = keyType switch
+					{
+						WorkerTaskType.Transcription => step.Context = result.Content,
+						WorkerTaskType.Resume => step.Resume = result.Content,
+						_ => throw new ArgumentException("Invalid WorkerTaskType")
+					};
 					
-					step.Context = result.Content;
 					step.UpdatedAt = DateTime.UtcNow;
 					_stepService.Update(step);
 				}
@@ -245,7 +253,7 @@ namespace SelfEduNet.Areas.Teach.Controllers
 			
 			try
 			{
-				string taskId = await _transcriptionService.AddURLToQueue(url); //TODO
+				string taskId = await _transcriptionService.AddResumeRequestToQueue(context);
 
 				return Ok(new { taskId = taskId, message = "Запит на резюме створено" });
 			}
@@ -254,39 +262,7 @@ namespace SelfEduNet.Areas.Teach.Controllers
 				return BadRequest(new { message = ex.Message });
 			}
 		}
-		//TODO
-		public async Task<IActionResult> GetResume(int id, string taskId)
-		{
-
-			if (taskId.Length < 0)
-			{
-				return BadRequest(new { message = "Помилка при отриманні резюме" });
-			}
-			try
-			{
-				TranscriptionResult result = await _transcriptionService.GetContentByTaskId(taskId);
-
-				if (result.IsEnd)
-				{
-					var step = await _stepService.GetStepByIdAsync(id, null);
-					if (step == null)
-					{
-						return NotFound(new { message = "Крок не знайдено" });
-					}
-
-					step.Resume = result.Content;
-					step.UpdatedAt = DateTime.UtcNow;
-					_stepService.Update(step);
-				}
-				return result.Content.Length > 0
-					? Ok(new { isSuccess = true, isEnd = result.IsEnd, content = result.Content })
-					: BadRequest(new { isSuccess = false, message = "Помилка при отриманні резюме" });
-			}
-			catch (Exception ex)
-			{
-				return BadRequest(new { message = ex.Message });
-			}
-		}
+	
 		public async Task<IActionResult> SubmitStep(int id)
 		{
 			string userId = User.GetUserId();
@@ -329,6 +305,49 @@ namespace SelfEduNet.Areas.Teach.Controllers
 			return result
 				? Ok(new { message = "Крок переглянуто" })
 				: BadRequest(new { message = "Помилка при перегляді кроку" });
+		}
+
+		public async Task<IActionResult> SaveStep(EditStepViewModel stepVM)
+		{
+			var step = await _stepService.GetStepByIdAsync(stepVM.Id);
+
+			if (step == null)
+			{
+				return NotFound();
+			}
+			if (!ModelState.IsValid)
+			{
+				TempData["NotifyType"] = "danger";
+				TempData["NotifyMessage"] = "Невдалося зберегти крок";
+
+				return RedirectToAction("EditLesson", "Lesson", new { courseId = step.Lesson.CourseId, lessonId = step.LessonId, stepId = step.Id });
+			}
+
+			if (!string.IsNullOrWhiteSpace(stepVM.Content))
+			{
+				step.Content = stepVM.Content;
+			}
+
+			if (!string.IsNullOrWhiteSpace(stepVM.Resume))
+			{
+				step.Resume = stepVM.Resume;
+			}
+
+			if (!string.IsNullOrWhiteSpace(stepVM.Context))
+			{
+				step.Context = stepVM.Context;
+			}
+
+			if (!string.IsNullOrWhiteSpace(stepVM.VideoUrl))
+			{
+				step.VideoUrl = stepVM.VideoUrl;
+			}
+
+			_stepService.Update(step);
+			TempData["NotifyType"] = "success";
+			TempData["NotifyMessage"] = "Дані збережено";
+
+			return RedirectToAction("EditLesson", "Lesson", new { courseId = step.Lesson.CourseId, lessonId = step.LessonId, stepId = step.Id});
 		}
 
 	}

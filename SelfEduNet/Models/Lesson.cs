@@ -8,6 +8,7 @@ namespace SelfEduNet.Models
 
         [Required]
         public int CourseModuleId { get; set; }
+        public int? CourseId { get; set; }
         public CourseModules? CourseModule { get; set; }
         [Required]
         [MaxLength(255)]

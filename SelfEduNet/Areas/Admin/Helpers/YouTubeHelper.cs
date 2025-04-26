@@ -4,9 +4,11 @@ using SelfEduNet.Data.Regex;
 
 public static class YouTubeHelper
 {
-    public static string GetYouTubeVideoId(string url)
+    public static string GetYouTubeVideoId(string? url)
     {
-        var pattern = @"(?:v=|\/)([0-9A-Za-z_-]{11}).*";
+		if (string.IsNullOrEmpty(url))
+			return null;
+		var pattern = @"(?:v=|\/)([0-9A-Za-z_-]{11}).*";
         var match = Regex.Match(url, pattern);
         return match.Success ? match.Groups[1].Value : null;
     }

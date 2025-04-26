@@ -20,11 +20,13 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 	ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("RedisConnection")));
 builder.Services.AddOptionsInjection(builder.Configuration);
 
-builder.Services.AddScoped<IAudioClientFactory, AudioClientFactory>();
+builder.Services.AddScoped<IOpenAIClientFactory, OpenAiClientFactory>();
 builder.Services.AddScoped<IFileService, FileService>();
-builder.Services.AddScoped<IVideoProcessor, VideoProcessor>();
+builder.Services.AddScoped<IVideoProcessorService, VideoProcessorService>();
+builder.Services.AddScoped<IContextProcessorService, ContextProcessorService>();
 
-builder.Services.AddHostedService<Worker.Worker>();
+builder.Services.AddHostedService<Worker.TranscriptionWorker>();
+builder.Services.AddHostedService<Worker.ResumeWorker>();
 
 var host = builder.Build();
 await host.RunAsync();

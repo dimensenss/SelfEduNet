@@ -223,9 +223,11 @@ namespace SelfEduNet.Services
 				try
 				{
 					int maxOrder = await _courseRepository.GetMaxLessonOrderAsync(moduleId);
+					var module = await _courseRepository.GetModuleByIdAsync(moduleId);
 					var lesson = new Lesson
 					{
 						CourseModuleId = moduleId,
+						CourseId = module.CourseId,
 						Title = title,
 						Order = maxOrder + 1
 					};

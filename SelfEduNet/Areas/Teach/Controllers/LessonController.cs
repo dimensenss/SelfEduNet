@@ -170,6 +170,52 @@ namespace SelfEduNet.Areas.Teach.Controllers
 			TempData["NotifyMessage"] = "Пройдіть хоча б 80% кроків."; // count of steps need to be cpompleted
 			return RedirectToAction("ViewLesson", new { courseId = courseId, lessonId = lessonId });
 		}
+		[HttpPost]
+		public async Task<IActionResult> CreateUpdateLesson(int moduleId, int? lessonId, string title)
+		{
+			if (string.IsNullOrWhiteSpace(title))
+			{
+				return BadRequest(new { message = "Введіть коректну назву урока" });
+			}
+
+			bool result = false;
+
+			if (lessonId.HasValue)
+			{
+				var lesson = await _courseService.GetLessonByIdAsync(lessonId);
+
+				lesson.Title = title;
+				result = await _courseService.UpdateLessonAsync(lesson);
+				return result
+					? Ok(new { message = "Урок оновлено" })
+					: BadRequest(new { message = "Сталася помилка при оновлені уроку." });
+			}
+			else
+			{
+				result = await _courseService.CreateLessonAsync(moduleId, title);
+				return result
+					? Ok(new { message = "Урок створено" })
+					: BadRequest(new { message = "Сталася помилка при створені уроку." });
+			}
+		}
+		[HttpPost]
+		public async Task<IActionResult> DeleteLesson(int lessonId)
+		{
+			var lesson = await _courseService.GetLessonByIdAsync(lessonId);
+
+			if (lesson != null)
+			{
+				bool result = _courseService.DeleteLesson(lesson);
+				return result
+					? Ok(new { message = "Урок видалено" })
+					: BadRequest(new { message = "Сталася помилка при видалені уроку." });
+			}
+			else
+			{
+				return BadRequest(new { message = "Сталася помилка при видалені уроку. Урок не знайдено." });
+			}
+		}
+
 		//TODO Complete module
 		//TODO Complete course
 

@@ -160,7 +160,7 @@
 		  let stepId = $(this).data("step-id");
 		  let $loader = $("#loader");
 		  let videoPlayer = $("#videoPlayer")[0];
-		  let youtuberVideoPlayer = $("#youtubePlayer")[0];
+		  let youtuberVideoPlayer = $("#youtubePlayerBox")[0];
 
 		  // Показываем лоадер
 		  $(videoPlayer).addClass('d-none');
@@ -207,7 +207,7 @@
 
 				  let $loader = $("#loader");
 				  let videoPlayer = $("#videoPlayer")[0];
-				  let youtuberVideoPlayer = $("#youtubePlayer")[0];
+				  let youtuberVideoPlayer = $("#youtubePlayerBox")[0];
 
 				  // Показываем лоадер
 				  $(videoPlayer).addClass('d-none');
@@ -293,7 +293,7 @@
 				let stepId = $(this).data("step-id");
 				const resumeValue = $("#step-resume").val().trim();
 					const hasResume = resumeValue.length > 0;
-					if (Resume){
+						if (hasResume){
 						showConfirmationDialog(
 						'У вас вже є резюме',
 						'Ця перезапише існуюче резюме. Ви не зможете відновити його!',
@@ -346,7 +346,7 @@
 				  const lessonId = form.find("input[name='LessonId']").val() || null;
 
 				  $.ajax({
-					  url: "@Url.Action("CreateUpdateLesson", "TeachCourse", new { area = "Teach" })",
+					  url: "@Url.Action("CreateUpdateLesson", "Lesson", new { area = "Teach" })",
 					  type: "POST",
 					  data: {
 						  moduleId: moduleId,

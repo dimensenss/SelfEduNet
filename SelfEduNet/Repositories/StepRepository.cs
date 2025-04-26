@@ -21,7 +21,9 @@ namespace SelfEduNet.Repositories
 
 		public async Task<Step> GetStepByIdAsync(int stepId, string? userId)
 		{
-			var query = context.Steps.AsQueryable();
+			var query = context.Steps
+				.Include(s => s.Lesson)
+				.AsQueryable();
 
 			if (userId != null)
 			{
