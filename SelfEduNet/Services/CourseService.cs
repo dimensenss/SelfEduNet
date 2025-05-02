@@ -146,9 +146,10 @@ namespace SelfEduNet.Services
 					course.HaveCertificate = courseVM.HaveCertificate;
 					course.IsPublished = courseVM.IsPublished;
 
-					return _courseRepository.Update(course);
+					bool result = _courseRepository.Update(course);
 					await transaction.CommitAsync();
 
+					return result;
 				}
 				catch (Exception ex)
 				{

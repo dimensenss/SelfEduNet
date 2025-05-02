@@ -2,8 +2,8 @@
 using CloudinaryDotNet.Actions;
 using Microsoft.Extensions.Options;
 using System.Threading.Tasks;
-using EduProject.Helpers;
 using System.Text.RegularExpressions;
+using SelfEduNet.Configurations;
 
 namespace EduProject.Services
 {

@@ -56,20 +56,21 @@
 		</h2>
 		<div id="flush-collapseTwo" class="accordion-collapse collapse" aria-labelledby="flush-headingTwo" data-bs-parent="#accordionFlushExample">
 			<div class="accordion-body">
-
-				<button type="button" name="generateContext" data-step-id="@Model.Id" class="btn btn-primary mb-3">Згенерувати контекст</button>
+				
+				<div class="d-flex justify-content-between">
+					<button type="button" name="generateContext" data-step-id="@Model.Id" class="btn btn-primary mb-3">Згенерувати контекст</button>
+				</div>
 
 				<div class="form-floating">
 					<form asp-action="SaveStep" asp-controller="Step" asp-area="Teach">
-						<button type="submit" class="btn btn-success">Зберегти контекст</button>
-						<input type="hidden" asp-for="Id" value="@Model.Id"/>
+						<input type="hidden" asp-for="Id" value="@Model.Id" />
 						<textarea class="form-control lh-base"
-							  style="max-height:600px; min-height:600px; resize:vertical; overflow:auto;"
-							  placeholder="Напишіть контекст для уроку"
-							  asp-for="Context"
-							  id="step-context">@(Model.Context ?? "")
+								  style="max-height:600px; min-height:600px; resize:vertical; overflow:auto;"
+								  placeholder="Напишіть контекст для уроку"
+								  asp-for="Context"
+								  id="step-context">@(Model.Context ?? "")
 						</textarea>
-						<label for="step-context">Контекст</label>
+						<button type="submit" class="btn btn-success mt-3">Зберегти контекст</button>
 					</form>
 				</div>
 			</div>
@@ -86,19 +87,15 @@
 				<p class="text-muted">Генерує резюме/конспект для користувачів на основі контексту крока</p>
 
 				<button type="button" name="generateResume" data-step-id="@Model.Id" class="btn btn-primary mb-3">Згенерувати резюме</button>
-				
+
 				<div class="form-floating">
-					<form asp-action="SaveStep" asp-controller="Step" asp-area="Teach">
-						<button type="submit" class="btn btn-success">Зберегти резюме</button>
-						<input type="hidden" asp-for="Id" value="@Model.Id"/>
-						<textarea class="form-control lh-base"
-							  style="max-height:600px; min-height:600px; resize:vertical; overflow:auto;"
-							  placeholder="Напишіть резюме для уроку"
-							  asp-for="Resume"
-							  id="step-resume">@(Model.Resume ?? "")
-						</textarea>
-						<label for="step-resume">Резюме</label>
-					</form>
+					<p id="saveStatus"></p>
+					<div class="editor-container editor-container_classic-editor editor-container_include-word-count" id="editor-container">
+						<div class="editor-container__editor">
+							<div id="resume-editor" data-step-id="@Model.Id" data-initial="@Html.Raw(System.Net.WebUtility.HtmlEncode(Model.Resume))"></div>
+						</div>
+						<div class="editor_container__word-count" id="editor-word-count"></div>
+					</div>
 				</div>
 			</div>
 		</div>

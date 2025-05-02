@@ -23,10 +23,20 @@ public class ContextProcessorService(IOpenAIClientFactory openAiClientFactory, I
 	private readonly ChatClient _chatClient = openAiClientFactory.CreateChatClient();
 	public async IAsyncEnumerable<string> GenerateResumeAsync(string context)
 	{
+		//todo add lang support
 		List<ChatMessage> messages = [
-		
-			new SystemChatMessage("You are a helpful assistant that summarizes text."),
-			new UserChatMessage($"Please summarize the following context:\n{context}")
+			new SystemChatMessage(
+				"You are a highly skilled educational content analyst. "
+				+ "Your job is to carefully analyze the provided transcript of a video lecture. "
+				+ "Your output must be clearly structured into the following sections"
+				+ "\n1. Summary: Briefly summarize the overall content in 5-7 sentences."
+				+ "\n2. Key Points: List the main points or concepts covered."
+				+ "\n3. Complex Topics: Identify and explain any parts that may be difficult to understand."
+				+ "\n4. Recommendations: Suggest additional resources or next learning steps based on the lecture.\n"
+				+ "\nUse semantic HTML template so it can be cleanly rendered in CKEditor."
+			),
+			new SystemChatMessage("All outputs including must be in the same language as the provided transcript."),
+			new UserChatMessage($"Here is the video lecture transcript:\n{context}")
 		];
 
 		AsyncCollectionResult<StreamingChatCompletionUpdate> completionUpdates = _chatClient.CompleteChatStreamingAsync(messages);

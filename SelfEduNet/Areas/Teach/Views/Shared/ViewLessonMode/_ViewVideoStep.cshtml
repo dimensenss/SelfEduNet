@@ -3,6 +3,8 @@
 	var videoTitle = await YouTubeHelper.GetYouTubeVideoTitleAsync(Model.VideoUrl ?? "");
 	bool isYoutubeVideo = (!string.IsNullOrEmpty(Model.VideoUrl) && YouTubeHelper.IsYouTubeUrl(Model.VideoUrl));
 }
+
+<div class="bg-body-secondary rounded">
 <div class="step-text-wrapper">
 	<h2 id="video-title">@videoTitle</h2>
 	<div id="video-box"
@@ -36,3 +38,23 @@
 		}
 	</div>
 </div>
+</div>
+@if (Model.Resume != null && Model.Resume.Length > 0)
+{
+	<div class="accordion p-0 my-3" id="accordionFlushExample">
+		<div class="accordion-item">
+			<h2 class="accordion-header">
+				<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
+					Резюме до кроку
+				</button>
+			</h2>
+			<div id="flush-collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
+				<div class="accordion-body">
+					<div id="stepResume" class="ck-content ms-3" style="max-width:1000px;">
+						@Html.Raw(Model.Resume)
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+}

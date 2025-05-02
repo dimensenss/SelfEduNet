@@ -28,7 +28,7 @@ namespace Worker.Services
 		public ChatClient CreateChatClient()
 		{
 			var client = CreateOpenAIClient();
-			return client.GetChatClient("gpt-4.1-nano");
+			return client.GetChatClient("gpt-4.1-mini");
 		}
 
 		public AudioClient CreateAudioClient()

@@ -35,6 +35,7 @@ namespace SelfEduNet.Repositories
 				return false;
 			}
 
+			userStep.IsViewed = true;
 			userStep.IsCompleted = true;
 			userStep.CompletedAt = DateTime.UtcNow;
 			return Update(userStep);

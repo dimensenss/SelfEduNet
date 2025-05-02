@@ -12,5 +12,9 @@
 		case StepType.Video:
 			@await Html.PartialAsync("EditLessonMode/_EditVideoStep")
 			break;
+
+		case StepType.Test:
+			@await Html.PartialAsync("EditLessonMode/_EditTestStep")
+			break;
 	}
 </div>

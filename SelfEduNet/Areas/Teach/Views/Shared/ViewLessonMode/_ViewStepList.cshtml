@@ -20,7 +20,7 @@
 			{ "stepId", step.Id.ToString() }
 			};
 			<li class="nav-item">
-					<a class="step-btn shadow p-3 mb-5 view-step @(userStep.IsCompleted ? "completed" : "") @(step.Id == currentStep?.Id ? "active" : "")"
+					<a class="step-btn shadow p-3 mb-5 view-step step-id-@(step.Id) @(userStep.IsCompleted ? "completed" : "") @(step.Id == currentStep?.Id ? "active" : "")"
 				   aria-current="page"
 				   asp-action="ViewLesson"
 				   asp-controller="Lesson"

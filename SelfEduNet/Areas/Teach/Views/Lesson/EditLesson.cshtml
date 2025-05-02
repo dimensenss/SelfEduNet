@@ -4,6 +4,7 @@
 	Layout = "_AdminLayout";
 	var currentStep = ViewData["Step"] as Step;
 	ViewData["Mode"] = "Edit";
+	ViewData["Title"] = currentStep.Lesson.Title ?? "Редагування уроку";
 }
 <link href="//vjs.zencdn.net/8.23.0/video-js.min.css" rel="stylesheet">
 @section Sidebar
@@ -131,6 +132,7 @@
 	<script src="//vjs.zencdn.net/8.23.0/video.min.js"></script>
 	<script src="~/js/youtubePlayer.js" asp-append-version="true"></script>
 	<script src="~/js/ckeditorLessonContent.js" asp-append-version="true"></script>
+	<script src="~/js/ckeditorStepResume.js" asp-append-version="true"></script>
 	<script src="~/js/transcriptionPolling.js" asp-append-version="true"></script>
 	<script>
 		$(document).ready(function() {
@@ -243,6 +245,8 @@
 			  });
 			$(document).on("click", 'button[name^="generateContext"]', function (event) {
 				event.preventDefault();
+				const $button = $(this);
+
 				let stepId = $(this).data("step-id");
 				const contextValue = $("#step-context").val().trim();
 				const hasContext = contextValue.length > 0;
@@ -253,6 +257,7 @@
 						'Так, згенерувати!',
 						'Відмінити',
 						() => {
+							showLoading($button);
 							$.ajax({
 								url: "/Teach/Step/GenerateContext",
 								type: 'POST',
@@ -260,7 +265,7 @@
 								success: function (response) {
 									$.notify({ message: response.message }, { type: 'success' });
 									ctxTaskId = response.taskId;
-									if (ctxTaskId) startPollingContext(stepId, ctxTaskId);
+										if (ctxTaskId) startPollingContext(stepId, ctxTaskId, $button);
 								},
 								error: function (xhr, status, error) {
 									const response = xhr.responseJSON;
@@ -272,6 +277,7 @@
 				}
 				else
 				{
+					showLoading($button);
 					$.ajax({
 						url: "/Teach/Step/GenerateContext",
 						type: 'POST',
@@ -290,9 +296,13 @@
 			});
 			$(document).on("click", 'button[name^="generateResume"]', function (event) {
 				event.preventDefault();
+
+				const $button = $(this);
+
 				let stepId = $(this).data("step-id");
-				const resumeValue = $("#step-resume").val().trim();
-					const hasResume = resumeValue.length > 0;
+				const resumeContent = resumeEditor.getData().trim();
+				const hasResume = resumeContent.length > 13; //initial ckeditor styles
+						console.log(resumeContent.length);
 						if (hasResume){
 						showConfirmationDialog(
 						'У вас вже є резюме',
@@ -300,6 +310,7 @@
 						'Так, згенерувати!',
 						'Відмінити',
 						() => {
+							showLoading($button);
 							$.ajax({
 								url: "/Teach/Step/GenerateResume",
 								type: 'POST',
@@ -307,7 +318,7 @@
 								success: function (response) {
 									$.notify({ message: response.message }, { type: 'success' });
 									ctxTaskId = response.taskId;
-									if (ctxTaskId) startPollingResume(stepId, ctxTaskId);
+										if (ctxTaskId) startPollingResume(stepId, ctxTaskId, $button);
 								},
 								error: function (xhr, status, error) {
 									const response = xhr.responseJSON;
@@ -319,6 +330,7 @@
 				}
 				else
 				{
+					showLoading($button);
 					$.ajax({
 						url: "/Teach/Step/GenerateResume",
 						type: 'POST',
@@ -387,11 +399,6 @@
 					  success: function (response) {
 						  const redirectUrl = `/EditLesson/@Model.Course.Id/${lessonId}?stepId=${response.stepId}`;
 						  window.location.href = redirectUrl;
-						  $.notify({
-							  message: response.message
-						  }, {
-							  type: 'success'
-						  });
 					  },
 					  error: function (xhr) {
 						  const response = xhr.responseJSON;

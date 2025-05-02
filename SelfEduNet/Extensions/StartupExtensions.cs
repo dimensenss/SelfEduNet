@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
-using EduProject.Helpers;
 using Microsoft.AspNetCore.Localization;
 using SelfEduNet.Configurations;
+using SelfEduNet.Services;
 
 namespace SelfEduNet.Extensions
 {
@@ -12,7 +12,8 @@ namespace SelfEduNet.Extensions
 			services.AddLocalization(options => options.ResourcesPath = "Resources");
 			return services
 				.Configure<EmailSMTPSettings>(configuration.GetSection(nameof(EmailSMTPSettings)))
-				.Configure<CloudinarySettings>(configuration.GetSection("CloudinarySettings"))
+				.Configure<CloudinarySettings>(configuration.GetSection(nameof(CloudinarySettings)))
+				.Configure<GoogleSheetService>(configuration.GetSection(nameof(GoogleSheetService)))
 				.Configure<RequestLocalizationOptions>(options =>
 				{
 					var supportedCultures = new[] { new CultureInfo("uk-UA") };

@@ -66,6 +66,29 @@ namespace SelfEduNet.Areas.Teach.Controllers
 		}
 
 		[HttpPost]
+		public async Task<IActionResult> UpdateStepResume(int id, [FromBody] string content)
+		{
+			if (content == null)
+			{
+				return BadRequest();
+			}
+			var step = await _stepService.GetStepByIdAsync(id, null);
+			if (step == null)
+			{
+				return NotFound(new { message = "Крок не знайдено" });
+			}
+			//var sanitizedContent = _sanitizer.Sanitize(content);
+
+			step.Content = content;
+			step.UpdatedAt = DateTime.UtcNow;
+			bool result = _stepService.Update(step);
+
+			return result
+				? Ok()
+				: BadRequest();
+		}
+
+		[HttpPost]
 		public async Task<IActionResult> UploadImage(IFormFile upload)
 		{
 			if (upload == null || upload.Length == 0)
@@ -320,7 +343,7 @@ namespace SelfEduNet.Areas.Teach.Controllers
 				TempData["NotifyType"] = "danger";
 				TempData["NotifyMessage"] = "Невдалося зберегти крок";
 
-				return RedirectToAction("EditLesson", "Lesson", new { courseId = step.Lesson.CourseId, lessonId = step.LessonId, stepId = step.Id });
+				return Redirect($"/EditLesson/{step.Lesson.CourseId}/{step.LessonId}?stepId={step.Id}");
 			}
 
 			if (!string.IsNullOrWhiteSpace(stepVM.Content))
@@ -347,8 +370,7 @@ namespace SelfEduNet.Areas.Teach.Controllers
 			TempData["NotifyType"] = "success";
 			TempData["NotifyMessage"] = "Дані збережено";
 
-			return RedirectToAction("EditLesson", "Lesson", new { courseId = step.Lesson.CourseId, lessonId = step.LessonId, stepId = step.Id});
+			return Redirect($"/EditLesson/{step.Lesson.CourseId}/{step.LessonId}?stepId={step.Id}");
 		}
-
 	}
 }
