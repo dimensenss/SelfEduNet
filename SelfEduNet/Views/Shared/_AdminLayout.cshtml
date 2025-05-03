@@ -74,17 +74,17 @@
 		   data-bs-toggle="dropdown"
 		   href="#"
 		   aria-expanded="false">
-			<div class="avatar-sm">
+			@* <div class="avatar-sm">
 				<img src="~/img/admin/jm_denis.jpg"
 				     alt="..."
 				     class="avatar-img rounded-circle"/>
-			</div>
+			</div> *@
 			<span class="profile-username">
 				<span class="op-7">Hi,</span>
-				<span class="fw-bold">Hizrian</span>
+				<span class="fw-bold">@User.Identity.Name</span>
 			</span>
 		</a>
-		<ul class="dropdown-menu dropdown-user animated fadeIn">
+		@* <ul class="dropdown-menu dropdown-user animated fadeIn">
 			<div class="dropdown-user-scroll scrollbar-outer">
 				<li>
 					<div class="user-box">
@@ -112,7 +112,7 @@
 					<a class="dropdown-item" href="#">Logout</a>
 				</li>
 			</div>
-		</ul>
+		</ul> *@
 	</li>
 	</ul>
 	</div>

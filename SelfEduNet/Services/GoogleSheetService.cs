@@ -2,32 +2,47 @@
 using Google.Apis.Sheets.v4;
 using Microsoft.Extensions.Options;
 using SelfEduNet.Configurations;
+using System.Text.RegularExpressions;
+using SelfEduNet.Data.Regex;
+using Google.Apis.Sheets.v4.Data;
 
 namespace SelfEduNet.Services;
 public interface IGoogleSheetService
 {
-	Task<IList<IList<object>>> GetRangeAsync(string spreadsheetId, string rangeA1);
+	string GetSheetIdFromUrl(string url);
+	Task<string> GetSheetNameAsync(string sheetId);
+	Task<IList<IList<object>>> GetValuesById(string sheetId, string range);
+
 }
-public class GoogleSheetService(IOptions<GoogleSheetService> configurations) : IGoogleSheetService
+public class GoogleSheetService(IGoogleSheetFactory googleSheetFactory) : IGoogleSheetService
 {
-	private readonly SheetsService _service;
-	private readonly GoogleSheetService _configurations = configurations.Value;
+	private readonly SheetsService _sheetsService = googleSheetFactory.CreateClient();
 
-
-	public SheetsService CreateSh(string apiKey, string applicationName = "GoogleSheetApp")
+	public string GetSheetIdFromUrl(string url)
 	{
-		_service = new SheetsService(new BaseClientService.Initializer
+		var match = Regex.Match(url, CommonRegex.GoogleSheetRegex.ToString());
+		return match.Success ? match.Value : null;
+	}
+	public async Task<string> GetSheetNameAsync(string sheetId)
+	{
+		try
 		{
-			ApiKey = _configurations.A,
-			ApplicationName = applicationName
-		});
+			var spreadsheet = await _sheetsService.Spreadsheets.Get(sheetId).ExecuteAsync();
+			return spreadsheet.Sheets
+				.Select(s => s.Properties.Title)
+				.FirstOrDefault(title => !string.IsNullOrEmpty(title));
+		}
+		catch
+		{
+			return String.Empty;
+		}
 	}
 
-	public async Task<IList<IList<object>>> GetRangeAsync(string spreadsheetId, string rangeA1)
+	public async Task<IList<IList<object>>> GetValuesById(string sheetId, string range)
 	{
-		var request = _service.Spreadsheets.Values.Get(spreadsheetId, rangeA1);
-		var response = await request.ExecuteAsync();
-		return response.Values ?? new List<IList<object>>();
+		var request = _sheetsService.Spreadsheets.Values.Get(sheetId, range);
+		ValueRange response = await request.ExecuteAsync();
+		return response.Values;
 	}
 }
 

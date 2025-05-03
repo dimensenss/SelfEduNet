@@ -22,6 +22,8 @@ namespace SelfEduNet.Data
 		public DbSet<UserStep> UserSteps { get; set; }
 		public DbSet<UserLesson> UserLessons { get; set; }
 		public DbSet<UserCourse> UserCourses { get; set; }
+		public DbSet<StepTest> StepTests { get; set; }
+		public DbSet<UserTestResult> UserTestResults { get; set; }
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			base.OnModelCreating(modelBuilder);
@@ -109,6 +111,24 @@ namespace SelfEduNet.Data
 				.HasOne(us => us.Lesson)
 				.WithMany(s => s.UserLessons)
 				.HasForeignKey(us => us.LessonId);
+
+			modelBuilder.Entity<Step>()
+				.HasOne(s => s.StepTest)
+				.WithOne(st => st.Step)
+				.HasForeignKey<StepTest>(st => st.StepId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			modelBuilder.Entity<StepTest>()
+				.HasMany(st => st.UserTestResults)
+				.WithOne(utr => utr.StepTest)
+				.HasForeignKey(utr => utr.StepTestId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			modelBuilder.Entity<UserTestResult>()
+				.HasOne(utr => utr.UserStep)
+				.WithOne(us => us.UserTestResult)
+				.HasForeignKey<UserTestResult>(utr => new { utr.UserId, utr.StepId })
+				.OnDelete(DeleteBehavior.Cascade);
 		}
 	}
 }

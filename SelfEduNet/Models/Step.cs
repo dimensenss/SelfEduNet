@@ -25,5 +25,6 @@ namespace SelfEduNet.Models
 		public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 		public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 		public ICollection<UserStep> UserSteps { get; set; } = new List<UserStep>();
+		public StepTest? StepTest { get; set; }
 	}
 }

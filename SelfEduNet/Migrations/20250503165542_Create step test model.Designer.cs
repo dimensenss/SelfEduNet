@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SelfEduNet.Data;
@@ -11,9 +12,11 @@ using SelfEduNet.Data;
 namespace SelfEduNet.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250503165542_Create step test model")]
+    partial class Createsteptestmodel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -571,9 +574,6 @@ namespace SelfEduNet.Migrations
                     b.Property<DateTime?>("CompletedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("Id")
-                        .HasColumnType("integer");
-
                     b.Property<bool>("IsCompleted")
                         .HasColumnType("boolean");
 
@@ -588,62 +588,6 @@ namespace SelfEduNet.Migrations
                     b.HasIndex("StepId");
 
                     b.ToTable("UserSteps");
-                });
-
-            modelBuilder.Entity("SelfEduNet.Models.UserTestResult", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AttemptsCount")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("BiggestScore")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsPassed")
-                        .HasColumnType("boolean");
-
-                    b.Property<int>("Score")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("StepId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("StepTestId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("TotalScore")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("UserStepId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("StepTestId");
-
-                    b.HasIndex("UserId", "StepId")
-                        .IsUnique();
-
-                    b.ToTable("UserTestResults");
                 });
 
             modelBuilder.Entity("CourseInfoAuthor", b =>
@@ -851,25 +795,6 @@ namespace SelfEduNet.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("SelfEduNet.Models.UserTestResult", b =>
-                {
-                    b.HasOne("SelfEduNet.Models.StepTest", "StepTest")
-                        .WithMany("UserTestResults")
-                        .HasForeignKey("StepTestId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SelfEduNet.Models.UserStep", "UserStep")
-                        .WithOne("UserTestResult")
-                        .HasForeignKey("SelfEduNet.Models.UserTestResult", "UserId", "StepId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("StepTest");
-
-                    b.Navigation("UserStep");
-                });
-
             modelBuilder.Entity("SelfEduNet.Models.AppUser", b =>
                 {
                     b.Navigation("OwnedCourses");
@@ -911,16 +836,6 @@ namespace SelfEduNet.Migrations
                     b.Navigation("StepTest");
 
                     b.Navigation("UserSteps");
-                });
-
-            modelBuilder.Entity("SelfEduNet.Models.StepTest", b =>
-                {
-                    b.Navigation("UserTestResults");
-                });
-
-            modelBuilder.Entity("SelfEduNet.Models.UserStep", b =>
-                {
-                    b.Navigation("UserTestResult");
                 });
 #pragma warning restore 612, 618
         }

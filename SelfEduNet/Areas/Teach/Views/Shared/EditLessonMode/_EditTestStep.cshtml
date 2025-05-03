@@ -1,4 +1,101 @@
-﻿<div class="test-block">
-	<iframe src="https://docs.google.com/forms/d/e/1FAIpQLSdF4K7yirueAMjzMdQGs-RaoTw0z-Wn5az-SdGMEoTxlnR6lQ/viewform?usp=dialog"
-	        width="750" height="1300" frameborder="0" marginheight="0" marginwidth="0">Загрузка…</iframe>
+﻿@model Step
+<div class="accordion" id="formInstruction">
+	<div class="accordion-item">
+		<h2 class="accordion-header" id="step1Heading">
+			<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#step1" aria-expanded="true">
+				📝 Інструкція: Як створити та прив’язати Google Форму
+			</button>
+		</h2>
+		<div id="step1" class="accordion-collapse collapse" data-bs-parent="#formInstruction">
+			<div class="accordion-body">
+				<div class="card mb-4 shadow-sm">
+					<div class="card-body">
+						<h3 class="mb-3">
+							Щоб додати тест до уроку, виконайте такі кроки:
+						</h3>
+						<ul class="list-group list-group-flush">
+							<li class="list-group-item d-flex">
+								<div class="me-3 fw-bold" style="width: 220px; min-width: 220px;">
+									1. Створіть Google Форму:
+								</div>
+								<div>
+									Перейдіть на <a href="https://forms.google.com" target="_blank">forms.google.com</a> і натисніть «+» для створення нової форми. 
+									Додайте запитання та налаштуйте форму під свій тест.
+								</div>
+							</li>
+
+							<li class="list-group-item d-flex">
+								<div class="me-3 fw-bold" style="width: 220px; min-width: 220px;">
+									2. Прив’яжіть Google Таблицю:
+								</div>
+								<div>
+									У самій формі натисніть на вкладку «Відповіді» → натисніть на іконку таблиці (Google Sheets) → створіть або виберіть таблицю.
+								</div>
+							</li>
+
+							<li class="list-group-item d-flex">
+								<div class="me-3 fw-bold" style="width: 220px; min-width: 220px;">
+									3. Відкрийте доступ до таблиці:
+								</div>
+								<div>
+									У Google Таблиці натисніть «Поділитися» → виберіть «Будь-хто з посиланням» → встановіть доступ «Перегляд».
+								</div>
+							</li>
+							<li class="list-group-item d-flex">
+								<div class="me-3 fw-bold" style="width: 220px; min-width: 220px;">
+									4. Перейменуйте поля:
+								</div>
+								<div>
+									У таблиці змініть назви колонок. Колонку з часом - <code>Timestamp</code>, з емейлами на - <code>Email</code>, з оцінками - <code>Score</code>, щоб було можливо обробляти результати.
+								</div>
+							</li>
+							<li class="list-group-item d-flex">
+								<div class="me-3 fw-bold" style="width: 220px; min-width: 220px;">
+									5. Увімкніть збір електронних адрес (обов'язково):
+								</div>
+								<div>
+									У Google Формі натисніть на «Налаштування» → розділ «Загальні» → позначте «Збирати адреси електронної пошти».
+								</div>
+							</li>
+							
+
+							<li class="list-group-item d-flex">
+								<div class="me-3 fw-bold" style="width: 220px; min-width: 220px;">
+									6. Закрийте показ оцінок (рекомендовано):
+								</div>
+								<div>
+									У вкладці «Налаштування» вимкніть перемикач «Публікація оцінок - після відправки форми».
+								</div>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
+<form asp-action="CreateTest" asp-controller="StepTest" asp-area="Teach">
+	<input type="hidden" name="Id" value="@Model.Id"/>
+	<div class="mb-3">
+		<label for="GoogleFormUrl" class="form-label">Посилання на тест</label>
+		<input id="GoogleFormUrl" name="GoogleFormUrl" type="text" class="form-control" aria-describedby="GoogleFormUrlHelp" value="@(Model?.StepTest?.GoogleFormUrl ?? "")">
+		<div id="GoogleFormUrlHelp" class="form-text">Додайте посилання на створену Google Form</div>
+	</div>
+	<div class="mb-3">
+		<label for="GoogleSheetUrl" class="form-label">Посилання на таблицю з відповідями</label>
+		<input id="GoogleSheetUrl" name="GoogleSheetUrl" type="text" class="form-control" aria-describedby="GoogleSheetUrlHelp" value="@(Model?.StepTest?.GoogleSheetUrl ?? "")">
+		<div id="GoogleSheetUrlHelp" class="form-text">Додайте посилання на прив'язану до форми Google Sheet</div>
+	</div>
+	<button type="submit" class="btn btn-primary">Прив'язати тест</button>
+</form>
+
+
+@if (Model.StepTest != null)
+{
+	<div class="test-block">
+		<iframe src="@(Model?.StepTest?.GoogleFormUrl ?? "")"
+		        width="750" height="1300" frameborder="0" marginheight="0" marginwidth="0">
+			Загрузка…
+		</iframe>
+	</div>
+}

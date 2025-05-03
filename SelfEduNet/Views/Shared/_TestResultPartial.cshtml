@@ -1,0 +1,32 @@
+﻿@model SelfEduNet.ViewModels.StepTestResult
+
+<div class="card shadow-sm mt-4">
+	<div class="card-header bg-primary text-white">
+		<h5 class="mb-0">Результати тесту</h5>
+	</div>
+	<div class="card-body">
+		<div class="row mb-3">
+			<div class="col-sm-6">
+				<strong>Дата проходження:</strong> @Model.Timestamp.ToLocalTime().ToString("g")
+			</div>
+			<div class="col-sm-6">
+				<strong>Кількість спроб:</strong> @Model.AttemptsCount
+			</div>
+		</div>
+		<div class="row mb-3">
+			<div class="col-sm-6">
+				<strong>Набрано балів:</strong> @Model.Score з @Model.TotalScore
+			</div>
+			<div class="col-sm-6">
+				<strong>Найкращий результат:</strong> @Model.BiggestScore
+			</div>
+		</div>
+		<div class="row">
+			<div class="col">
+				<div class="alert @(Model.IsPassed ? "alert-success" : "alert-danger")" role="alert">
+					@(Model.IsPassed ? "Вітаємо! Ви успішно пройшли тест." : "На жаль, тест не пройдено. Спробуйте ще раз.")
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

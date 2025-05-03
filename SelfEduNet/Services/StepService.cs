@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using NuGet.Protocol.Core.Types;
 using SelfEduNet.Models;
 using SelfEduNet.Repositories;
+using SelfEduNet.ViewModels;
 
 namespace SelfEduNet.Services
 {
@@ -13,6 +14,7 @@ namespace SelfEduNet.Services
 		Task<bool> IsLastStepInLesson(int lessonId, int stepId);
 		Task<List<Step>> GetStepsByLessonIdAsync(int lessonId, string? userId = null);
 		Task<int> GetMaxOrderAsync(int lessonId);
+		Task<bool> CreateStepTestAsync(StepTest stepTest, int stepId);
 		public bool Update(Step step);
 	}
 
@@ -20,7 +22,7 @@ namespace SelfEduNet.Services
 	{
 		private readonly IStepRepository _stepRepository = stepRepository;
 
-		public async Task<Step> GetStepByIdAsync(int stepId, string? userId)
+		public async Task<Step> GetStepByIdAsync(int stepId, string? userId = null)
 		{
 			return await _stepRepository.GetStepByIdAsync(stepId, userId);
 		}
@@ -38,10 +40,27 @@ namespace SelfEduNet.Services
 		{
 			return await _stepRepository.GetMaxOrderAsync(lessonId);
 		}
+
+		public async Task<bool> CreateStepTestAsync(StepTest stepTest, int stepId)
+		{
+			stepTest.StepId = stepId;
+
+			var result = await _stepRepository.AddStepTestAsync(stepTest);
+
+			if (!result)
+				return false;
+
+			var step = await _stepRepository.GetStepByIdAsync(stepId, null);
+			step.StepTest = stepTest;
+
+			return _stepRepository.Update(step);
+		}
+
 		public bool Update(Step step)
 		{
 			return _stepRepository.Update(step);
 		}
+
 		public async Task<bool> CreateStepAsync(Step step)
 		{
 			return await stepRepository.AddAsync(step);

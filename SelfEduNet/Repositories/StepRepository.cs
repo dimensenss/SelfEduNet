@@ -9,6 +9,7 @@ namespace SelfEduNet.Repositories
 		Task<Step> GetStepByIdAsync(int stepId, string? userId);
 		Task<List<Step>> GetStepsByLessonIdAsync(int lessonId, string? userId);
 		Task<int> GetMaxOrderAsync(int lessonId);
+		Task<bool> AddStepTestAsync(StepTest stepTest);
 		Task<bool> IsLastStepInLesson(int lessonId, int stepId);
 		Task<bool> AddAsync(Step step);
 		Task<bool> SaveAsync();
@@ -23,6 +24,7 @@ namespace SelfEduNet.Repositories
 		{
 			var query = context.Steps
 				.Include(s => s.Lesson)
+				.Include(t => t.StepTest)
 				.AsQueryable();
 
 			if (userId != null)
@@ -38,6 +40,7 @@ namespace SelfEduNet.Repositories
 		{
 			var query = context.Steps
 				.Where(s => s.LessonId == lessonId)
+				.Include(t => t.StepTest)
 				.OrderBy(s => s.Order)
 				.AsQueryable();
 
@@ -59,6 +62,12 @@ namespace SelfEduNet.Repositories
 				.MaxAsync();
 
 			return maxOrder ?? 0;
+		}
+
+		public async Task<bool> AddStepTestAsync(StepTest stepTest)
+		{
+			await _context.StepTests.AddAsync(stepTest);
+			return await _context.SaveChangesAsync() > 0;
 		}
 
 		public async Task<bool> IsLastStepInLesson(int lessonId, int stepId)

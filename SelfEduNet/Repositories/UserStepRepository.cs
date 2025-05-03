@@ -6,15 +6,16 @@ namespace SelfEduNet.Repositories
 {
 	public interface IUserStepRepository
 	{
-		public Task<bool> StepExistsAsync(string userId, int stepId);
-		public Task<bool> MarkStepAsCompletedAsync(string userId, int stepId);
-		public Task<bool> MarkStepAsViewedAsync(string userId, int stepId);
-		public Task<bool> CheckViewedStepAsync(string userId, int stepId);
-		public Task<UserStep> GetOrCreateUserStepAsync(string userId, int stepId);
+		Task<bool> StepExistsAsync(string userId, int stepId);
+		Task<bool> MarkStepAsCompletedAsync(string userId, int stepId);
+		Task<bool> MarkStepAsViewedAsync(string userId, int stepId);
+		Task<bool> CheckViewedStepAsync(string userId, int stepId);
+		Task<UserStep> GetOrCreateUserStepAsync(string userId, int stepId);
+		Task<bool> AddUserTestResultAsync(UserTestResult userTestResult);
 		Task<bool> AddAsync(UserStep step);
 		Task<bool> SaveAsync();
-		public bool Update(UserStep step);
-		public bool Save();
+		bool Update(UserStep step);
+		bool Save();
 	}
 	public class UserStepRepository(ApplicationDbContext context) : IUserStepRepository
 	{
@@ -89,6 +90,12 @@ namespace SelfEduNet.Repositories
 			}
 
 			return userStep;
+		}
+
+		public async Task<bool> AddUserTestResultAsync(UserTestResult userTestResult)
+		{
+			await _context.UserTestResults.AddAsync(userTestResult);
+			return await _context.SaveChangesAsync() > 0;
 		}
 
 		public Task<bool> AddAsync(UserStep step)

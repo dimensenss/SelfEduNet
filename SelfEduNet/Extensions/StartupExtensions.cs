@@ -13,7 +13,7 @@ namespace SelfEduNet.Extensions
 			return services
 				.Configure<EmailSMTPSettings>(configuration.GetSection(nameof(EmailSMTPSettings)))
 				.Configure<CloudinarySettings>(configuration.GetSection(nameof(CloudinarySettings)))
-				.Configure<GoogleSheetService>(configuration.GetSection(nameof(GoogleSheetService)))
+				.Configure<GoogleSheetSettings>(configuration.GetSection(nameof(GoogleSheetSettings)))
 				.Configure<RequestLocalizationOptions>(options =>
 				{
 					var supportedCultures = new[] { new CultureInfo("uk-UA") };
