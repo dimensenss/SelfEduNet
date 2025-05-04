@@ -12,7 +12,7 @@ namespace SelfEduNet.Services
 		public Task<bool> MarkStepAsViewedAsync(string userId, int stepId);
 		public Task<bool> CheckViewedStepAsync(string userId, int stepId);
 		public Task<UserStep> GetOrCreateUserStepAsync(string userId, int stepId);
-		Task<bool> CreateUserTestResultAsync(StepTestResult stepTestResult, int stepId, string userId);
+		Task<bool> CreateOrUpdateUserTestResultAsync(StepTestResult stepTestResult, int stepId, string userId);
 
 		public bool Update(UserStep userStep);
 	}
@@ -51,41 +51,59 @@ namespace SelfEduNet.Services
 		{
 			return await _userStepRepository.GetOrCreateUserStepAsync(userId, stepId);
 		}
-		public async Task<bool> CreateUserTestResultAsync(StepTestResult stepTestResult, int stepId, string userId)
+		public async Task<bool> CreateOrUpdateUserTestResultAsync(StepTestResult stepTestResult, int stepId, string userId)
 		{
 			var userStep = await GetOrCreateUserStepAsync(userId, stepId);
 			if (userStep == null)
-			{
 				return false;
+
+			var existingResult = await _userStepRepository.GetUserTestResultAsync(userId, stepId);
+
+			if (existingResult != null)
+			{
+				// Обновляем существующий результат
+				existingResult.Score = stepTestResult.Score;
+				existingResult.TotalScore = stepTestResult.TotalScore;
+				existingResult.Timestamp = stepTestResult.Timestamp;
+				existingResult.AttemptsCount = stepTestResult.AttemptsCount;
+				existingResult.BiggestScore = stepTestResult.BiggestScore;
+				existingResult.IsPassed = stepTestResult.IsPassed;
+
+				return _userStepRepository.UpdateUserTestResultAsync(existingResult);
 			}
-
-			var userTestResult = new UserTestResult()
+			else
 			{
-				StepTest = userStep.Step.StepTest,
-				StepTestId = userStep.Step.StepTest.Id,
-				UserStep = userStep,
-				UserStepId = userStep.Id,
-				UserId = userId,
-				StepId = stepId,
-				Score = stepTestResult.Score,
-				TotalScore = stepTestResult.TotalScore,
-				Timestamp = stepTestResult.Timestamp,
-				AttemptsCount = stepTestResult.AttemptsCount,
-				BiggestScore = stepTestResult.BiggestScore,
-				IsPassed = stepTestResult.IsPassed,
-			};
-			var result = await _userStepRepository.AddUserTestResultAsync(userTestResult);
-			if (!result)
-				return false;
+				// Создаем новый результат
+				var userTestResult = new UserTestResult()
+				{
+					StepTest = userStep.Step.StepTest,
+					StepTestId = userStep.Step.StepTest.Id,
+					UserStep = userStep,
+					UserStepId = userStep.Id,
+					UserId = userId,
+					StepId = stepId,
+					Score = stepTestResult.Score,
+					TotalScore = stepTestResult.TotalScore,
+					Timestamp = stepTestResult.Timestamp,
+					AttemptsCount = stepTestResult.AttemptsCount,
+					BiggestScore = stepTestResult.BiggestScore,
+					IsPassed = stepTestResult.IsPassed,
+				};
 
-			userStep.UserTestResult = userTestResult;
+				var result = await _userStepRepository.AddUserTestResultAsync(userTestResult);
+				if (!result)
+					return false;
 
-			return _userStepRepository.Update(userStep);
+				userStep.UserTestResult = userTestResult;
+				return _userStepRepository.Update(userStep);
+			}
 		}
 
 		public bool Update(UserStep userStep)
 		{
 			return _userStepRepository.Update(userStep);
 		}
+
+		
 	}
 }

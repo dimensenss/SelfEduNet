@@ -36,11 +36,23 @@ public class StepTestController(IStepService stepService, IUserStepService userS
 		}
 
 		string sheetId = _googleSheetService.GetSheetIdFromUrl(step?.StepTest?.GoogleSheetUrl ?? String.Empty);
-
+		string sheetName;
 		if (string.IsNullOrWhiteSpace(sheetId) || string.IsNullOrWhiteSpace(userEmail))
 			return BadRequest("Missing sheetId or userEmail");
 
-		string sheetName = await _googleSheetService.GetSheetNameAsync(sheetId);
+		try
+		{
+			sheetName = await _googleSheetService.GetSheetNameAsync(sheetId);
+		}
+		catch (Google.GoogleApiException ex) when (ex.HttpStatusCode == System.Net.HttpStatusCode.Forbidden)
+		{
+			return BadRequest(new { message = "Сталася проблема з доступ для отриманням відповіді. Зв'яжіться з автором курсу." });
+		}
+		catch (Exception ex)
+		{
+			return BadRequest(new { message = "Сталася помилка з отриманням відповіді" });
+
+		}
 		string range = sheetName;
 
 		var values = await _googleSheetService.GetValuesById(sheetId, range);
@@ -58,9 +70,11 @@ public class StepTestController(IStepService stepService, IUserStepService userS
 			string.Equals(h?.ToString()?.Trim(), "Timestamp", StringComparison.OrdinalIgnoreCase));
 
 		if (emailColumnIndex == -1)
-			return NotFound("Email column not found.");
+			return NotFound(new { message = "Колонку Email не знайдено" });
+		if (scoreColumnIndex == -1)
+			return NotFound(new { message = "Колонку Score не знайдено" });
 		if (timestampColumnIndex == -1)
-			return NotFound("Timestamp column not found.");
+			return NotFound(new { message = "Колонку Timestamp не знайдено" });
 
 		var userRows = values
 			.Skip(1)
@@ -70,7 +84,7 @@ public class StepTestController(IStepService stepService, IUserStepService userS
 			.ToList();
 
 		if (userRows.Count == 0)
-			return NotFound("User not found");
+			return NotFound(new { message = "Ви ще не проходили тест" });
 
 		Regex scoreRegex = new Regex(@"(?<got>\d+)\s*/\s*(?<total>\d+)", RegexOptions.Compiled);
 
@@ -127,46 +141,34 @@ public class StepTestController(IStepService stepService, IUserStepService userS
 			}
 		}
 
-		// Собираем ответы из лучшей попытки
-		//var answerDict = new Dictionary<string, object>();
-		//if (bestAttemptRow != null)
-		//{
-		//	for (int i = 0; i < headers.Count && i < bestAttemptRow.Count; i++)
-		//	{
-		//		string header = headers[i]?.ToString();
-		//		if (string.IsNullOrWhiteSpace(header) ||
-		//			header.Trim().Equals("Email", StringComparison.OrdinalIgnoreCase) ||
-		//			header.Trim().Equals("Score", StringComparison.OrdinalIgnoreCase) ||
-		//			header.Trim().Equals("Timestamp", StringComparison.OrdinalIgnoreCase))
-		//			continue;
-
-		//		answerDict[header] = bestAttemptRow[i];
-		//	}
-		//}
-
 		var stepTestResult = new StepTestResult
 		{
-			Timestamp = (DateTime)latestRow[timestampColumnIndex], //check cast
+			Timestamp = DateTime.TryParse(latestRow[timestampColumnIndex]?.ToString(), out var ts) ? ts.ToUniversalTime() : throw new InvalidOperationException("Invalid date format"),
 			AttemptsCount = userRows.Count,
 			Score = lastScoreGot,
 			BiggestScore = bestScoreRaw,
 			TotalScore = lastScoreTotal,
 			IsPassed = lastScoreTotal > 0 && ((double)lastScoreGot / lastScoreTotal) >= 0.8
 		};
-		bool result = await _userStepService.CreateUserTestResultAsync(stepTestResult, id, userId);
+		
+		bool result = await _userStepService.CreateOrUpdateUserTestResultAsync(stepTestResult, id, userId);
 		if (!result)
 		{
-			TempData["NotifyType"] = "danger";
-			TempData["NotifyMessage"] = "Не вдалось отримати результати тесту";
+			return BadRequest(new { message = "Не вдалось отримати результати тесту" });
 		}
 
 		if (!stepTestResult.IsPassed)
 		{
-			TempData["NotifyType"] = "danger";
-			TempData["NotifyMessage"] = "Необхідно набрати хоча б 80% правильних відповідей. Спробуйте ще раз.";
+			return BadRequest(new { message = "Не вдалось отримати результати тесту" });
 		}
-		return PartialView("_TestResultPartial" );
+		var redirectUrl = Url.Action("ViewLesson", "Lesson", new
+		{
+			courseId = step.Lesson.CourseId,
+			lessonId = step.LessonId,
+			stepId = step.Id
+		});
 
+		return Ok(new { redirectUrl = redirectUrl, message = "Тест пройдено." });
 	}
 	public async Task<IActionResult> CreateTest(CreateTestViewModel createTestVM)
 	{

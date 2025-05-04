@@ -35,6 +35,8 @@ namespace SelfEduNet.ViewModels
 		[Url(ErrorMessage = "Некоректна URL-адреса для попереднього перегляду.")]
 		public string? PreviewURL { get; set; }
 
+		public Category? Category { get; set; } = default!;
+
 		public ICollection<CourseModules> Modules { get; set; } = new List<CourseModules>();
 
 		[Range(0, int.MaxValue, ErrorMessage = "Завантаження повинно бути додатним числом.")]

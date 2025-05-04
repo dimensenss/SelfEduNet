@@ -67,7 +67,8 @@ namespace SelfEduNet.Services
 				Authors = course.Info.Authors,
 				Modules = course.Modules,
 				PreviewVideo = course.Info.PreviewVideo,
-				IsPublished = course.IsPublished
+				IsPublished = course.IsPublished,
+				Category = course.Category,
 			};
 			
 			return courseVM;

@@ -11,10 +11,12 @@ namespace SelfEduNet.Repositories
 		Task<bool> MarkStepAsViewedAsync(string userId, int stepId);
 		Task<bool> CheckViewedStepAsync(string userId, int stepId);
 		Task<UserStep> GetOrCreateUserStepAsync(string userId, int stepId);
+		Task<UserTestResult?> GetUserTestResultAsync(string userId, int stepId);
 		Task<bool> AddUserTestResultAsync(UserTestResult userTestResult);
 		Task<bool> AddAsync(UserStep step);
 		Task<bool> SaveAsync();
 		bool Update(UserStep step);
+		bool UpdateUserTestResultAsync(UserTestResult userTestResult);
 		bool Save();
 	}
 	public class UserStepRepository(ApplicationDbContext context) : IUserStepRepository
@@ -72,6 +74,8 @@ namespace SelfEduNet.Repositories
 		public async Task<UserStep> GetOrCreateUserStepAsync(string userId, int stepId)
 		{
 			var userStep = await _context.UserSteps
+				.Include(s => s.Step)
+				.Include(t => t.UserTestResult)
 				.FirstOrDefaultAsync(us => us.UserId == userId && us.StepId == stepId);
 
 			if (userStep == null)
@@ -90,6 +94,12 @@ namespace SelfEduNet.Repositories
 			}
 
 			return userStep;
+		}
+
+		public async Task<UserTestResult?> GetUserTestResultAsync(string userId, int stepId)
+		{
+			return await _context.UserTestResults
+				.FirstOrDefaultAsync(r => r.UserId == userId && r.StepId == stepId);
 		}
 
 		public async Task<bool> AddUserTestResultAsync(UserTestResult userTestResult)
@@ -113,7 +123,11 @@ namespace SelfEduNet.Repositories
 			_context.Update(userStep);
 			return Save();
 		}
-
+		public bool UpdateUserTestResultAsync(UserTestResult userTestResult)
+		{
+			_context.Update(userTestResult);
+			return Save();
+		}
 		public bool Save()
 		{
 			var saved = _context.SaveChanges();

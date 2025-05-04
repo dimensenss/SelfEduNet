@@ -25,17 +25,10 @@ public class GoogleSheetService(IGoogleSheetFactory googleSheetFactory) : IGoogl
 	}
 	public async Task<string> GetSheetNameAsync(string sheetId)
 	{
-		try
-		{
-			var spreadsheet = await _sheetsService.Spreadsheets.Get(sheetId).ExecuteAsync();
-			return spreadsheet.Sheets
-				.Select(s => s.Properties.Title)
-				.FirstOrDefault(title => !string.IsNullOrEmpty(title));
-		}
-		catch
-		{
-			return String.Empty;
-		}
+		var spreadsheet = await _sheetsService.Spreadsheets.Get(sheetId).ExecuteAsync();
+		return spreadsheet.Sheets
+			.Select(s => s.Properties.Title)
+			.FirstOrDefault(title => !string.IsNullOrEmpty(title));
 	}
 
 	public async Task<IList<IList<object>>> GetValuesById(string sheetId, string range)

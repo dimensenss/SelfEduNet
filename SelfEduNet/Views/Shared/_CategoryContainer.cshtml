@@ -1,0 +1,16 @@
+﻿<div id="category-container" class="mt-3">
+	@if (Model.Category != null)
+	{ 
+		<div class="d-flex flex-column border-bottom border-1 ">
+			<div class="row">
+				<div class="col-11">
+					<p>@Model.Category</p>
+				</div>
+				<div class="col-1">
+					<a data-category-id="@Model.Category.Id"><i class="fa-solid fa-trash"></i></a>
+				</div>
+			</div>
+		</div>
+		<br/>
+	}
+</div>

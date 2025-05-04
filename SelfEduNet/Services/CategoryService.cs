@@ -7,6 +7,8 @@ namespace SelfEduNet.Services
 	public interface ICategoryService
 	{
 		Task<Category> GetOrCreateDraftsCategoryAsync();
+		Task<Category?> GetCategoryByIdAsync(int id);
+		Task<Category?> GetCategoryByTitleAsync(string title);
 		Task<IEnumerable<Category>> GetAllCategoriesAsync();
 	}
 
@@ -26,6 +28,18 @@ namespace SelfEduNet.Services
 
 			return draftsCategory;
 		}
+
+		public async Task<Category?> GetCategoryByIdAsync(int id)
+		{
+			return await _categoryRepository.GetCategoryByIdAsync(id);
+		}
+
+		public async Task<Category?> GetCategoryByTitleAsync(string title)
+		{
+			return await _categoryRepository.GetCategoryByTitleAsync(title);
+			
+		}
+
 		public async Task<IEnumerable<Category>> GetAllCategoriesAsync()
 		{
 			return await _categoryRepository.GetAllCategoriesAsync();

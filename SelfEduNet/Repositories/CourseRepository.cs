@@ -67,6 +67,7 @@ namespace SelfEduNet.Repositories
 				.Include(c => c.Owner)
 				.Include(c => c.Info)
 				.ThenInclude(ci => ci.Authors) 
+				.Where(c => c.IsPublished == true)
 				.AsQueryable();
 		}
 
@@ -167,6 +168,7 @@ namespace SelfEduNet.Repositories
 				.ThenInclude(a => a.Authors)
 				.Include(c => c.Modules)  // Загружаем связанные модули
 				.ThenInclude(m => m.Lessons)  // Загружаем уроки в этих модулях
+				.Include(c => c.Category)
 				.FirstOrDefaultAsync(c => c.Id == courseId);
 		}
         public async Task<Course> GetCourseWithModulesByIdAsync(int courseId)

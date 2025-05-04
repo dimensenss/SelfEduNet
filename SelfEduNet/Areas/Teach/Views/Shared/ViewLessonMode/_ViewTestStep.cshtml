@@ -1,14 +1,31 @@
 ﻿@model Step
-
+@{
+	var currentStep = ViewData["Step"] as Step;
+	var currentUserStep = currentStep.UserSteps.Single();
+}
 @if (Model?.StepTest?.GoogleFormUrl is { Length: > 0 })
 {
-	<div class="test-block">
+	if (currentUserStep.UserTestResult != null)
+	{
+		@await Html.PartialAsync("_TestResultPartial", currentUserStep.UserTestResult)
+	}
+	<div class="test-block d-flex justify-content-center bg-form-color rounded">
 		<iframe src="@Model?.StepTest?.GoogleFormUrl"
 		        width="750" height="1300" frameborder="0" marginheight="0" marginwidth="0">
 			Завантаження…
 		</iframe>
 	</div>
 }
-<div class="d-flex justify-content-center">
-	<button type="button" name="check-test-results" class="btn btn-success" data-step-id="@Model.Id">Показати результати</button>
-</div>
+<div id="results-container"></div>
+@if (Model.StepTest != null)
+{
+	<div class="d-flex justify-content-center my-2">
+		<button type="button" class="btn btn-success" name="get-user-answers" data-step-id="@Model.Id">Показати результати</button>
+	</div>
+}
+else
+{
+	<div class="d-flex justify-content-center">
+		<h2>Тест не знайдено</h2>
+	</div>
+}

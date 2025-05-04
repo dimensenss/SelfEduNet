@@ -196,7 +196,7 @@ $(document).ready(function () {
 				reversed: true
 			}
 		},
-		placeholder: 'Type or paste your content here!',
+		placeholder: 'Напишіть резюме до кроку!',
 		table: {
 			contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells', 'tableProperties', 'tableCellProperties']
 		},

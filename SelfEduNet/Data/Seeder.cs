@@ -88,7 +88,7 @@ namespace SelfEduNet.Data
                         UpdatedAt = DateTime.UtcNow,
                         Info = coursesInfos[0],
                         IsPublished = true,
-                        CategoryId = 6 // Курс належить категорії "Програмування"
+                        CategoryId = 1 // Курс належить категорії "Програмування"
                     },
                     new Course
                     {
@@ -103,7 +103,7 @@ namespace SelfEduNet.Data
                         UpdatedAt = DateTime.UtcNow,
                         Info = coursesInfos[1],
                         IsPublished = true,
-                        CategoryId = 6 // Курс належить підкатегорії "JavaScript"
+                        CategoryId = 1 // Курс належить підкатегорії "JavaScript"
                     },
                     new Course
                     {
@@ -118,7 +118,7 @@ namespace SelfEduNet.Data
                         UpdatedAt = DateTime.UtcNow,
                         Info = coursesInfos[2],
                         IsPublished = true,
-                        CategoryId = 6 // Курс належить підкатегорії "Python"
+                        CategoryId = 1 // Курс належить підкатегорії "Python"
                     },
                     new Course
                     {
@@ -133,7 +133,7 @@ namespace SelfEduNet.Data
                         UpdatedAt = DateTime.UtcNow,
                         Info = coursesInfos[3],
                         IsPublished = true,
-                        CategoryId = 6 // Курс належить підкатегорії "JavaScript"
+                        CategoryId = 1 // Курс належить підкатегорії "JavaScript"
                     },
                     new Course
                     {
@@ -148,7 +148,7 @@ namespace SelfEduNet.Data
                         UpdatedAt = DateTime.UtcNow,
                         Info = coursesInfos[4],
                         IsPublished = true,
-                        CategoryId = 7 // Курс належить категорії "Промо"
+                        CategoryId = 1 // Курс належить категорії "Промо"
                     }
                 };
                 await _context.CourseInfos.AddRangeAsync(coursesInfos);

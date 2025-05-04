@@ -12,7 +12,9 @@ namespace SelfEduNet.Repositories
 		Task<bool> AddStepTestAsync(StepTest stepTest);
 		Task<bool> IsLastStepInLesson(int lessonId, int stepId);
 		Task<bool> AddAsync(Step step);
+		Task<bool> DeleteStep(Step step);
 		Task<bool> SaveAsync();
+
 		public bool Update(Step step);
 		public bool Save();
 	}
@@ -31,7 +33,9 @@ namespace SelfEduNet.Repositories
 			{
 				query = query
 					.Include(s => s.UserSteps)
+					.ThenInclude(t => t.UserTestResult)
 					.Where(s => s.UserSteps.Any(us => us.UserId == userId));
+
 			}
 
 			return await query.FirstOrDefaultAsync(s => s.Id == stepId);
@@ -83,6 +87,13 @@ namespace SelfEduNet.Repositories
 			await _context.Steps.AddAsync(step);
 			return await SaveAsync();
 		}
+
+		public async Task<bool> DeleteStep(Step step)
+		{
+			_context.Steps.Remove(step);
+			return await SaveAsync();
+		}
+
 		public bool Update(Step step)
 		{
 			_context.Update(step);

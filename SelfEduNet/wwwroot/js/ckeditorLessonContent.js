@@ -236,7 +236,7 @@ $(document).ready(function () {
 				reversed: true
 			}
 		},
-		placeholder: 'Type or paste your content here!',
+		placeholder: 'Створіть контент до уроку',
 		table: {
 			contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells', 'tableProperties', 'tableCellProperties']
 		},

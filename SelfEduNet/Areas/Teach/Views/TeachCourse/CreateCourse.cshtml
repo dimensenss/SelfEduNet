@@ -5,7 +5,7 @@
 <div class="marco-layout">
 	<div class="container-fluid">
 		<div class="row">
-			@Html.Partial("_TeachSidepanel", @Model.Id)
+			@await Html.PartialAsync("_TeachSidepanel")
 			<div class="col-md-9">
 				<div class="catalog-main-content">
 					<form method="post" asp-action="CreateCourse">
@@ -25,23 +25,3 @@
 		</div>
 	</div>
 </div>
-
-
-@* <script>
-	document.addEventListener('DOMContentLoaded', function () {
-		const submitBtn = document.getElementById('submit-btn');
-		const captchaContainer = document.getElementById('captcha-container');
-		let captchaVisible = false;
-
-		// Слушаем нажатие на кнопку сабмита
-		submitBtn.addEventListener('click', function (event) {
-
-			if (!captchaVisible) {
-				event.preventDefault();  // Останавливаем отправку формы
-				captchaContainer.style.display = 'block';  // Показываем капчу
-				captchaVisible = true;  // Теперь капча видна
-			}
-		});
-
-	});
-</script> *@

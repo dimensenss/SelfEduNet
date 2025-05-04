@@ -24,16 +24,10 @@ namespace SelfEduNet.Areas.Teach.Controllers
             string userId = User.GetUserId();
             var user = await _userManager.FindByIdAsync(userId);
 
-            //if (user == null)
-            //{
-            //    return NotFound(new { message = "User not found." });
-            //}
-
             var courses = await _courseRepository.GetCoursesByOwnerAsync(userId);
 
             return View(courses);
 
         }
-
 	}
 }

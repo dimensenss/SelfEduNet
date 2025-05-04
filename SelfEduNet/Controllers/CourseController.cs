@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using SelfEduNet.Extensions;
 using SelfEduNet.Models;
 using SelfEduNet.Repositories;
@@ -11,11 +12,12 @@ using SelfEduNet.ViewModels;
 
 namespace SelfEduNet.Controllers
 {
-    public class CourseController(ICourseService courseService, UserManager<AppUser> userManager, IPhotoService photoService) : Controller
+    public class CourseController(ICourseService courseService, UserManager<AppUser> userManager, IPhotoService photoService, ICategoryService categoryService) : Controller
     {
 	    private readonly ICourseService _courseService = courseService;
 	    private readonly UserManager<AppUser> _userManager = userManager;
 	    private readonly IPhotoService _photoService = photoService;
+	    private readonly ICategoryService _categoryService = categoryService;
 
 	    public async Task<IActionResult> Detail(int id)
         {
@@ -26,9 +28,10 @@ namespace SelfEduNet.Controllers
 		public async Task<IActionResult> EditInfo(int id)
 		{
 			var courseVM = await _courseService.GetEditViewModelAsync(id);
-			if (courseVM == null) return NotFound();
+			if (courseVM == null) 
+				return NotFound();
 
-			//ViewData["Categories"] = await _categoryRepository.GetAllCategoriesAsync();
+			ViewData["Categories"] = await _categoryService.GetAllCategoriesAsync();
 			return View(courseVM);
 		}
 		[HttpPost]
@@ -47,6 +50,9 @@ namespace SelfEduNet.Controllers
 				return View("EditInfo", courseVM);
 			}
 			var previousUrl = Request.Headers["Referer"].ToString();
+
+			TempData["NotifyType"] = "success";
+			TempData["NotifyMessage"] = "Курс успішно оновлено";
 
 			return Redirect(previousUrl);
 		}
@@ -139,7 +145,7 @@ namespace SelfEduNet.Controllers
 				return NotFound(new { message = "Користувача не знайдено." });
 			}
 
-			if (!course.Info.Authors.Any(a => a.Id == user.Id))
+			if (course.Info.Authors.All(a => a.Id != user.Id))
 			{
 				return Conflict(new { message = "Користувач не є автором цього курсу." });
 			}
@@ -160,17 +166,104 @@ namespace SelfEduNet.Controllers
 
 			// TODO перенести
 			var users = await _userManager.Users
-				.Where(u => u.FirstName.Contains(name) || u.LastName.Contains(name)) // Замените на поле, которое вы используете для имени
-				.Select(u => new { id = u.Id, text = u.FirstName + " " + u.LastName }) // Замените на поля, которые вам нужны
+				.Where(u =>
+					u.FirstName.Contains(name, StringComparison.OrdinalIgnoreCase) ||
+					u.LastName.Contains(name, StringComparison.OrdinalIgnoreCase)).Select(u => new { id = u.Id, text = u.FirstName + " " + u.LastName })
 				.ToListAsync();
 
 			return Json(new { results = users });
 		}
 
+		[HttpGet]
+		public async Task<IActionResult> SearchCategory(string title)
+		{
+			if (string.IsNullOrEmpty(title))
+			{
+				return Json(new { results = new object() });
+			}
+
+			var categories = await _categoryService.GetAllCategoriesAsync();
+			var filteredCategories = categories
+				.Where(c => c.Title.Contains(title, StringComparison.OrdinalIgnoreCase))
+				.Select(c => new { id = c.Id, text = c.Title })
+				.ToList();
+
+			return Json(new { results = filteredCategories });
+		}
+		[HttpPost]
+		public async Task<IActionResult> AddCategoryToCourse(int courseId, int categoryId)
+		{
+			if (categoryId <= 0)
+			{
+				return BadRequest(new { message = "Щось пішло не так." });
+			}
+			var course = await _courseService.GetCourseWithInfoByIdAsync(courseId);
+
+			if (course == null)
+			{
+				return NotFound(new { message = "Курс не знайдено." });
+			}
+
+			var category = await _categoryService.GetCategoryByIdAsync(categoryId);
+			if (category == null)
+			{
+				return NotFound(new { message = "Категорію не знайдено." });
+			}
+
+			if (course.Category.Id == categoryId)
+			{
+				return Conflict(new { message = "Цей курс вже знаходиться в цій категорії." });
+			}
+
+			course.Category = category;
+			_courseService.Update(course);
+
+			return Ok(new { message = "Категорію додано!" });
+		}
+		public async Task<IActionResult> RenderCategory(int courseId)
+		{
+			var course = await _courseService.GetCourseWithInfoByIdAsync(courseId);
+			var courseVM = new EditCourseViewModel
+			{
+				Id = course.Id,
+				Category = course.Category
+			};
+			return PartialView("_CategoryContainer", courseVM);
+		}
+		[HttpPost]
+		public async Task<IActionResult> DeleteCourseCategory(int courseId, int categoryId)
+		{
+			if (categoryId <= 0)
+			{
+				return BadRequest(new { message = "Щось пішло не так." });
+			}
+			var course = await _courseService.GetCourseWithInfoByIdAsync(courseId);
+
+			if (course == null)
+			{
+				return NotFound(new { message = "Курс не знайдено." });
+			}
+
+			var category = await _categoryService.GetCategoryByIdAsync(categoryId);
+			if (category == null)
+			{
+				return NotFound(new { message = "Категорію не знайдено." });
+			}
+
+			if (course.Category.Id != categoryId)
+			{
+				return Conflict(new { message = "Цей курс не знаходиться в цій категорії." });
+			}
+			var draftsCategory = await _categoryService.GetOrCreateDraftsCategoryAsync();
+			course.Category = draftsCategory;
+			_courseService.Update(course);
+
+			return Ok(new { message = "Категорію видалено. Курс перенесено в чорнетки." });
+		}
+
 		[HttpPost]
 		public async Task<IActionResult> AddCourseAuthor(int courseId, string authorId)
 		{
-			//TODO перевести
 			if (string.IsNullOrEmpty(authorId))
 			{
 				return BadRequest(new { message = "Щось пішло не так." });

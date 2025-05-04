@@ -26,7 +26,7 @@ namespace SelfEduNet.Models
 
 		public int? CategoryId { get; set; }
         [ForeignKey("CategoryId")]
-        public Category Category { get; set; } = new Category { Title = "Drafts" };
+        public Category Category { get; set; } = default!;
 
 		[Range(0, int.MaxValue)]
         public int FullPrice { get; set; } = 0;

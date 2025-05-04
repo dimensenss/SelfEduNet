@@ -11,11 +11,10 @@ namespace SelfEduNet.Areas.Teach.Controllers
 {
 	[Area("Teach")]
 	[Authorize]
-	public class TeachCourseController(ICourseService courseService, UserManager<AppUser> userManager, IHttpContextAccessor httpContextAccessor) : Controller
+	public class TeachCourseController(ICourseService courseService, UserManager<AppUser> userManager) : Controller
 	{
 		private readonly ICourseService _courseService = courseService;
 		private readonly UserManager<AppUser> _userManager = userManager;
-		private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
 		//public IActionResult Index()
 		//{
@@ -24,8 +23,19 @@ namespace SelfEduNet.Areas.Teach.Controllers
 		
 		public async Task<IActionResult> CreateCourse()
 		{
-			string userId = _httpContextAccessor.HttpContext.User.GetUserId();
-			var courseVM = new CreateCourseViewModel() { OwnerId = userId };
+			string userId = User.GetUserId();
+			var user = await _userManager.FindByIdAsync(userId);
+			if (user != null)
+			{
+				await _userManager.AddToRoleAsync(user, "Teacher");
+			}
+			var courseVM = new CreateCourseViewModel()
+			{
+				OwnerId = userId,
+				Owner = user
+			};
+			TempData["NotifyType"] = "success";
+			TempData["NotifyMessage"] = "Курс створено. Вітаємо, ви стали вчителем!";
 
 			return View(courseVM);
 		}

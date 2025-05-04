@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SelfEduNet.Data.Enum;
 using SelfEduNet.Extensions;
 using SelfEduNet.Models;
@@ -8,6 +9,7 @@ using SelfEduNet.ViewModels;
 namespace SelfEduNet.Areas.Teach.Controllers
 {
 	[Area("Teach")]
+	[Authorize]
 	public class LessonController(ICourseService courseService, IStepService stepService, IUserStepService userStepService,
 		IUserLessonService userLessonService) : Controller
 	{
@@ -40,7 +42,7 @@ namespace SelfEduNet.Areas.Teach.Controllers
 			ViewData["Lesson"] = lessonId;
 			ViewData["Step"] = stepId != null
 				? steps.Find(s => s.Id == stepId)
-				: steps.Find(s => s.Order == 1);
+				: steps.FirstOrDefault();
 
 			if (Request.Headers["X-Requested-With"] == "XMLHttpRequest") // Если это AJAX-запрос
 			{
@@ -125,20 +127,27 @@ namespace SelfEduNet.Areas.Teach.Controllers
 			if (!await _userStepService.StepExistsAsync(userId, stepId))
 			{
 				TempData["NotifyMessage"] = "Крок не знайдено.";
-				return RedirectToAction("ViewLesson", new { courseId = courseId, lessonId = lessonId });
+				return RedirectToAction("ViewLesson", new { courseId = courseId, lessonId = lessonId, stepId = stepId });
+			}
+			var userStep = await _userStepService.GetOrCreateUserStepAsync(userId, stepId);
+			if (userStep.Step.StepType == StepType.Test && (userStep.UserTestResult == null || !userStep.UserTestResult.IsPassed))
+			{
+				TempData["NotifyType"] = "danger";
+				TempData["NotifyMessage"] = "Спочатку необхідно пройти тест";
+				return RedirectToAction("ViewLesson", new { courseId = courseId, lessonId = lessonId, stepId = stepId });
 			}
 
 			bool completeStep = await _userStepService.MarkStepAsCompletedAsync(userId, stepId);
 			if (!completeStep)
 			{
 				TempData["NotifyMessage"] = "Помилка при проходженні кроку.";
-				return RedirectToAction("ViewLesson", new { courseId = courseId, lessonId = lessonId });
+				return RedirectToAction("ViewLesson", new { courseId = courseId, lessonId = lessonId, stepId = stepId });
 			}
 			bool isLastStep = await _stepService.IsLastStepInLesson(lessonId, stepId);
 			if (!isLastStep)
 			{
 				TempData["NotifyMessage"] = "Сталася помилка при завершені уроку. Це не останній крок.";
-				return RedirectToAction("ViewLesson", new { courseId = courseId, lessonId = lessonId });
+				return RedirectToAction("ViewLesson", new { courseId = courseId, lessonId = lessonId, stepId = stepId });
 			}
 			var lessonStatistics = await _courseService.GetLessonStatisticsByIdAsync(lessonId, userId);
 			if (lessonStatistics.CompletedStepsPercentage >= 80)
@@ -147,7 +156,7 @@ namespace SelfEduNet.Areas.Teach.Controllers
 				if (!completeLesson)
 				{
 					TempData["NotifyMessage"] = "Помилка при проходженні урока.";
-					return RedirectToAction("ViewLesson", new { courseId = courseId, lessonId = lessonId });
+					return RedirectToAction("ViewLesson", new { courseId = courseId, lessonId = lessonId, stepId = stepId });
 				}
 				var nextLesson = await _courseService.GetNextLessonAsync(courseId, lessonId);
 				if (nextLesson != null)
@@ -168,7 +177,7 @@ namespace SelfEduNet.Areas.Teach.Controllers
 			}
 			TempData["NotifyType"] = "danger";
 			TempData["NotifyMessage"] = "Пройдіть хоча б 80% кроків."; // count of steps need to be cpompleted
-			return RedirectToAction("ViewLesson", new { courseId = courseId, lessonId = lessonId });
+			return RedirectToAction("ViewLesson", new { courseId = courseId, lessonId = lessonId, stepId = stepId });
 		}
 		[HttpPost]
 		public async Task<IActionResult> CreateUpdateLesson(int moduleId, int? lessonId, string title)
@@ -215,14 +224,5 @@ namespace SelfEduNet.Areas.Teach.Controllers
 				return BadRequest(new { message = "Сталася помилка при видалені уроку. Урок не знайдено." });
 			}
 		}
-
-		//TODO Complete module
-		//TODO Complete course
-
-		//public async Task<IActionResult> RenderStepsList(int lessonId)
-		//{
-		//	var steps = await _stepService.GetStepsByLessonIdAsync(lessonId);
-		//	return PartialView("_TeachAllSteps");
-		//}
 	}
 }

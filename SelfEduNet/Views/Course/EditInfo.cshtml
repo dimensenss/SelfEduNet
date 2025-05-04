@@ -2,7 +2,7 @@
 	Layout = "_Layout";
 }
 
-@using Microsoft.AspNetCore.Mvc.TagHelpers 
+@using Microsoft.AspNetCore.Mvc.TagHelpers
 @using SelfEduNet.Data.Enum
 @model SelfEduNet.ViewModels.EditCourseViewModel
 <link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/44.1.0/ckeditor5.css" crossorigin>
@@ -11,10 +11,10 @@
 <div class="d-flex justify-content-center">
 	<div class="col-md-7">
 		<div class="main-content justify-content-center">
-			<form method="post" asp-action="EditInfo"  enctype="multipart/form-data" id="save_course">
+			<form method="post" asp-action="EditInfo" enctype="multipart/form-data" id="save_course">
 
-				<input type="hidden" asp-for="Id"/>
-				<input type="hidden" asp-for="PreviewURL"/>
+				<input type="hidden" asp-for="Id" />
+				<input type="hidden" asp-for="PreviewURL" />
 
 				<div class="row mb-50">
 					<div class="col-md-6">
@@ -22,12 +22,12 @@
 							@if (!string.IsNullOrEmpty(Model.PreviewURL))
 							{
 								<img id="imagePreview" src="@Model.PreviewURL" alt="@Model.CourseName"
-								     class="preview-img img-fluid rounded ">
+									 class="preview-img img-fluid rounded ">
 							}
 							else
 							{
 								<div id="load-preview">
-									<div class="text-center">Завантажте прев'ю курса</div>
+									<div class="text-center upload-video-placeholder">Завантажте прев'ю курсу</div>
 								</div>
 								<img id="imagePreview" src="" alt="imagePreview" class="d-none">
 							}
@@ -41,18 +41,18 @@
 					</div>
 					<div class="col-md-6">
 						<div id="video-box"
-						     class="upload-box @(string.IsNullOrEmpty(Model.PreviewVideo) ? "upload-box-border mb-3" : "mb-3")">
+							 class="upload-box @(string.IsNullOrEmpty(Model.PreviewVideo) ? "upload-box-border mb-3" : "mb-3")">
 							@if (!string.IsNullOrEmpty(Model.PreviewVideo))
 							{
 								<iframe id="youtubePlayer" width="100%" height="315"
-								        src=@YouTubeHelper.GetYouTubeEmbedUrl(Model.PreviewVideo)
-								        frameborder="0"
-								        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-								        allowfullscreen></iframe>
+										src=@YouTubeHelper.GetYouTubeEmbedUrl(Model.PreviewVideo)
+										frameborder="0"
+										allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+										allowfullscreen></iframe>
 							}
 							else
 							{
-								<span class="upload-video-placeholder d-block">🎥</span>
+								<span class="upload-video-placeholder d-block">Завантажте відео-прев'ю курсу</span>
 							}
 						</div>
 						<input asp-for="PreviewVideo" type="text" class="form-control" id="id_preview_video" placeholder="Введіть посилання на YouTube">
@@ -85,7 +85,7 @@
 							<div class="editor_container__word-count" id="editor-word-count"></div>
 						</div>
 					</div>
-					
+
 				</div>
 
 				<div class="row mb-30">
@@ -139,7 +139,21 @@
 
 
 				</div>
+				<div class="row mb-30">
+					<div class="row">
+						<h3>Категорія</h3>
+						<p class="text-secondary">Додайте категорію до курсу. Шукайте категорію за ім'ям.</p>
+					</div>
+					<div class="row col-md-6">
 
+						@await Html.PartialAsync("_CategoryContainer")
+					</div>
+					<div class="block">
+						<select id="categorySelect" class="form-control" style="width:320px;"></select>
+						<button id="addCategoryButton" type="button" class="button-3">Додати категорію</button>
+						<span asp-validation-for="Category" class="text-danger"></span>
+					</div>
+				</div>
 				<div class="course-editor-menu">
 					<div class="course-editor-menu-inner">
 						<button type="submit" class="button-3 me-3" id="save-button" style="background-color:#38a73a;">
@@ -179,143 +193,80 @@
 
 
 	<script>
-    $(document).ready(function () {
+		$(document).ready(function () {
 
-		// Initialize the select2 dropdown
-		$('#authorSelect').select2({
-			ajax: {
-				url: "@Url.Action("SearchAuthors", "Course")", // Endpoint for searching authors
-				dataType: 'json',
-				delay: 250,
-				data: function (params) {
-					return {
-						name: params.term // Search term sent to the backend
-					};
+			// Initialize the select2 dropdown
+			$('#authorSelect').select2({
+				ajax: {
+					url: "@Url.Action("SearchAuthors", "Course")", // Endpoint for searching authors
+					dataType: 'json',
+					delay: 250,
+					data: function (params) {
+						return {
+							name: params.term // Search term sent to the backend
+						};
+					},
+					processResults: function (data) {
+						return {
+							results: data.results // Format expected by select2
+						};
+					},
+					cache: true
 				},
-				processResults: function (data) {
-					return {
-						results: data.results // Format expected by select2
-					};
-				},
-				cache: true
-			},
-			placeholder: "Пошук автора за ім'ям",
-			minimumInputLength: 3,
-			language: {
-				inputTooShort: function (args) {
-					return `Введіть ${args.minimum} або більше символів`; // Ваш текст
-				}
-			}
-		});
-
-		function renderAuthorsList() {
-			$.ajax({
-				url: "@Url.Action("RenderAuthorsList", "Course")",  // The action URL in your controller
-				type: 'GET',
-				data: { courseId: "@Model.Id"},
-				success: function (response) {
-					$('#authors-container').html(response);
-				},
-				error: function (xhr, status, error) {
-					console.error("Error loading authors list: ", status, error);
-				}
-			});
-		}
-		$('#save-continue-edit-button').on('click', function (e) {
-			e.preventDefault(); // предотвращаем стандартное поведение кнопки
-
-			var form = $('#save_course'); // замените #editForm на id вашей формы
-			var url = "@Url.Action("EditInfoAndContinueEdit", "Course")"
-
-			$.ajax({
-				url: url,
-				type: 'POST',
-				data: form.serialize(),
-				success: function (response) {
-					if (response.success) {
-						$.notify({
-							message: response.message
-						}, {
-							type: 'success' // Уведомление об успешной операции
-						});
-						// Можно обновить часть страницы, например, через AJAX.
-					} else {
-						$.notify({
-							message: response.message
-						}, {
-							type: 'warning' // Уведомление с предупреждением
-						});
-						// Вывести ошибки валидации, если есть
-						if (response.errors) {
-							response.errors.forEach(function (error) {
-								console.error(error); // Вывод в консоль или отображение в форме
-							});
-						}
+				placeholder: "Пошук автора за ім'ям",
+				minimumInputLength: 3,
+				language: {
+					inputTooShort: function (args) {
+						return `Введіть ${args.minimum} або більше символів`; // Ваш текст
 					}
-				},
-				error: function (xhr, status, error) {
-					console.error("Помилка:", error);
-					$.notify({
-						message: 'An error occurred while processing the request.'
-					}, {
-						type: 'danger' // Уведомление об ошибке
-					});
 				}
 			});
-		});
-
-		// Handle the add author button click
-		$('#addAuthorButton').on('click', function () {
-
-			const selectedAuthorId = $('#authorSelect').val(); // Get the selected author ID
-			if (!selectedAuthorId) {
-				$.notify({
-					message: 'Please select an author before adding.'
-				}, {
-					type: 'warning'
-				});
-
-				return;
-			}
-
-			// Make an AJAX request to add the author
-			$.ajax({
-				url: "@Url.Action("AddCourseAuthor", "Course")",
-				type: 'POST',
-				data: {
-					courseId: "@Model.Id",
-					authorId: selectedAuthorId
+			$('#categorySelect').select2({
+				ajax: {
+					url: "@Url.Action("SearchCategory", "Course")",
+					dataType: 'json',
+					delay: 250,
+					data: function (params) {
+						return {
+							title: params.term
+						};
+					},
+					processResults: function (data) {
+						return {
+							results: data.results
+						};
+					},
+					cache: true
 				},
-				success: function (response) {
-					$.notify({
-						message: response.message
-					}, {
-						type: 'success'
-					});
-
-					renderAuthorsList();
-
-				},
-				error: function (xhr) {
-					const response = xhr.responseJSON;
-					const errorMessage = response && response.message ? response.message : "An unexpected error occurred.";
-					$.notify({
-						message: response.message
-					}, {
-						type: 'danger'
-					});
+				placeholder: "Пошук категорії за назвою",
+				minimumInputLength: 3,
+				language: {
+					inputTooShort: function (args) {
+						return `Введіть ${args.minimum} або більше символів`;
+					}
 				}
 			});
-		});
 
-            $(document).on('click', 'a[data-author-id]', function () {
-                var author = $(this).data('author-id');
+			$('#addCategoryButton').on('click', function () {
+
+					const selectedCategoryId = $('#categorySelect').val(); // Get the selected author ID
+					if (!selectedCategoryId) {
+					$.notify({
+						message: 'Виберіть категорію перед тим як додати.'
+					}, {
+						type: 'warning'
+					});
+
+					return;
+				}
+
+				// Make an AJAX request to add the author
 				$.ajax({
-					url: "@Url.Action("DeleteCourseAuthor", "Course")",
+					url: "@Url.Action("AddCategoryToCourse", "Course")",
 					type: 'POST',
 					data: {
 						courseId: "@Model.Id",
-						authorId: author
+						categoryId: selectedCategoryId
 					},
 					success: function (response) {
 						$.notify({
@@ -323,7 +274,9 @@
 						}, {
 							type: 'success'
 						});
-						renderAuthorsList();
+
+						renderCategoryList();
+
 					},
 					error: function (xhr) {
 						const response = xhr.responseJSON;
@@ -335,30 +288,199 @@
 						});
 					}
 				});
-            });
-            document.getElementById('id_preview').addEventListener('change', function (event) {
-                const file = event.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function (e) {
-                        document.getElementById('imagePreview').src = e.target.result;
-                        document.getElementById('imagePreview').classList.remove('d-none');
-						document.getElementById('load-preview').classList.add('d-none');
-                        document.getElementById('imagePreview').classList.add('img-fluid');
-						document.getElementById('imagePreview').classList.add('preview-img');
-                        document.querySelector('.upload-image-placeholder').classList.add('d-none');
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-            // Отслеживаем изменения в поле с ссылкой на видео
-            $('#id_preview_video').on('input', function () {
-                var videoUrl = $(this).val();
-                updateYouTubePlayer(videoUrl);
-            });
+			});
+				function renderCategoryList() {
+				$.ajax({
+					url: "@Url.Action("RenderCategory", "Course")",  // The action URL in your controller
+					type: 'GET',
+					data: { courseId: "@Model.Id"},
+					success: function (response) {
+						$('#category-container').html(response);
+					},
+					error: function (xhr, status, error) {
+						console.error("Error loading authors list: ", status, error);
+					}
+				});
+			}
+				$(document).on('click', 'a[data-category-id]', function () {
+						var category = $(this).data('category-id');
+						$.ajax({
+							url: "@Url.Action("DeleteCourseCategory", "Course")",
+							type: 'POST',
+							data: {
+								courseId: "@Model.Id",
+									categoryId: category
+							},
+							success: function (response) {
+								$.notify({
+									message: response.message
+								}, {
+									type: 'success'
+								});
+									renderCategoryList();
+							},
+							error: function (xhr) {
+								const response = xhr.responseJSON;
+								const errorMessage = response && response.message ? response.message : "An unexpected error occurred.";
+								$.notify({
+									message: response.message
+								}, {
+									type: 'danger'
+								});
+							}
+						});
+					});
+			function renderAuthorsList() {
+				$.ajax({
+					url: "@Url.Action("RenderAuthorsList", "Course")",  // The action URL in your controller
+					type: 'GET',
+					data: { courseId: "@Model.Id"},
+					success: function (response) {
+						$('#authors-container').html(response);
+					},
+					error: function (xhr, status, error) {
+						console.error("Error loading authors list: ", status, error);
+					}
+				});
+			}
+			$('#save-continue-edit-button').on('click', function (e) {
+				e.preventDefault(); // предотвращаем стандартное поведение кнопки
+
+				var form = $('#save_course'); // замените #editForm на id вашей формы
+				var url = "@Url.Action("EditInfoAndContinueEdit", "Course")"
+
+				$.ajax({
+					url: url,
+					type: 'POST',
+					data: form.serialize(),
+					success: function (response) {
+						if (response.success) {
+							$.notify({
+								message: response.message
+							}, {
+								type: 'success' // Уведомление об успешной операции
+							});
+							// Можно обновить часть страницы, например, через AJAX.
+						} else {
+							$.notify({
+								message: response.message
+							}, {
+								type: 'warning' // Уведомление с предупреждением
+							});
+							// Вывести ошибки валидации, если есть
+							if (response.errors) {
+								response.errors.forEach(function (error) {
+									console.error(error); // Вывод в консоль или отображение в форме
+								});
+							}
+						}
+					},
+					error: function (xhr, status, error) {
+						console.error("Помилка:", error);
+						$.notify({
+							message: 'An error occurred while processing the request.'
+						}, {
+							type: 'danger' // Уведомление об ошибке
+						});
+					}
+				});
+			});
+
+			// Handle the add author button click
+			$('#addAuthorButton').on('click', function () {
+
+				const selectedAuthorId = $('#authorSelect').val(); // Get the selected author ID
+				if (!selectedAuthorId) {
+					$.notify({
+						message: 'Виберіть автора перед тим як додати.'
+					}, {
+						type: 'warning'
+					});
+
+					return;
+				}
+
+				// Make an AJAX request to add the author
+				$.ajax({
+					url: "@Url.Action("AddCourseAuthor", "Course")",
+					type: 'POST',
+					data: {
+						courseId: "@Model.Id",
+						authorId: selectedAuthorId
+					},
+					success: function (response) {
+						$.notify({
+							message: response.message
+						}, {
+							type: 'success'
+						});
+
+						renderAuthorsList();
+
+					},
+					error: function (xhr) {
+						const response = xhr.responseJSON;
+						const errorMessage = response && response.message ? response.message : "An unexpected error occurred.";
+						$.notify({
+							message: response.message
+						}, {
+							type: 'danger'
+						});
+					}
+				});
+			});
+
+				$(document).on('click', 'a[data-author-id]', function () {
+					var author = $(this).data('author-id');
+					$.ajax({
+						url: "@Url.Action("DeleteCourseAuthor", "Course")",
+						type: 'POST',
+						data: {
+							courseId: "@Model.Id",
+							authorId: author
+						},
+						success: function (response) {
+							$.notify({
+								message: response.message
+							}, {
+								type: 'success'
+							});
+							renderAuthorsList();
+						},
+						error: function (xhr) {
+							const response = xhr.responseJSON;
+							const errorMessage = response && response.message ? response.message : "An unexpected error occurred.";
+							$.notify({
+								message: response.message
+							}, {
+								type: 'danger'
+							});
+						}
+					});
+				});
+				document.getElementById('id_preview').addEventListener('change', function (event) {
+					const file = event.target.files[0];
+					if (file) {
+						const reader = new FileReader();
+						reader.onload = function (e) {
+							document.getElementById('imagePreview').src = e.target.result;
+							document.getElementById('imagePreview').classList.remove('d-none');
+							document.getElementById('load-preview').classList.add('d-none');
+							document.getElementById('imagePreview').classList.add('img-fluid');
+							document.getElementById('imagePreview').classList.add('preview-img');
+							document.querySelector('.upload-image-placeholder').classList.add('d-none');
+						};
+						reader.readAsDataURL(file);
+					}
+				});
+				// Отслеживаем изменения в поле с ссылкой на видео
+				$('#id_preview_video').on('input', function () {
+					var videoUrl = $(this).val();
+					updateYouTubePlayer(videoUrl);
+				});
 
 
-        });
-</script>
+			});
+	</script>
 
 }

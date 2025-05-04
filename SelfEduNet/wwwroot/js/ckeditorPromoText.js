@@ -236,7 +236,7 @@ $(document).ready(function () {
 				reversed: true
 			}
 		},
-		placeholder: 'Type or paste your content here!',
+		placeholder: 'Створіть промо текст для курсу',
 		table: {
 			contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells', 'tableProperties', 'tableCellProperties']
 		},

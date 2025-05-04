@@ -372,5 +372,25 @@ namespace SelfEduNet.Areas.Teach.Controllers
 
 			return Redirect($"/EditLesson/{step.Lesson.CourseId}/{step.LessonId}?stepId={step.Id}");
 		}
+
+		public async Task<IActionResult> DeleteStep(int id)
+		{
+			var step = await _stepService.GetStepByIdAsync(id);
+
+			if (step == null)
+			{
+				return NotFound();
+			}
+
+			await _stepService.DeleteStep(step);
+
+			var redirectUrl = Url.Action("EditLesson", "Lesson", new
+			{
+				courseId = step.Lesson.CourseId,
+				lessonId = step.LessonId
+			});
+
+			return Ok(new { redirectUrl = redirectUrl, message = "Крок видалено" });
+		}
 	}
 }

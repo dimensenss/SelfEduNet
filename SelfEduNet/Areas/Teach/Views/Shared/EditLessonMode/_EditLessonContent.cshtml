@@ -11,12 +11,19 @@
 	<div>
 		@await Html.PartialAsync("EditLessonMode/_EditStepBase", currentStep)
 	</div>
-	<a asp-action="ViewLesson" asp-controller="Lesson" asp-area="Teach"
-	   asp-route-courseId="@Model.Course.Id"
-	   asp-route-lessonId="@Model.Lesson.Id"
-	   asp-route-stepId="@currentStep.Id">
-		Повернутися до перегляду <i class="fa-solid fa-eye"></i>
-	</a>
+
+	<div class="d-flex justify-content-between align-items-baseline mt-2">
+		<a asp-action="ViewLesson" asp-controller="Lesson" asp-area="Teach"
+		   asp-route-courseId="@Model.Course.Id"
+		   asp-route-lessonId="@Model.Lesson.Id"
+		   asp-route-stepId="@currentStep.Id">
+			Повернутися до перегляду <i class="fa-solid fa-eye"></i>
+		</a>
+		<button class="btn btn-danger" name="delete-step" data-step-id="@currentStep.Id">
+			Видалити крок 
+		</button>
+	</div>
+	
 
 }
 else

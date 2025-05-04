@@ -1,4 +1,6 @@
-﻿@model SelfEduNet.ViewModels.EditLessonViewModel
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using SelfEduNet.Data.Enum
+@model SelfEduNet.ViewModels.EditLessonViewModel
 
 @{
 	var currentStep = ViewData["Step"] as Step;
@@ -41,22 +43,24 @@
 				var currentIndex = Model.Steps.FindIndex(s => s.Id == currentStep.Id);
 				var isLastStep = currentIndex == Model.Steps.Count - 1;
 				var nextStep = !isLastStep ? Model.Steps[currentIndex + 1] : null;
-			
+				bool isTestStep = currentStep.StepType == StepType.Test;
 			}
 
 			@if (!isLastStep)
 			{
-			<a class="btn btn-success shadow fw-4 view-step" style="height:40px;"
-			   asp-action="ViewLesson"
-			   asp-controller="Lesson"
-			   asp-area="Teach"
-			   asp-route-courseId="@Model.Course.Id"
-			   asp-route-lessonId="@Model.Lesson.Id"
-			   asp-route-stepId="@nextStep.Id"
-			   data-step-id="@currentStep.Id"
-			   data-step-is-completed="@currentUserStep.IsCompleted">
-				Наступний крок
-			</a>
+				<a class="btn btn-success shadow fw-4 view-step" style="height:40px;"
+				   asp-action="ViewLesson"
+				   asp-controller="Lesson"
+				   asp-area="Teach"
+				   asp-route-courseId="@Model.Course.Id"
+				   asp-route-lessonId="@Model.Lesson.Id"
+				   asp-route-stepId="@nextStep.Id"
+				   data-step-id="@currentStep.Id"
+				   data-step-is-completed="@currentUserStep.IsCompleted"
+				   data-is-test="@isTestStep.ToString().ToLower()"
+				   data-is-test-passed="@((currentUserStep.UserTestResult?.IsPassed ?? false).ToString().ToLower())">
+					Наступний крок
+				</a>
 			}
 			else
 			{

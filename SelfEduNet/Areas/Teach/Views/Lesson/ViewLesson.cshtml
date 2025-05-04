@@ -22,61 +22,71 @@
 @section Scripts
 {
 	<script src="~/js/youtubePlayer.js" asp-append-version="true"></script>
+	<script src="~/js/button-loading.js" asp-append-version="true"></script>
+
 	<script>
 		$(document).ready(function () {
 			$(document).on("click", ".view-step", function (event) {
-				event.preventDefault();
-				var stepId = $(this).data("step-id");
-				var isCompleted = $(this).data("step-is-completed");
-				var isStepList = $(this).data("is-step-list");
-				var url = $(this).attr("href");
+			event.preventDefault();
 
-				if(isStepList) {
+			const stepId = $(this).data("step-id");
+			const isCompleted = $(this).data("step-is-completed") === "True";
+			const isStepList = $(this).data("is-step-list");
+			const isTest = $(this).data("is-test") === true || $(this).data("is-test") === "true";
+			const isTestPassed = $(this).data("is-test-passed") === true || $(this).data("is-test-passed") === "true";
+			const url = $(this).attr("href");
+
+			if (isStepList) {
+				viewStep(url);
+				return;
+			}
+
+			if (isTest && !isTestPassed) {
+				$.notify({
+					message: 'Ви не можете перейти до наступного кроку, поки не пройдете тест.'
+				}, {
+					type: 'danger'
+				});
+				return;
+			}
+
+			checkViewedStep(stepId, function (isTextRead) {
+				function proceedAfterSubmit() {
 					viewStep(url);
-					return;
+					$('.step-id-' + stepId).addClass('completed');
+					$('.step-id-' + stepId).attr("data-step-is-completed", "True");
 				}
 
-				checkViewedStep(stepId, function(isTextRead) {
-					function proceedAfterSubmit() {
-						viewStep(url);
-						$('.step-id-' + stepId).addClass('completed');
-						$('.step-id-' + stepId).attr("data-step-is-completed", "True");
-					}
-
-					if (!isTextRead) {
-						showConfirmationDialog(
-							'Ви впевнені?',
-							'Ви хочете завершити крок, який ще не пройшли.',
-							'Так!',
-							'Відмінити',
-							() => {
-								if(isCompleted === "False") {
-									submitStep(stepId, function(err) {
-										// вне зависимости от ошибки явно показываем следующий шаг
-										proceedAfterSubmit();
-									});
-								} else {
+				if (!isTextRead) {
+					showConfirmationDialog(
+						'Ви впевнені?',
+						'Ви хочете завершити крок, який ще не пройшли.',
+						'Так!',
+						'Відмінити',
+						() => {
+							if (!isCompleted) {
+								submitStep(stepId, function () {
 									proceedAfterSubmit();
-								}
-							}
-						);
-					} else {
-						if(isCompleted === "False") {
-							submitStep(stepId, function(err) {
+								});
+							} else {
 								proceedAfterSubmit();
-							});
-						} else {
-							proceedAfterSubmit();
+							}
 						}
+					);
+				} else {
+					if (!isCompleted) {
+						submitStep(stepId, function () {
+							proceedAfterSubmit();
+						});
+					} else {
+						proceedAfterSubmit();
 					}
-				});
+				}
 			});
+		});
 			window.onpopstate = function () {
 				location.reload();
 			};
-
-			//view step
-
 			$(window).on("scroll", function () {
 				let scrollTop = $(window).scrollTop();
 				let windowHeight = $(window).height();
@@ -89,8 +99,6 @@
 					$(window).off("scroll");
 				}
 			});
-
-
 			function viewStep(url){
 				$.ajax({
 					url: url,
@@ -117,7 +125,6 @@
 					}
 				});
 			}
-
 			function setTextViewed(stepId){
 				$.ajax({
 					url: "@Url.Action("SetViewedStep", "Step", new { area = "Teach" })",
@@ -133,7 +140,6 @@
 					}
 				});
 			}
-			// Функция для отправки шага через AJAX
 			function submitStep(stepId, callback) {
 				$.ajax({
 					url: "@Url.Action("SubmitStep", "Step", new { area = "Teach" })",
@@ -149,33 +155,30 @@
 					}
 				});
 			}
-			$(document).on("click", 'button[name^="check-test-results"]', function (event) {
-				  event.preventDefault();
-				  let stepId = $(this).data("step-id");
 
-				  $.ajax({
-					  url: "@Url.Action("GetUserAnswers", "StepTest", new { area = "Teach" })",
-					  type: "POST",
-					  data: { id: stepId },
-					  success: function (response) {
-						  $.notify({
-							  message: response.message
-						  }, {
-							  type: 'success'
-						  });
-						  renderModulesList();
-					  },
-					  error: function (xhr) {
-						  const response = xhr.responseJSON;
-						  $.notify({
-							  message: response.message
-						  }, {
-							  type: 'danger'
-						  });
-						  console.log(xhr);
-					  }
-				  });
-			  });
+			$(document).on("click", 'button[name^="get-user-answers"]', function (event) {
+				event.preventDefault();
+				const $button = $(this);
+				let stepId = $(this).data("step-id");
+				
+				showLoading($button);
+				$.ajax({
+					url: "/Teach/StepTest/GetUserAnswers",
+					type: 'POST',
+					data: { id: stepId },
+					success: function (response) {
+						hideLoading($button);
+						$.notify({message: response.message}, {type: 'success'});
+						
+						window.location.href = response.redirectUrl;
+					},
+					error: function (xhr, status, error) {
+						const response = xhr.responseJSON;
+						hideLoading($button);
+						$.notify({ message: response.message }, { type: 'danger' });
+					}
+				});
+			});
 		});
 	</script>
 }
