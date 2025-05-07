@@ -1,13 +1,74 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@{
 	Layout = "_Layout";
 }
+<div class="container-xl">
 
-<div class="catalog">
-	<div class="text-center">
-		@* TODO Промо *@
-		<a asp-action="TeacherCourseList" asp-controller="Home" asp-area="Teach" class="button-3 text-center">Створити курс</a>
+	<div class="row justify-content-center text-center">
+		<div class="col-md-8">
+			<section id="hero" class="section-light">
+				<p class="promo-title mt-70 ">Створюйте будь-які онлайн-курси<br>за допомогою конструктора selfedu</p>
+				<p class="fs-2 mb-30">Діліться знаннями на нашій освітній платформі, створюючи безкоштовні курси за допомогою функціоналу selfedu.</p>
+				<a asp-action="TeacherCourseList" asp-controller="Home" asp-area="Teach" class="button-3 text-center fs-2">Створити курс</a>
+			</section>
+		</div>
+	</div>
+
+	<div class="row justify-content-center text-center">
+		<div class="col-md-10">
+			<section id="about" class="section-light" style="padding-top:40px;">
+				<p class="promo-title">Що таке selfedu?</p>
+				<p class="fs-1">Багатофункціональна та гнучка платформа для створення й розміщення навчальних матеріалів.</p>
+				<div style="display:flex; flex-wrap:wrap; justify-content:center; gap:50px; margin-top:50px; ">
+					<div style="max-width:280px;">
+						<strong class="fs-2 ">Конструктор курсів</strong>
+						<p class="fs-3">Створюй повноцінні онлайн-курси за лічені хвилини. Створюй навчальний контент, додавай відео та тести.</p>
+					</div>
+					<div style="max-width:280px;">
+						<strong class="fs-2 ">Маркетплейс для авторів</strong>
+						<p class="fs-3">Розміщуй свої курси на відкритому маркетплейсі та отримуй нових студентів з усього світу.</p>
+					</div>
+					<div style="max-width:280px;">
+						<strong class="fs-2 ">Інтеграція з ШІ</strong>
+						<p class="fs-3">Автоматичне створення контенту — завдяки інтеграції зі штучним інтелектом.</p>
+					</div>
+				</div>
+			</section>
+		</div>
+	</div>
+	<div class="row justify-content-center text-center">
+		<div class="col-md-10">
+			<section id="types" class="py-5 bg-light">
+				<div class="container">
+					<div class="row justify-content-center g-4" style="gap:50px;">
+						<p class="promo-title">Види курсів</p>
+						<!-- Платні курси -->
+						<div class="col-md-6 col-lg-5">
+							<div class="pb-25 px-4 pt-4 rounded-4 text-light h-100" style="background-color: #ba2aff;">
+								<h1 class="fw-bold text-light pt-10">Платні курси</h1>
+								<p class="mb-4 text-light">Повна функціональність</p>
+								<hr class="border-white opacity-50">
+								<h2 class="fw-bold mt-4 text-light">Комісія з платежів від 7%</h2>
+								<p class="text-light">Створюйте платні курси<br>і монетизуйте свої знання</p>
+								<a href="#" class="btn btn-light text-dark mt-3 px-4 fs-3">Дізнатись більше</a>
+							</div>
+						</div>
+
+						<!-- Безкоштовні курси -->
+						<div class="col-md-6 col-lg-5">
+							<div class="pb-25 px-4 pt-4 border rounded-4 h-100" style="border-color: #e219ff!important;">
+								<h1 class="fw-bold text-dark pt-10">Безкоштовні курси</h1>
+								<p class="text-muted">Обмежена функціональність</p>
+								<hr style="border-color: #e219ff;">
+								<h2 class="fw-bold mt-4 text-dark">Безкоштовно</h2>
+								<p class="text-dark">Створюйте відкриті курси без<br>комерційних цілей</p>
+								<a asp-action="TeacherCourseList" asp-controller="Home" asp-area="Teach" class="button-3 text-center">Створити курс</a>
+							</div>
+						</div>
+
+					</div>
+				</div>
+			</section>
+
+		</div>
 	</div>
 </div>

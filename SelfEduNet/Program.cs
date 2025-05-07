@@ -33,16 +33,15 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddStackExchangeRedisCache(options =>
     options.Configuration = builder.Configuration.GetConnectionString("RedisConnection"));
 
-// IConnectionMultiplexer для работы с очередью
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 	ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("RedisConnection")));
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
-    {
-        options.SignIn.RequireConfirmedAccount = true;
-    })
+{
+    options.SignIn.RequireConfirmedAccount = true;
+})
 
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
@@ -105,6 +104,11 @@ if (app.Environment.IsDevelopment())
         var seeder = scope.ServiceProvider.GetService<Seeder>();
         await seeder.SeedAsync();
     }
+}
+else
+{
+	app.UseExceptionHandler("/Error");
+	app.UseStatusCodePagesWithReExecute("/Error/{0}");
 }
 app.UseHttpsRedirection();
 app.UseStaticFiles();

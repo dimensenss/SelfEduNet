@@ -16,6 +16,9 @@ namespace SelfEduNet.Areas.Teach.Controllers
 
         public IActionResult Index()
 		{
+			if(User.IsInRole("Teacher") || User.IsInRole("Admin"))
+                return RedirectToAction("TeacherCourseList");
+
 			return View();
 		}
 		[Authorize]

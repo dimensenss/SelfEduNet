@@ -21,21 +21,15 @@
                                     <nav>
                                         <ul id="navigation">
                                             <li><a asp-action="Index" asp-controller="Catalog" asp-area="" >Курси</a></li>
-                                            @if (true)
-                                            {
-                                                // Предположим, что у нас есть некая переменная userHasCourses
-                                                bool userHasCourses = true; // Это можно заменить логикой проверки наличия курсов у пользователя
                                                 <li>
                                                     <a asp-area="Teach" asp-action="Index" asp-controller="Home">
                                                         Викладання
                                                     </a>
                                                 </li>
-                                            }
-
                                             @if (!User.Identity.IsAuthenticated)
                                             {
                                                 <li class="button-header margin-left">
-                                                    <a asp-area="Identity" asp-page="/Account/Register" class="btn btn3">Регістрація</a>
+                                                    <a asp-area="Identity" asp-page="/Account/Register" class="btn btn3">Реєстрація</a>
                                                 </li>
                                                 <li>
                                                     <a asp-area="Identity" asp-page="/Account/Login" class="btn btn3">Вхід</a>
