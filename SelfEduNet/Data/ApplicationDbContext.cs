@@ -42,6 +42,8 @@ namespace SelfEduNet.Data
                 .HasForeignKey(c => c.OwnerId)
                 .OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<UserCourse>()
+	            .HasKey(uc => uc.Id);
+			modelBuilder.Entity<UserCourse>()
                 .HasOne(c => c.User)
                 .WithMany(u => u.UserCourses)
                 .HasForeignKey(c => c.UserId)

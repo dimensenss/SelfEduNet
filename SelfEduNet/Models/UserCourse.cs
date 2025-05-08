@@ -12,8 +12,10 @@ namespace SelfEduNet.Models
 
         [Range(1, 5, ErrorMessage = "Рейтинг повинен бути між {1} і {2}.")]
         public int Rate { get; set; } = default;
-        public bool IsWish { get; set; }
-        public DateTime CreatedAt { get; set; }
-        //public string Review { get; set; }
-    }
+
+        public bool IsWish { get; set; } = false;
+        public bool IsEnrolled { get; set; } = false;
+		public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+		//public string Review { get; set; }
+	}
 }

@@ -1,4 +1,5 @@
 ﻿using EduProject.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -12,17 +13,26 @@ using SelfEduNet.ViewModels;
 
 namespace SelfEduNet.Controllers
 {
-    public class CourseController(ICourseService courseService, UserManager<AppUser> userManager, IPhotoService photoService, ICategoryService categoryService) : Controller
+    public class CourseController(ICourseService courseService, UserManager<AppUser> userManager, IPhotoService photoService, ICategoryService categoryService,
+	    IUserCourseService userCourseService) : Controller
     {
 	    private readonly ICourseService _courseService = courseService;
 	    private readonly UserManager<AppUser> _userManager = userManager;
 	    private readonly IPhotoService _photoService = photoService;
 	    private readonly ICategoryService _categoryService = categoryService;
+	    private readonly IUserCourseService _userCourseService = userCourseService;
 
 	    public async Task<IActionResult> Detail(int id)
         {
             var course = await _courseService.GetCourseByIdAsync(id);
-            return View(course);
+            var userId = User.GetUserId();
+
+			var courseVm = new CourseWithUserViewModel()
+            {
+	            Course = course,
+	            UserCourse = userId != null ? await _userCourseService.GetOrCreateUserCourseAsync(userId, id) : null
+            };
+            return View(courseVm);
         }
 
 		public async Task<IActionResult> EditInfo(int id)
@@ -167,8 +177,9 @@ namespace SelfEduNet.Controllers
 			// TODO перенести
 			var users = await _userManager.Users
 				.Where(u =>
-					u.FirstName.Contains(name, StringComparison.OrdinalIgnoreCase) ||
-					u.LastName.Contains(name, StringComparison.OrdinalIgnoreCase)).Select(u => new { id = u.Id, text = u.FirstName + " " + u.LastName })
+					u.FirstName.ToLower().Contains(name.ToLower()) ||
+					u.LastName.ToLower().Contains(name.ToLower()))
+				.Select(u => new { id = u.Id, text = u.FirstName + " " + u.LastName })
 				.ToListAsync();
 
 			return Json(new { results = users });
@@ -184,7 +195,7 @@ namespace SelfEduNet.Controllers
 
 			var categories = await _categoryService.GetAllCategoriesAsync();
 			var filteredCategories = categories
-				.Where(c => c.Title.Contains(title, StringComparison.OrdinalIgnoreCase))
+				.Where(c => c.Title.ToLower().Contains(title.ToLower()))
 				.Select(c => new { id = c.Id, text = c.Title })
 				.ToList();
 
@@ -326,18 +337,37 @@ namespace SelfEduNet.Controllers
 			return PartialView("_GetCoursesWithEdit", courses);
 		}
 
+		[Authorize]
 		[HttpPost]
 		public async Task<IActionResult> SignUpToCourse(int id)
 		{
 			var course = await _courseService.GetCourseByIdAsync(id);
 			if (course == null)
 			{
-				return NotFound(new { message = "Курс не знайдено" });
+				TempData["NotifyType"] = "danger";
+				TempData["NotifyMessage"] = "Курс не знайдено";
+				return View("Detail", course);
 			}
 			var userId = User.GetUserId();
 
-			return Ok();
-		}
+			if (userId == null)
+			{
+				TempData["NotifyType"] = "danger";
+				TempData["NotifyMessage"] = "Користувача не знайдено";
+				return View("Detail", course);
+			}
 
+			var userCourse = await _userCourseService.GetOrCreateUserCourseAsync(userId, id);
+			if (userCourse.IsEnrolled)
+			{
+				TempData["NotifyType"] = "danger";
+				TempData["NotifyMessage"] = "Ви вже записані на цей курс.";
+				return View("Detail", course);
+			}
+
+			await _userCourseService.MarkCourseAsEnrolledAsync(userId, id);
+
+			return Redirect($"/Lesson/{course.Id}");
+		}
 	}
 }

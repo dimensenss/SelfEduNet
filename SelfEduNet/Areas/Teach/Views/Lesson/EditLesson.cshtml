@@ -269,6 +269,7 @@
 									},
 									error: function (xhr, status, error) {
 										const response = xhr.responseJSON;
+										hideLoading($button);
 										$.notify({ message: response.message }, { type: 'danger' });
 									}
 								});
@@ -322,6 +323,7 @@
 									},
 									error: function (xhr, status, error) {
 										const response = xhr.responseJSON;
+										hideLoading($button);
 										$.notify({ message: response.message }, { type: 'danger' });
 									}
 								});
@@ -342,6 +344,7 @@
 							},
 							error: function (xhr, status, error) {
 								const response = xhr.responseJSON;
+								hideLoading($button);
 								$.notify({ message: response.message }, { type: 'danger' });
 							}
 						});
@@ -439,6 +442,7 @@
 						},
 						error: function (xhr, status, error) {
 							const response = xhr.responseJSON;
+							hideLoading($button);
 							$.notify({ message: response.message }, { type: 'danger' });
 						}
 					});

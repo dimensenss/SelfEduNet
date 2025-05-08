@@ -33,6 +33,9 @@ public static class DependencyInjection
 			.AddScoped<ITranscriptionRepository, TranscriptionRepository>()
 			.AddScoped<IGoogleSheetFactory, GoogleSheetFactory>()
 			.AddScoped<IGoogleSheetService, GoogleSheetService>()
+			.AddScoped<IUserCourseService, UserCourseService>()
+			.AddScoped<IUserCourseRepository, UserCourseRepository>()
+
 			.AddSingleton<IHtmlSanitizer, HtmlSanitizer>()
 			.AddTransient<Seeder>();
 	}

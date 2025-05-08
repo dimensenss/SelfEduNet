@@ -8071,7 +8071,6 @@ b, sup, sub, u, del {
 
     /* Пример секции с фоном */
     .section-light {
-        background-color: #fafafa;
         padding: 50px 20px;
     }
 
@@ -8112,4 +8111,7 @@ b, sup, sub, u, del {
     background-position: center center;
     border-color: transparent;
     border-style: solid;
+}
+.image_resized {
+    height: auto;
 }

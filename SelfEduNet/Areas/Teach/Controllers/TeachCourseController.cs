@@ -25,17 +25,17 @@ namespace SelfEduNet.Areas.Teach.Controllers
 		{
 			string userId = User.GetUserId();
 			var user = await _userManager.FindByIdAsync(userId);
-			if (user != null)
+			if (!await _userManager.IsInRoleAsync(user, "Teacher"))
 			{
 				await _userManager.AddToRoleAsync(user, "Teacher");
+				TempData["NotifyType"] = "success";
+				TempData["NotifyMessage"] = "Вітаємо, ви стали вчителем!";
 			}
 			var courseVM = new CreateCourseViewModel()
 			{
 				OwnerId = userId,
 				Owner = user
 			};
-			TempData["NotifyType"] = "success";
-			TempData["NotifyMessage"] = "Курс створено. Вітаємо, ви стали вчителем!";
 
 			return View(courseVM);
 		}

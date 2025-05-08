@@ -2,6 +2,7 @@
 using SelfEduNet.Data.Enum;
 using SelfEduNet.Models;
 using System.ComponentModel.DataAnnotations.Schema;
+using Newtonsoft.Json.Serialization;
 
 namespace SelfEduNet.ViewModels
 {
@@ -12,7 +13,8 @@ namespace SelfEduNet.ViewModels
         public string OwnerId { get; set; }
         [ForeignKey("OwnerId")]
         public AppUser? Owner { get; set; }
-		[Required]
+		[Required(ErrorMessage = "Назва курсу є обов'язковим полем")]
+        
 		public string CourseName { get; set; }
     }
 }

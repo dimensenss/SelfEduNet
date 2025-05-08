@@ -41,7 +41,6 @@
     <Folder Include="Areas\Admin\Views\Shared\" />
     <Folder Include="Areas\Teach\Data\" />
     <Folder Include="Areas\Teach\Models\" />
-    <Folder Include="Helpers\" />
   </ItemGroup>
 	<PropertyGroup>
 		<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>

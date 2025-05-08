@@ -1,9 +1,11 @@
 ﻿@{
 	Layout = "_Layout";
+	ViewData["Title"] = $"Редагувати курс {Model.CourseName}";
 }
 
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 @using SelfEduNet.Data.Enum
+@using SelfEduNet.Helpers
 @model SelfEduNet.ViewModels.EditCourseViewModel
 <link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/44.1.0/ckeditor5.css" crossorigin>
 <link rel="stylesheet" href="~/css/ckeditor.css" />
@@ -16,7 +18,7 @@
 				<input type="hidden" asp-for="Id" />
 				<input type="hidden" asp-for="PreviewURL" />
 
-				<div class="row mb-50">
+				<div class="row mb-20 mt-20">
 					<div class="col-md-6">
 						<div id="image-box" class="upload-box @(string.IsNullOrEmpty(Model.PreviewURL) ? "upload-box-border mb-3" : "mb-3")">
 							@if (!string.IsNullOrEmpty(Model.PreviewURL))
@@ -81,7 +83,7 @@
 
 					<div class="main-container mx-0">
 						<div class="editor-container editor-container_classic-editor editor-container_include-word-count" id="editor-container">
-							<div class="editor-container__editor"><div id="editor" data-course-id="@Model.Id" data-initial="@Html.Raw(System.Net.WebUtility.HtmlEncode(@Model?.PromoText))"></div></div>
+							<div class="editor-container__editor" style="max-width:880px; min-width:880px;"><div id="editor" data-course-id="@Model.Id" data-initial="@Html.Raw(System.Net.WebUtility.HtmlEncode(@Model?.PromoText))"></div></div>
 							<div class="editor_container__word-count" id="editor-word-count"></div>
 						</div>
 					</div>
@@ -93,7 +95,7 @@
 						<div class="row align-items-baseline">
 							<div class="col-md-3 me-3">
 								<div class="d-flex flex-column">
-									<label asp-for="Language">Language</label>
+									<label asp-for="Language">Мова</label>
 									<select asp-for="Language" asp-items="@(new SelectList(Enum.GetValues(typeof(LanguageType))))" class="form-control">
 									</select>
 									<span asp-validation-for="Language" class="text-danger"></span>
@@ -101,15 +103,15 @@
 							</div>
 							<div class="col-md-3 me-3">
 								<div class="d-flex flex-column">
-									<label asp-for="Difficulty">Difficulty</label>
+									<label asp-for="Difficulty">Складність</label>
 									<select asp-for="Difficulty" asp-items="@(new SelectList(Enum.GetValues(typeof(DifficultyType))))" class="form-control">
 									</select>
 									<span asp-validation-for="Difficulty" class="text-danger"></span>
 								</div>
 							</div>
-							<div class="col-md-3 me-3">
+							<div class="col-md-4 me-3">
 								<div class="d-flex flex-column">
-									<label asp-for="Workload">Часи у неділю</label>
+									<label asp-for="Workload">Навантаження (часи у неділю)</label>
 									<input asp-for="Workload" type="text" class="form-control nice-select" placeholder="Enter workload">
 									<span asp-validation-for="Workload" class="text-danger"></span>
 								</div>

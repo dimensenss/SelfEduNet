@@ -21,7 +21,30 @@
 }
 @if (TempData["NotifyMessage"] != null)
 {
-    <div id="notification" data-notify-type="@TempData["NotifyType"]" class="d-none">
+	<div id="notification" data-notify-type="@TempData["NotifyType"]" class="d-none">
 		@TempData["NotifyMessage"]
 	</div>
+    <script>
+        window.onload = function () {
+            var notification = document.getElementById('notification');
+            if (notification) {
+                var message = notification.innerText.trim();
+                var type = notification.getAttribute('data-notify-type') || 'info';
+
+                $.notify({
+                    message: message
+                }, {
+                    type: type,
+                    placement: {
+                        from: 'top',
+                        align: 'right'
+                    },
+                    delay: 3000,
+                    offset: { x: 20, y: 60 }
+                });
+
+                notification.remove();
+            }
+        };
+    </script>
 }

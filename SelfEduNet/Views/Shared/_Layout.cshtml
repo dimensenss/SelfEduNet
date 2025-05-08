@@ -62,15 +62,12 @@
 
 
 <div class="page">
-		@Html.Partial("_Navbar")
+		@await Html.PartialAsync("_Navbar")
 	<main class="main-content">
 		@RenderBody()
 	</main>
-
-	@Html.Partial("_Notifications")
-	@Html.Partial("_Footer")
-
-
+		@await Html.PartialAsync("_Notifications")
+		@await Html.PartialAsync("_Footer")
 	<div id="back-top">
 		<a title="Go to Top" href="#"> <i class="fas fa-level-up-alt"></i></a>
 	</div>

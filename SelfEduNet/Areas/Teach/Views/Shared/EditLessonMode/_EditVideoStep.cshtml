@@ -1,4 +1,5 @@
-﻿@model Step
+﻿@using SelfEduNet.Helpers
+@model Step
 @{
 	bool isYoutubeVideo = YouTubeHelper.IsYouTubeUrl(Model.VideoUrl ?? "");
 }
@@ -120,7 +121,7 @@
 
 		<video id="videoPlayer" class="video-js vjs-big-play-centered @((string.IsNullOrEmpty(Model.VideoUrl) || isYoutubeVideo) ? "d-none" : "")"
 			   controls preload="auto" width="640" height="360"
-			   poster="thumbnail.jpg" data-setup="{}">
+			   poster="" data-setup="{}">
 			<source src="@(!string.IsNullOrEmpty(Model.VideoUrl) ? Model.VideoUrl : "")" type="video/mp4" />
 			<p class="vjs-no-js">
 				To view this video please enable JavaScript...
