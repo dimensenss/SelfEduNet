@@ -6,6 +6,7 @@ namespace SelfEduNet.Models
     {
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
+        public string? PhotoURL { get; set; }
         public ICollection<CourseInfo> AuthoredCourses { get; set; } = new List<CourseInfo>();
 		public ICollection<Course> OwnedCourses { get; set; } = new List<Course>();
 		public ICollection<UserCourse> UserCourses { get; set; } = new List<UserCourse>();

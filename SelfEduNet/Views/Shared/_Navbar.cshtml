@@ -15,12 +15,14 @@
                             </div>
                         </div>
                         <div class="col-xl-10 col-lg-10">
-                            <div class="menu-wrapper d-flex align-items-center justify-content-end">
+                            <div class="menu-wrapper d-flex align-items-center justify-content-end flex-nowrap">
                                 <!-- Main-menu -->
                                 <div class="main-menu d-none d-lg-block">
                                     <nav>
                                         <ul id="navigation">
-                                            <li><a asp-action="Index" asp-controller="Catalog" asp-area="" >Курси</a></li>
+	                                        <li>
+		                                        <a asp-action="Index" asp-controller="Catalog" asp-area="">Курси</a>
+	                                        </li>
                                                 <li>
                                                     <a asp-area="Teach" asp-action="Index" asp-controller="Home">
                                                         Викладання
@@ -39,11 +41,39 @@
                                             {
 	                                            @if (User.IsInRole("Admin"))
 	                                            {
-		                                            <li class="button-header margin-left">
+		                                            @* <li class="button-header margin-left">
 			                                            <a asp-area="Admin" asp-action="Index" asp-controller="Home" class="btn btn3">Адмін панель</a>
-                                                    </li>
+                                                    </li> *@
 	                                            }
-                                                <li><a asp-area="" asp-controller="Account" asp-action="Logout">Вихід</a></li>
+                                                <li class="nav-item dropdown d-none d-lg-inline-flex">
+		                                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+		                                               data-bs-toggle="dropdown" aria-expanded="false">
+			                                            Профіль
+		                                            </a>
+		                                            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDropdown">
+			                                            <li><a class="dropdown-item" asp-controller="Account" asp-action="Profile">Редагувати профіль</a></li>
+			                                            <li><a class="dropdown-item" asp-area="Teach" asp-controller="Home" asp-action="Index">Викладання</a></li>
+			                                            @if (User.IsInRole("Admin"))
+			                                            {
+				                                            <li><a class="dropdown-item" asp-area="Admin" asp-controller="Home" asp-action="Index">Адмін-панель</a></li>
+			                                            }
+			                                            <li><a class="dropdown-item" asp-controller="Account" asp-action="Logout">Вихід</a></li>
+		                                            </ul>
+	                                            </li>
+	                                            <li class="d-lg-none">
+		                                            <a href="#">Профіль</a>
+		                                            <ul>
+			                                            <li><a asp-controller="Account" asp-action="Profile">Редагувати профіль</a></li>
+			                                            <li><a asp-area="Teach" asp-controller="Home" asp-action="Index">Викладання</a></li>
+			                                            @if (User.IsInRole("Admin"))
+			                                            {
+				                                            <li><a asp-area="Admin" asp-controller="Home" asp-action="Index">Адмін-панель</a></li>
+			                                            }
+			                                            <li><a asp-controller="Account" asp-action="Logout">Вихід</a></li>
+		                                            </ul>
+	                                            </li>
+                                                @* <li><a asp-area="" asp-controller="Account" asp-action="Profile">Профіль</a></li>
+                                                <li><a asp-area="" asp-controller="Account" asp-action="Logout">Вихід</a></li> *@
                                             }
                                         </ul>
                                     </nav>

@@ -1,0 +1,47 @@
+﻿@model SelfEduNet.ViewModels.EditUserProfileViewModel
+@{
+	ViewData["Title"] = "Редагування профілю";
+}
+<div class="container-fluid">
+	<div class="row justify-content-center mt-40 mb-40">
+		<div class="col-md-8">
+			<form asp-action="Profile" method="post" enctype="multipart/form-data">
+				<div class="row">
+					<div class="col-md-4 px-5">
+						<label asp-for="PhotoFile" class="control-label fs-2 mb-3"></label>
+						@if (Model.PhotoURL is { Length: > 0 })
+						{
+							<img src="@Model.PhotoURL" class="img-fluid rounded mb-3"/>
+						}
+						<div class="form-group mb-3">
+							<input asp-for="PhotoFile" type="file" class="form-control"/>
+							<span asp-validation-for="PhotoFile" class="text-danger"></span>
+						</div>
+					</div>
+					<div class="col-md-8 px-5">
+						<h2>Редагувати профіль</h2>
+
+						<div class="form-group mb-3">
+							<label asp-for="FirstName" class="control-label"></label>
+							<input asp-for="FirstName" class="form-control" value="@Model.FirstName" />
+							<span asp-validation-for="FirstName" class="text-danger"></span>
+						</div>
+
+						<div class="form-group mb-3">
+							<label asp-for="LastName" class="control-label"></label>
+							<input asp-for="LastName" class="form-control" value="@Model.LastName" />
+							<span asp-validation-for="LastName" class="text-danger"></span>
+						</div>
+
+						<button type="submit" class="button-3">Зберегти</button>
+
+						<div class="d-flex flex-row justify-content-between mt-5">
+							<a class="a-purple" asp-area="Identity" asp-page="/Account/ForgotPassword">Забули пароль?</a>
+							<a class="a-purple" asp-area="Identity" asp-page="/Account/Manage/Email">Змінити email</a>
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>

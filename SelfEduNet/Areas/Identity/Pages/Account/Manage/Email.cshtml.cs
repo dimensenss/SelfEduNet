@@ -70,7 +70,7 @@ namespace SelfEduNet.Areas.Identity.Pages.Account.Manage
             /// </summary>
             [Required]
             [EmailAddress]
-            [Display(Name = "New email")]
+            [Display(Name = "Новий email")]
             public string NewEmail { get; set; }
         }
 

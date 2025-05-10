@@ -2896,7 +2896,6 @@ hr {
 }
 
 .mobile_menu .slicknav_menu .slicknav_nav {
-    margin-top: 9px !important;
     color: #FFFFFF;
     background-color: rgba(0, 0, 0, 0.6); /* Черный цвет с прозрачностью */
     backdrop-filter: blur(10px); /* Эффект размытия, создающий эффект стекла */

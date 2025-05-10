@@ -6,8 +6,8 @@
 {
 	@await Html.PartialAsync("EditLessonMode/_EditLessonForm", @Model.Lesson)
 	@await Html.PartialAsync("EditLessonMode/_EditStepList", @Model)
-					
-					
+
+
 	<div>
 		@await Html.PartialAsync("EditLessonMode/_EditStepBase", currentStep)
 	</div>
@@ -19,12 +19,13 @@
 		   asp-route-stepId="@currentStep.Id">
 			Повернутися до перегляду <i class="fa-solid fa-eye"></i>
 		</a>
-		<button class="btn btn-danger" name="delete-step" data-step-id="@currentStep.Id">
-			Видалити крок 
-		</button>
+		@if (Model.Steps != null && Model.Steps.Count != 1)
+		{
+			<button class="btn btn-danger" name="delete-step" data-step-id="@currentStep.Id">
+				Видалити крок
+			</button>
+		}
 	</div>
-	
-
 }
 else
 {
