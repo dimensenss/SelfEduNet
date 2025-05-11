@@ -2745,7 +2745,6 @@ hr {
     -moz-transition: .3s;
     -o-transition: .3s;
     transition: .3s;
-    text-transform: capitalize;
 }
 
 .main-header .main-menu ul li:hover > a {
@@ -8113,4 +8112,10 @@ b, sup, sub, u, del {
 }
 .image_resized {
     height: auto;
+}
+header .dropdown-item:hover,
+header .dropdown-item:focus {
+    background-color: transparent !important;
+    color: inherit !important;
+    text-decoration: none !important;
 }

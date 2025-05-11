@@ -35,10 +35,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Areas\Admin\Data\" />
-    <Folder Include="Areas\Admin\Models\" />
-    <Folder Include="Areas\Admin\ViewModels\" />
-    <Folder Include="Areas\Admin\Views\Shared\" />
+    <Folder Include="Areas\Learn\Data\" />
+    <Folder Include="Areas\Learn\Models\" />
     <Folder Include="Areas\Teach\Data\" />
     <Folder Include="Areas\Teach\Models\" />
   </ItemGroup>

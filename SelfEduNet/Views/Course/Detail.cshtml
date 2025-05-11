@@ -66,7 +66,7 @@
 		<div class="row">
 			<div class="col-md-8">
 				<div id="coursePromoText" class="ck-content border rounded ms-3 p-4" style="max-width:1000px;">
-					@if (@Model.Course.PromoText != null && @Model.Course.PromoText.Length > 0)
+					@if (@Model.Course.PromoText is { Length: > 0 })
 					{
 						@Html.Raw(Model.Course.PromoText)
 					}
@@ -74,38 +74,62 @@
 			</div>
 			<div class="col-md-4 price-section d-flex flex-column">
 				<div>
-					<div>
+					<div class="mb-10">
 						<span class="price fs-2 mb-2">@(Model.Course.FullPrice > 0 ? Model.Course.FullPrice : "Безкоштовно")</span>
 					</div>
 					@if (User.Identity is { IsAuthenticated: true })
 					{
-						if(Model.UserCourse is { IsEnrolled: true })
-						{
-							<a asp-action="ViewLesson" asp-controller="Lesson" asp-area="Teach" asp-route-courseId="@Model.Course.Id" class="btn btn-outline-success btn-lg btn-block fs-3">Перейти до уроків</a>
-						}
-						else
-						{
+						<div class="row mb-3 ms-1">
+							@if (Model.UserCourse is { IsCompleted: true })
+							{
+								<a asp-action="ViewLesson" asp-controller="Lesson" asp-area="Teach" asp-route-courseId="@Model.UserCourse.Course.Id" class="btn btn-outline-secondary btn-lg btn-block fs-3 w-50">
+									Написати відгук
+								</a>
+							}
+						</div>
+						<div class="row mb-3 ms-1">
+							@if (Model.UserCourse is { IsEnrolled: true })
+							{
+								<a asp-action="ViewLesson" asp-controller="Lesson" asp-area="Teach" asp-route-courseId="@Model.UserCourse.Course.Id" class="btn btn-outline-success btn-lg btn-block fs-3 w-50">
+									@(Model.UserCourse is { IsCompleted: true } ? "Подивитись уроки" : "Повернутися до навчання")
+								</a>
+							}
+							else
+							{
 							<div class="d-flex flex-row gap-2">
 								<button class="btn btn-buy btn-lg btn-block fs-3 disabled">Придбати</button>
-								@* <button type="button" name="enroll-in-course" data-course-id="@Model.Course.Id" class="btn btn-outline-success btn-lg btn-block fs-3">
-			            Спробувати безкоштовно
-		            </button> *@
 								<form asp-action="SignUpToCourse" asp-controller="Course" asp-route-id="@Model.Course.Id" method="post">
 									<button type="submit" class="btn btn-outline-success btn-lg btn-block fs-3">
 										Спробувати безкоштовно
 									</button>
 								</form>
 							</div>
-						}
+							}
+						</div>
+						
+						
 					}
 					else
 					{
 						<a asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Url.Action("Detail", "Course", new { id = Model.Course.Id })" class="btn btn-outline-success btn-lg btn-block fs-3">Увійти, щоб записатися</a>
 					}
+					<div class="row mb-20 mt-20 fs-3">
+						<form asp-action="AddOrDeleteCourseToWish" asp-controller="Course" asp-area="" asp-route-id="@Model.Course.Id" method="post">
+							@if (Model.UserCourse is { IsWish: false })
+							{
+								<input type="hidden" name="delete" value="false" />
+								<button type="submit" class="button-4 w-50 ms-1"><i class="fa-solid fa-heart-circle-plus"></i>&nbsp;Хочу пройти</button>
+							}
+							else if (Model.UserCourse is { IsWish: true })
+							{
+								<input type="hidden" name="delete" value="true" />
 
-					<p class="mt-3">
-						<a href="#">Хочу пройти</a> @* TODO *@
-					</p>
+								<button type="submit" class="button-4 w-50 ms-1"><i class="fa-solid fa-heart-circle-minus"></i>&nbsp;Видалити з бажаного</button>
+							}
+						</form>
+						
+					</div>
+					
 				</div>
 				<div>
 					<h2>Програма курсу</h2>

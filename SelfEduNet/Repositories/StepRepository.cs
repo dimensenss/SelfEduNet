@@ -51,7 +51,7 @@ namespace SelfEduNet.Repositories
 			if (userId != null)
 			{
 				query = query
-					.Include(s => s.UserSteps)
+					.Include(s => s.UserSteps.Where(us => us.UserId == userId))
 					.Where(s => s.UserSteps.Any(us => us.UserId == userId));
 			}
 

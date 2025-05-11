@@ -342,32 +342,84 @@ namespace SelfEduNet.Controllers
 		public async Task<IActionResult> SignUpToCourse(int id)
 		{
 			var course = await _courseService.GetCourseByIdAsync(id);
+
+			string userId = User.GetUserId();
+			var userCourse = await _userCourseService.GetOrCreateUserCourseAsync(userId, id);
+
+			var courseDetailVM = new CourseWithUserViewModel()
+			{
+				Course = course,
+				UserCourse = userCourse
+			};
 			if (course == null)
 			{
 				TempData["NotifyType"] = "danger";
 				TempData["NotifyMessage"] = "Курс не знайдено";
-				return View("Detail", course);
+				return View("Detail", courseDetailVM);
 			}
-			var userId = User.GetUserId();
-
+			
 			if (userId == null)
 			{
 				TempData["NotifyType"] = "danger";
 				TempData["NotifyMessage"] = "Користувача не знайдено";
-				return View("Detail", course);
+				return View("Detail", courseDetailVM);
 			}
 
-			var userCourse = await _userCourseService.GetOrCreateUserCourseAsync(userId, id);
+			
 			if (userCourse.IsEnrolled)
 			{
 				TempData["NotifyType"] = "danger";
 				TempData["NotifyMessage"] = "Ви вже записані на цей курс.";
-				return View("Detail", course);
+				return View("Detail", courseDetailVM);
 			}
 
 			await _userCourseService.MarkCourseAsEnrolledAsync(userId, id);
 
 			return Redirect($"/Lesson/{course.Id}");
+		}
+
+		[Authorize]
+		[HttpPost]
+		public async Task<IActionResult> AddOrDeleteCourseToWish(int id, bool delete = false)
+		{
+			var course = await _courseService.GetCourseByIdAsync(id);
+
+			string userId = User.GetUserId();
+			var userCourse = await _userCourseService.GetOrCreateUserCourseAsync(userId, id);
+
+			var courseDetailVM = new CourseWithUserViewModel()
+			{
+				Course = course,
+				UserCourse = userCourse
+			};
+			if (course == null)
+			{
+				TempData["NotifyType"] = "danger";
+				TempData["NotifyMessage"] = "Курс не знайдено";
+				return View("Detail", courseDetailVM);
+			}
+
+			if (userId == null)
+			{
+				TempData["NotifyType"] = "danger";
+				TempData["NotifyMessage"] = "Користувача не знайдено";
+				return View("Detail", courseDetailVM);
+			}
+
+			if (!delete)
+			{
+				userCourse.IsWish = true;
+				_userCourseService.Update(userCourse);
+			}
+			else
+			{
+				userCourse.IsWish = false;
+				_userCourseService.Update(userCourse);
+			}
+
+			courseDetailVM.UserCourse = userCourse;
+
+			return RedirectToAction("Detail", new { id = course.Id });
 		}
 	}
 }

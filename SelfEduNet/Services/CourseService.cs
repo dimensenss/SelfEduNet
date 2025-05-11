@@ -22,6 +22,7 @@ namespace SelfEduNet.Services
 		Task<Lesson> GetLessonByIdAsync(int? lessonId, string userId = null);
 		Task<Lesson?> GetNextLessonAsync(int courseId, int lessonId);
 		Task<LessonStatistics> GetLessonStatisticsByIdAsync(int lessonId, string userId);
+		Task<CourseStatistics> GetCourseStatisticsByLessons(int courseId, string userId);
 		Task<CourseContentViewModel> GetCourseContentViewModelAsync(int id);
 		Task<IEnumerable<Course>> GetAllCoursesAsync();
 		IQueryable<Course> GetAllCoursesByOwnerQuery(string userId);
@@ -83,6 +84,13 @@ namespace SelfEduNet.Services
 		{
 			var steps = await _stepRepository.GetStepsByLessonIdAsync(lessonId, userId);
 			return _courseRepository.GetLessonStatisticsByIdAsync(steps);
+		}
+
+		public async Task<CourseStatistics> GetCourseStatisticsByLessons(int courseId, string userId)
+		{
+			var lessons = await _courseRepository.GetLessonsByCourseIdAsync(courseId, userId);
+
+			return _courseRepository.GetCourseStatisticsByLessons(lessons);
 		}
 
 		public async Task<CourseContentViewModel> GetCourseContentViewModelAsync(int id)

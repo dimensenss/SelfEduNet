@@ -1,6 +1,8 @@
 ﻿<div class="flex-shrink-0 p-0  border-end" style="width: 280px; height: 100vh;">
 	<div class="d-flex align-items-center pb-3 mb-3 border-bottom mt-40 ps-5">
-		<span class="fs-3 fw-semibold"><i class="fa-solid fa-graduation-cap"></i> Моє навчання</span>
+		<a asp-area="Learn" asp-action="Index" asp-controller="Learning" class="d-inline-flex text-decoration-none rounded fs-4 a-purple mb-3">
+			<span class="fs-3 fw-semibold"><i class="fa-solid fa-graduation-cap"></i> Моє навчання</span>
+		</a>
 	</div> 
 	<ul class="list-unstyled ps-0">
 		<li class="mb-1">
@@ -9,8 +11,9 @@
 			</button> 
 			<div class="collapse show" id="home-collapse" style="">
 			<ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small ml-50">
-					<li><a href="#" class=" d-inline-flex text-decoration-none rounded fs-4 a-purple mb-3">Активні</a></li>
-					<li><a href="#" class=" d-inline-flex text-decoration-none rounded fs-4 a-purple mb-3">Хочу пройти</a></li>
+					<li><a asp-action="ActiveCourses" asp-controller="Learning" asp-area="Learn" class=" d-inline-flex text-decoration-none rounded fs-4 a-purple mb-3">Активні</a></li>
+					<li><a asp-action="CompletedCourses" asp-controller="Learning" asp-area="Learn" class=" d-inline-flex text-decoration-none rounded fs-4 a-purple mb-3">Пройдені</a></li>
+					<li><a asp-action="WishedCourses" asp-controller="Learning" asp-area="Learn" class=" d-inline-flex text-decoration-none rounded fs-4 a-purple mb-3">Хочу пройти</a></li>
 				</ul>
 			</div>
 		</li>

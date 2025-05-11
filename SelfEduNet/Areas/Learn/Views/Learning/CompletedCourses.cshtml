@@ -1,0 +1,49 @@
+﻿@{
+	ViewData["Title"] = "Моє навчання";
+	Layout = "_Layout";
+	var lastCompletedCourse = Model.EnrolledCourses
+		.OrderByDescending(kvp => kvp.Key.CompletedAt)
+		.FirstOrDefault();
+
+	if (lastCompletedCourse.Key != null)
+	{
+		Model.EnrolledCourses.Remove(lastCompletedCourse.Key);
+	}
+
+}
+@model SelfEduNet.ViewModels.LearningViewModel
+<div class="container-fluid">
+	<div class="row justify-content-center mb-40">
+		<div class="container-xl">
+			<div class="row">
+				@await Html.PartialAsync("_LearningSidepanel")
+				<div class="col-md-8 px-5 mt-40">
+					@if (lastCompletedCourse.Key != null)
+					{
+						<h2 class="mb-3">Останній курс який ви пройшли</h2>
+						@await Html.PartialAsync("_GetLastLearningCourse", lastCompletedCourse)
+					}
+					@if (Model.EnrolledCourses.Any())
+					{
+						<h2 class="mb-3 mt-40">Інші ваші пройдені курси</h2>
+						@await Html.PartialAsync("_GetLearningCourses", @Model.EnrolledCourses)
+					}
+					else if (lastCompletedCourse.Key == null)
+					{
+						<div class="d-flex flex-column justify-content-center">
+							<h2 class="text-center mb-3">
+								Ви ще не пройшли жоден курс.
+								<br/>
+								<a asp-action="Index" asp-controller="Catalog" asp-area="" class="button-3 w-50 mt-3">Перейти до каталогу</a>
+							</h2>
+							
+
+							
+						</div>
+						
+					}
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

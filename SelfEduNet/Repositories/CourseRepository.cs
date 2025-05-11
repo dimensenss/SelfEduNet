@@ -19,7 +19,9 @@ namespace SelfEduNet.Repositories
 		public Task<Course?> GetCourseByIdAsync(int courseId);
 		public Task<Lesson?> GetLessonByIdAsync(int? lessonId, string? userId);
 		public Task<Lesson?> GetNextLessonAsync(int courseId, int lessonId);
+		public Task<List<Lesson>> GetLessonsByCourseIdAsync(int courseId, string? userId);
 		public LessonStatistics GetLessonStatisticsByIdAsync(List<Step> userSteps);
+		public CourseStatistics GetCourseStatisticsByLessons(List<Lesson> lessons);
 		public Task<Course?> GetCourseWithInfoByIdAsync(int courseId);
         public Task<bool> IsCourseOwnedByUser(int courseId, string userId);
         public Task<List<AppUser>> GetCourseAuthorsAsync(int courseId);
@@ -159,9 +161,56 @@ namespace SelfEduNet.Repositories
 		        CompletedStepsCount = completedStepsCount,
 		        CompletedStepsPercentage = completedStepsPercentage
 	        };
+			//TODO save to db?
         }
+        public async Task<List<Lesson>> GetLessonsByCourseIdAsync(int courseId, string? userId)
+        {
+	        var query = context.Lessons
+		        .Where(s => s.CourseId == courseId)
+		        .OrderBy(s => s.Order)
+		        .AsQueryable();
 
-        public async Task<Course?> GetCourseWithInfoByIdAsync(int courseId)
+	        if (userId != null)
+	        {
+		        query = query
+			        .Include(s => s.UserLessons
+				        .Where(us => us.UserId == userId))
+			        .Where(s => s.UserLessons.Any(us => us.UserId == userId));
+	        }
+
+	        return await query.ToListAsync();
+        }
+		public CourseStatistics GetCourseStatisticsByLessons(List<Lesson> lessons)
+        {
+	        var userLessons = lessons.SelectMany(l => l.UserLessons).ToList();
+	        if (!userLessons.Any())
+	        {
+		        return new CourseStatistics
+				{
+			        StartCourseTime = DateTime.MinValue,
+			        EndCourseTime = DateTime.MinValue,
+			        CompletedLessonsCount = 0,
+			        CompletedLessonsPercentage = 0
+		        };
+	        }
+
+	        var completedLessons = userLessons.Where(ul => ul.IsCompleted).ToList();
+	        int totalLessons = userLessons.Count;
+	        int completedLessonsCount = completedLessons.Count;
+	        int completedLessonsPercentage = totalLessons > 0 ? (completedLessonsCount * 100 / totalLessons) : 0;
+
+	        return new CourseStatistics
+			{
+		        StartCourseTime = userLessons.Min(ul => ul.StartedAt) ?? DateTime.MinValue,
+		        EndCourseTime = completedLessons.Any()
+			        ? completedLessons.Max(ul => ul.CompletedAt) ?? DateTime.MinValue
+			        : DateTime.MinValue,
+		        CompletedLessonsCount = completedLessonsCount,
+		        CompletedLessonsPercentage = completedLessonsPercentage
+	        };
+	        //TODO save to db
+		}
+		public async Task<Course?> GetCourseWithInfoByIdAsync(int courseId)
         {
 			return await _context.Courses
 				.Include(c => c.Info)

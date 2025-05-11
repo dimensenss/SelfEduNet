@@ -1,0 +1,70 @@
+﻿@model Dictionary<SelfEduNet.Models.UserCourse, SelfEduNet.Models.CourseCompletedSteps>
+
+@foreach (var (userCourse, courseCompletion) in Model)
+{
+	<div class="card course-card">
+		<div class="card-body">
+			<div class="d-flex flex-column">
+				<div class="row mb-3">
+					<div class="d-flex flex-row justify-content-between">
+						<div class="d-flex flex-row gap-3">
+							<a asp-controller="Course" asp-action="Detail" asp-route-id="@userCourse.Course.Id" asp-area="" class="text-decoration-none">
+								<div class="row">
+									@if (!string.IsNullOrEmpty(userCourse.Course.Preview))
+									{
+										<img src="@userCourse.Course.Preview" alt="@userCourse.Course.CourseName"
+										     class="img-fluid me-3 rounded" style="width: 100px; height:auto"/>
+									}
+									else
+									{
+										<img src="https://dummyimage.com/450x300/dee2e6/6c757d.jpg"
+											 alt="@userCourse.Course.CourseName"
+										     class="img-fluid me-3 rounded" style="width: 100px; height:auto"/>
+									}
+								</div>
+							</a>
+
+
+							<a asp-controller="Course" asp-action="Detail" asp-route-id="@userCourse.Course.Id" asp-area="" class="text-decoration-none">
+								<h2 class="card-title text-dark me-auto">@userCourse.Course.CourseName</h2>
+							</a>
+						</div>
+						@if (userCourse is { IsCompleted: true })
+						{
+							<h2 class="text-dark"><i class="fa-solid fa-circle-check" style="color: #00ff40;">&nbsp</i>Курс пройдено</h2>
+						}
+
+					</div>
+				
+				</div>
+				<div class="row mb-3 ps-2">
+					<p class="text-secondary">
+						<strong>@courseCompletion.CompletedSteps/@courseCompletion.TotalSteps</strong> кроків виконано
+					</p>
+					<p class="text-secondary">
+						<strong>@courseCompletion.CourseCompletionPercent %</strong> матеріалу пройдено
+					</p>
+
+					<div class="progress p-0" role="progressbar" aria-label="Default striped example" aria-valuenow="@courseCompletion.CourseCompletionPercent" aria-valuemin="0" aria-valuemax="100">
+						<div class="progress-bar progress-bar-striped " style="width: @courseCompletion.CourseCompletionPercent%"></div>
+					</div>
+				</div>
+				<div class="row mb-3 ps-2 justify-content-between">
+					@if (userCourse is { IsEnrolled: true })
+					{
+						<a asp-action="ViewLesson" asp-controller="Lesson" asp-area="Teach" asp-route-courseId="@userCourse.Course.Id" class="btn btn-outline-success btn-lg btn-block fs-3 w-50">
+							@(userCourse is { IsCompleted: true } ? "Подивитись уроки" : "Повернутися до навчання")
+						</a>
+					}
+					@if (userCourse is { IsCompleted: true })
+					{
+						<a asp-action="ViewLesson" asp-controller="Lesson" asp-area="Teach" asp-route-courseId="@userCourse.Course.Id" class="btn btn-outline-secondary btn-lg btn-block fs-3 w-25">
+							Написати відгук
+						</a>
+					}
+				</div>
+			</div>
+		</div>
+	</div>
+}
+

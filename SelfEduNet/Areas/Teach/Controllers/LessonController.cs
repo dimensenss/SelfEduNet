@@ -11,12 +11,13 @@ namespace SelfEduNet.Areas.Teach.Controllers
 	[Area("Teach")]
 	[Authorize]
 	public class LessonController(ICourseService courseService, IStepService stepService, IUserStepService userStepService,
-		IUserLessonService userLessonService) : Controller
+		IUserLessonService userLessonService, IUserCourseService userCourseService) : Controller
 	{
 		private readonly ICourseService _courseService = courseService;
 		private readonly IStepService _stepService = stepService;
 		private readonly IUserStepService _userStepService = userStepService;
 		private readonly IUserLessonService _userLessonService = userLessonService;
+		private readonly IUserCourseService _userCourseService = userCourseService;
 
 		public IActionResult Index()
 		{
@@ -130,7 +131,7 @@ namespace SelfEduNet.Areas.Teach.Controllers
 				return RedirectToAction("ViewLesson", new { courseId = courseId, lessonId = lessonId, stepId = stepId });
 			}
 			var userStep = await _userStepService.GetOrCreateUserStepAsync(userId, stepId);
-			if (userStep.Step.StepType == StepType.Test && (userStep.UserTestResult == null || !userStep.UserTestResult.IsPassed))
+			if (userStep.Step.StepType == StepType.Test && userStep.UserTestResult is not { IsPassed: true })
 			{
 				TempData["NotifyType"] = "danger";
 				TempData["NotifyMessage"] = "Спочатку необхідно пройти тест";
@@ -149,35 +150,50 @@ namespace SelfEduNet.Areas.Teach.Controllers
 				TempData["NotifyMessage"] = "Сталася помилка при завершені уроку. Це не останній крок.";
 				return RedirectToAction("ViewLesson", new { courseId = courseId, lessonId = lessonId, stepId = stepId });
 			}
+
 			var lessonStatistics = await _courseService.GetLessonStatisticsByIdAsync(lessonId, userId);
-			if (lessonStatistics.CompletedStepsPercentage >= 80)
+			if (lessonStatistics.CompletedStepsPercentage < 80)
 			{
-				bool completeLesson = await _userLessonService.MarkLessonAsCompletedAsync(userId, lessonId);
-				if (!completeLesson)
+				TempData["NotifyType"] = "danger";
+				TempData["NotifyMessage"] = "Пройдіть хоча б 80% кроків.";
+				return RedirectToAction("ViewLesson", new { courseId = courseId, lessonId = lessonId, stepId = stepId });
+			}
+
+			bool completeLesson = await _userLessonService.MarkLessonAsCompletedAsync(userId, lessonId);
+			if (!completeLesson)
+			{
+				TempData["NotifyMessage"] = "Помилка при проходженні уроку.";
+				return RedirectToAction("ViewLesson", new { courseId = courseId, lessonId = lessonId, stepId = stepId });
+			}
+			var nextLesson = await _courseService.GetNextLessonAsync(courseId, lessonId);
+			if (nextLesson != null)
+			{
+				TempData["NotifyType"] = "success";
+				TempData["NotifyMessage"] = "Урок завершено.";
+				return RedirectToAction("ViewLesson", new { courseId = courseId, lessonId = nextLesson.Id });
+			}
+			else
+			{
+				var courseStatistics = await _courseService.GetCourseStatisticsByLessons(courseId, userId);
+				if (courseStatistics.CompletedLessonsPercentage < 80)
 				{
-					TempData["NotifyMessage"] = "Помилка при проходженні урока.";
+					TempData["NotifyType"] = "danger";
+					TempData["NotifyMessage"] = "Пройдіть хоча б 80% уроків.";
 					return RedirectToAction("ViewLesson", new { courseId = courseId, lessonId = lessonId, stepId = stepId });
 				}
-				var nextLesson = await _courseService.GetNextLessonAsync(courseId, lessonId);
-				if (nextLesson != null)
+
+				bool result = await _userCourseService.MarkCourseAsCompletedAsync(userId, courseId);
+				if (!result)
 				{
-					TempData["NotifyType"] = "success";
-					TempData["NotifyMessage"] = "Урок завершено.";
-					return RedirectToAction("ViewLesson", new { courseId = courseId, lessonId = nextLesson.Id });
+					TempData["NotifyType"] = "danger";
+					TempData["NotifyMessage"] = "Сталася помилка при проходженні курсу.";
+					return RedirectToAction("ViewLesson", new { courseId = courseId, lessonId = lessonId, stepId = stepId });
+
 				}
-				else
-				{
-					//check complition of course
-					//redirect on certificate
-					//update course is completed
-					TempData["NotifyType"] = "success";
-					TempData["NotifyMessage"] = "Вітаємо з проходженням курсу";
-					return Ok("Course completed");
-				}
+				TempData["NotifyType"] = "success";
+				TempData["NotifyMessage"] = "Вітаємо з проходженням курсу";
+				return RedirectToAction("CompletedCourses", "Learning", new { area = "Learn" });
 			}
-			TempData["NotifyType"] = "danger";
-			TempData["NotifyMessage"] = "Пройдіть хоча б 80% кроків."; // count of steps need to be cpompleted
-			return RedirectToAction("ViewLesson", new { courseId = courseId, lessonId = lessonId, stepId = stepId });
 		}
 		[HttpPost]
 		public async Task<IActionResult> CreateUpdateLesson(int moduleId, int? lessonId, string title)

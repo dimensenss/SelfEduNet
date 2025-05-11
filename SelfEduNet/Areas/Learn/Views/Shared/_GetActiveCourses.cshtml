@@ -1,0 +1,39 @@
+﻿@model IEnumerable<SelfEduNet.Models.UserCourse>
+
+@foreach (var userCourse in @Model)
+{
+	<div class="card mb-3">
+		<div class="card-body">
+			<div class="d-flex mx-2">
+				<div class="course-img">
+					@if (!string.IsNullOrEmpty(userCourse.Course.Preview))
+					{
+						<img src="@userCourse.Course.Preview" alt="@userCourse.Course.CourseName"
+							 class="img-fluid me-3 rounded card-image" style="width: 100px;" />
+					}
+					else
+					{
+						<img src="https://dummyimage.com/450x300/dee2e6/6c757d.jpg"
+							 alt="@userCourse.Course.CourseName"
+							 class="img-fluid me-3 rounded card-image" style="width: 100px;" />
+					}
+				</div>
+
+				<div class="d-flex flex-column justify-content-between col">
+					<h3 class="card-title">@userCourse.Course.CourseName</h3>
+
+					@if (userCourse is { IsEnrolled: true })
+					{
+						<a asp-action="ViewLesson"
+						   asp-controller="Lesson"
+						   asp-area="Teach"
+						   asp-route-courseId="@userCourse.Course.Id"
+						   class="btn btn-outline-success btn-lg align-self-start mt-auto w-50 fs-3">
+							Повернутися до навчання
+						</a>
+					}
+				</div>
+			</div>
+		</div>
+	</div>
+}
