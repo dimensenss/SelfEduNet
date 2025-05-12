@@ -7707,7 +7707,7 @@ b, sup, sub, u, del {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    overflow: hidden;
+/*    overflow: hidden;*/
 }
 .preview-img{
     height: 315px;

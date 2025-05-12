@@ -7,7 +7,7 @@
 <div class="marco-layout">
 	<div class="container-fluid">
 		<div class="row">
-			@Html.Partial("_TeachSidepanelExtended", @Model)
+			@await Html.PartialAsync("_TeachSidepanelExtended", @Model.Course)
 			<div class="col-md-9">
 				<div class="catalog-main-content">
 

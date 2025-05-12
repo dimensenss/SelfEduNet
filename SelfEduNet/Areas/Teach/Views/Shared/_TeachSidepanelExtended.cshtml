@@ -1,9 +1,9 @@
-﻿@model SelfEduNet.ViewModels.CourseContentViewModel
+﻿@model Course
 
 <div class="col-md-3 border-end ">
-	<div class="d-flex flex-column sticky-top stick-filter d-none d-md-flex">
+	<div class="d-flex flex-column sticky-top stick-filter d-none d-md-flex sticky-top">
 		<a asp-action="CreateCourse" asp-controller="TeachCourse" asp-area="Teach" class="a-purple mb-3">Створити курс</a>
-		@if (Model.Lessons.Any())
+		@if (Model.Modules.Any(m => m.Lessons != null && m.Lessons.Any()))
 		{
 			<a asp-action="EditLesson" asp-controller="Lesson" asp-area="Teach" class="a-purple mb-3" asp-route-courseId="@Model.Id">
 				Редагувати уроки
@@ -12,5 +12,7 @@
 		<a asp-action="EditInfo" asp-controller="Course" asp-area="" class="a-purple mb-3" asp-route-id="@Model.Id">
 			Редагувати інформацію про курс
 		</a>
+		<a asp-action="PublishCourse" asp-controller="TeachCourse" asp-area="Teach" asp-route-id="@Model.Id" class="a-purple mb-3">Викласти курс</a>
+
 	</div>
 </div>

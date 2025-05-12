@@ -1,0 +1,235 @@
+﻿@model SelfEduNet.ViewModels.CourseChecklistViewModel
+@{
+	Layout = "_Layout";
+	ViewData["Title"] = "Викладення курсу";
+}
+<div class="marco-layout">
+	<div class="container-fluid">
+		<div class="row">
+			@await Html.PartialAsync("_TeachSidepanelExtended", Model.Course)
+			<div class="col-md-9">
+				<div class="catalog-main-content">
+					<div class="row">
+						<div class="col-md-8">
+							<h2 class="mb-20">Викладення курсу</h2>
+                            <div class="d-flex flex-row align-items-baseline">
+	                            <h2 class="mb-20">Курс готовий на 
+		                            <strong>@(Model.PresentationCompleted + Model.StructureCompleted) / @(Model.PresentationTotal + Model.StructureTotal)</strong>
+	                            </h2>
+                                <a class="a-purple ms-2 fs-3 text-secondary" style="cursor:pointer"><i class="fa-solid fa-rotate-right"></i></a>
+								
+							</div>
+							
+							<h3 class="mb-3">Структура та контент</h3>
+							<ul class="list-group">
+								<li class="list-group-item d-flex justify-content-between align-items-center">
+									<div class="col-md-8">
+										<div class="d-flex flex-column">
+											<div class="d-flex flex-row justify-content-between">
+                                                <strong>Модулів: @Model.TotalModules</strong>
+
+                                            </div>
+											<p class="text-muted">Розбийте курс на щонайменше два модулі, щоб зробити навчання структурованішим і легшим для сприйняття.</p>
+
+										</div>
+									</div>
+									<div class="col-md-4 d-flex justify-content-end">
+										<span class="badge bg-@(Model.TotalModules >= 2 ? "success" : "danger") align-items-center ">
+                                            @(Model.TotalModules >= 2 ? "\u2713" : "Додайте модулі")
+										</span>
+									</div>
+								</li>
+
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div class="col-md-8">
+                                        <div class="d-flex flex-column">
+                                            <div class="d-flex flex-row justify-content-between">
+	                                            <strong>Уроків: @Model.TotalLessons</strong>
+                                            </div>
+                                            <p class="text-muted">Проходження уроку за один раз (протягом 15-30 хвилин) є ефективним. Ми рекомендуємо включити щонайменше десять уроків.</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 d-flex justify-content-end">
+                                        <span class="badge bg-@(Model.TotalLessons >= 10 ? "success" : "danger") align-items-center">
+                                            @(Model.TotalLessons >= 10 ? "\u2713" : "Додайте уроки")
+                                        </span>
+                                    </div>
+                                </li>
+
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div class="col-md-8">
+                                        <div class="d-flex flex-column">
+                                            <div class="d-flex flex-row justify-content-between">
+	                                            <strong>Кроків: @Model.TotalSteps</strong>
+                                            </div>
+                                            <p class="text-muted">Практика — найкращий спосіб навчання. Додайте мінімум 10 кроків до курсу, включаючи завдання, відео або тести.</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 d-flex justify-content-end">
+                                        <span class="badge bg-@(Model.TotalSteps >= 10 ? "success" : "danger") align-items-center">
+                                            @(Model.TotalSteps >= 10 ? "\u2713" : "Додайте кроки")
+                                        </span>
+                                    </div>
+                                </li>
+
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div class="col-md-8">
+                                        <div class="d-flex flex-column">
+                                            <div class="d-flex flex-row justify-content-between">
+												<strong>Порожніх модулів: @Model.EmptyModules</strong>
+                                            </div>
+                                            <p class="text-muted">Кожен модуль має містити принаймні один урок, інакше курс виглядатиме незавершеним.</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 d-flex justify-content-end">
+                                        <span class="badge bg-@(Model.EmptyModules == 0 ? "success" : "danger") align-items-center">
+                                            @(Model.EmptyModules == 0 ? "\u2713" : "Заповніть модулі")
+                                        </span>
+                                    </div>
+                                </li>
+
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div class="col-md-8">
+                                        <div class="d-flex flex-column">
+                                            <div class="d-flex flex-row justify-content-between">
+												<strong>Модулів із назвою за замовчуванням: @Model.DefaultModuleTitles</strong>
+                                            </div>
+                                            <p class="text-muted">Змініть назви "Новий модуль" на більш інформативні. Це зробить курс зрозумілішим для студентів.</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 d-flex justify-content-end">
+                                        <span class="badge bg-@(Model.DefaultModuleTitles == 0 ? "success" : "danger") align-items-center">
+                                            @(Model.DefaultModuleTitles == 0 ? "\u2713" : "Перейменуйте модулі")
+                                        </span>
+                                    </div>
+                                </li>
+
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div class="col-md-8">
+                                        <div class="d-flex flex-column">
+                                            <div class="d-flex flex-row justify-content-between">
+	                                            <strong>Кроків з текстом за замовчуванням: @Model.DefaultTexts</strong>
+                                            </div>
+                                            <p class="text-muted">Не залишайте тексти за замовчуванням. Унікальний контент робить курс ціннішим для учнів.</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 d-flex justify-content-end">
+                                        <span class="badge bg-@(Model.DefaultTexts == 0 ? "success" : "danger") align-items-center">
+                                            @(Model.DefaultTexts == 0 ? "\u2713" : "Оновіть тексти")
+                                        </span>
+                                    </div>
+                                </li>
+
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div class="col-md-8">
+                                        <div class="d-flex flex-column">
+                                            <div class="d-flex flex-row justify-content-between">
+	                                            <strong>Відео без завантаження: @Model.MissingVideos</strong>
+                                            </div>
+                                            <p class="text-muted">Переконайтесь, що всі відеокроки мають прикріплене відео. Візуальні матеріали підвищують залучення.</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 d-flex justify-content-end">
+                                        <span class="badge bg-@(Model.MissingVideos == 0 ? "success" : "danger") align-items-center">
+                                            @(Model.MissingVideos == 0 ? "\u2713" : "Завантажте відео")
+                                        </span>
+                                    </div>
+                                </li>
+
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div class="col-md-8">
+                                        <div class="d-flex flex-column">
+                                            <div class="d-flex flex-row justify-content-between">
+	                                            <strong>Несформовані тести: @Model.MissingTests</strong>
+                                            </div>
+                                            <p class="text-muted">Кожне завдання повинно мати щонайменше одну правильну відповідь. Перевірте, чи можна його пройти.</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 d-flex justify-content-end">
+                                        <span class="badge bg-@(Model.MissingTests == 0 ? "success" : "danger") align-items-center">
+                                            @(Model.MissingTests == 0 ? "\u2713" : "Підв'яжіть тести")
+                                        </span>
+                                    </div>
+                                </li>
+								<h3 class="mt-20">Презентація</h3>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div class="col-md-8">
+                                        <div class="d-flex flex-column">
+                                            <div class="d-flex flex-row justify-content-between">
+												<strong>Прев'ю курсу: @(Model.PreviewIsLoaded ? "підв'язано" : "не підв'язано")</strong>
+                                            </div>
+                                            <p class="text-muted">Прев’ю зображення — це перше враження. Завантажте яскраву обкладинку курсу.</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 d-flex justify-content-end">
+                                        <span class="badge bg-@(Model.PreviewIsLoaded ? "success" : "danger") align-items-center">
+                                            @(Model.PreviewIsLoaded ? "\u2713" : "Підв'яжіть прев'ю")
+                                        </span>
+                                    </div>
+                                </li>
+
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div class="col-md-8">
+                                        <div class="d-flex flex-column">
+                                            <div class="d-flex flex-row justify-content-between">
+	                                            <strong>Категорія: @(Model.CategoryIsAttached ? "підв'язана" : "не підв'язана")</strong>
+                                            </div>
+                                            <p class="text-muted">Вкажіть категорію, щоб користувачі могли легко знайти ваш курс за темою.</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 d-flex justify-content-end">
+                                        <span class="badge bg-@(Model.CategoryIsAttached ? "success" : "danger") align-items-center">
+	                                        <strong>@(Model.CategoryIsAttached ? "\u2713" : "Підв'яжіть категорію")</strong>
+                                        </span>
+                                    </div>
+                                </li>
+
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div class="col-md-8">
+                                        <div class="d-flex flex-column">
+                                            <div class="d-flex flex-row justify-content-between">
+                                                Промо текст: @(Model.PromoTextExists ? "підв'язаний" : "не підв'язаний")
+                                            </div>
+                                            <p class="text-muted">Короткий промотекст мотивує потенційних учнів записатися на курс.</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 d-flex justify-content-end">
+                                        <span class="badge bg-@(Model.PromoTextExists ? "success" : "danger") align-items-center">
+                                            @(Model.PromoTextExists ? "\u2713" : "Напишіть промо текст")
+                                        </span>
+                                    </div>
+                                </li>
+							</ul>
+						</div>
+						<div class="col-md-4 mt-20">
+							<div class="sticky-top" style="top:80px;">
+								<div class="card shadow-sm">
+									<div class="card-body">
+										<h3 class="card-title">Прогрес курсу</h3>
+										<ul class="list-group list-group-flush">
+											<li class="list-group-item d-flex justify-content-between">
+												<span>Структура</span>
+												<strong>@Model.StructureCompleted / @Model.StructureTotal</strong>
+											</li>
+											<li class="list-group-item d-flex justify-content-between">
+												<span>Презентація</span>
+												<strong>@Model.PresentationCompleted / @Model.PresentationTotal</strong>
+											</li>
+										</ul>
+										@if ((Model.StructureCompleted + Model.PresentationCompleted) ==
+																		(Model.StructureTotal + Model.PresentationTotal))
+										{
+											<div class="alert alert-success mt-3" role="alert">
+												🎉 Усі пункти виконано — можна публікувати!
+											</div>
+										}
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

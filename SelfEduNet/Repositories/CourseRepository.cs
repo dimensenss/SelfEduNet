@@ -9,36 +9,37 @@ namespace SelfEduNet.Repositories
 {
     public interface ICourseRepository
     {
-	    public Task<IEnumerable<Course>> GetAllCoursesAsync();
-	    public IQueryable<Course> GetAllCoursesQuery();
-	    public IQueryable<Course> GetAllCoursesByOwnerQuery(string userId);
-        public Task<IEnumerable<Course>> GetCoursesByCategoryAsync(int catId);
-        public Task<CourseModules> GetModuleByIdAsync(int moduleId);
-        public Task<IEnumerable<CourseModules>> GetAllModulesByCourseId(int courseId);
-        public Task<Course> GetCourseWithModulesByIdAsync(int courseId);
-		public Task<Course?> GetCourseByIdAsync(int courseId);
-		public Task<Lesson?> GetLessonByIdAsync(int? lessonId, string? userId);
-		public Task<Lesson?> GetNextLessonAsync(int courseId, int lessonId);
-		public Task<List<Lesson>> GetLessonsByCourseIdAsync(int courseId, string? userId);
-		public LessonStatistics GetLessonStatisticsByIdAsync(List<Step> userSteps);
-		public CourseStatistics GetCourseStatisticsByLessons(List<Lesson> lessons);
-		public Task<Course?> GetCourseWithInfoByIdAsync(int courseId);
-        public Task<bool> IsCourseOwnedByUser(int courseId, string userId);
-        public Task<List<AppUser>> GetCourseAuthorsAsync(int courseId);
-        public Task<IEnumerable<Course>> GetCoursesByOwnerAsync(string userId);
-        public Task<bool> AddModuleAsync(CourseModules module);
-        public Task<bool> AddLessonAsync(Lesson lesson);
-        public Task<bool> AddAsync(Course course);
-		public bool Add(Course course);
-        public bool Update(Course course);
-        public Task<bool> UpdateModuleAsync(CourseModules module);
-        public Task<bool> UpdateLessonAsync(Lesson lesson);
-        public Task<int> GetMaxLessonOrderAsync(int moduleId);
-        public Task<int> GetMaxModuleOrderAsync(int courseId);
-		public bool Delete(Course course);
-		public bool DeleteModule(CourseModules module);
-		public bool DeleteLesson(Lesson lesson);
-        public bool Save();
+	    Task<IEnumerable<Course>> GetAllCoursesAsync();
+	    IQueryable<Course> GetAllCoursesQuery();
+	    IQueryable<Course> GetAllCoursesByOwnerQuery(string userId);
+        Task<IEnumerable<Course>> GetCoursesByCategoryAsync(int catId);
+        Task<CourseModules> GetModuleByIdAsync(int moduleId);
+        Task<IEnumerable<CourseModules>> GetAllModulesByCourseId(int courseId);
+        Task<Course> GetCourseWithModulesByIdAsync(int courseId);
+		Task<Course?> GetCourseByIdAsync(int courseId);
+		Task<Lesson?> GetLessonByIdAsync(int? lessonId, string? userId);
+		Task<Lesson?> GetNextLessonAsync(int courseId, int lessonId);
+		Task<List<Lesson>> GetLessonsByCourseIdAsync(int courseId, string? userId);
+		LessonStatistics GetLessonStatisticsByIdAsync(List<Step> userSteps);
+		CourseStatistics GetCourseStatisticsByLessons(List<Lesson> lessons);
+		Task<Course?> GetCourseWithInfoByIdAsync(int courseId);
+        Task<bool> IsCourseOwnedByUser(int courseId, string userId);
+        Task<List<AppUser>> GetCourseAuthorsAsync(int courseId);
+        Task<IEnumerable<Course>> GetCoursesByOwnerAsync(string userId);
+        Task<bool> AddModuleAsync(CourseModules module);
+        Task<bool> AddLessonAsync(Lesson lesson);
+        Task<bool> AddAsync(Course course);
+		bool Add(Course course);
+        bool Update(Course course);
+        Task<bool> UpdateModuleAsync(CourseModules module);
+        Task<bool> UpdateLessonAsync(Lesson lesson);
+        Task<int> GetMaxLessonOrderAsync(int moduleId);
+        Task<int> GetMaxModuleOrderAsync(int courseId);
+        Task<Course?> GetCourseWithCheckListAsync(int courseId);
+		bool Delete(Course course);
+		bool DeleteModule(CourseModules module);
+		bool DeleteLesson(Lesson lesson);
+        bool Save();
     }
     public class CourseRepository(ApplicationDbContext context) : ICourseRepository
     {
@@ -303,6 +304,25 @@ namespace SelfEduNet.Repositories
 				.MaxAsync();
 
 			return maxOrder ?? 0;
+		}
+
+        public async Task<Course?> GetCourseWithCheckListAsync(int courseId)
+        {
+			try
+			{
+				return await _context.Courses
+					.Include(c => c.Modules)
+					.ThenInclude(m => m.Lessons)
+					.ThenInclude(l => l.Steps)
+					.ThenInclude(s => s.StepTest)
+					.Include(c => c.Category)
+					.Include(c => c.Info)
+					.FirstOrDefaultAsync(c => c.Id == courseId);
+			}
+			catch (Exception ex)
+			{
+				return null;
+			}
 		}
 
         public bool Delete(Course course)

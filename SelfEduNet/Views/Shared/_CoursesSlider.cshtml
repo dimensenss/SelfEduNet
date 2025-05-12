@@ -5,33 +5,40 @@
 <div id="carousel-@catId" class="carousel carousel-dark slide">
 	<div class="carousel-inner">
 		@foreach (var group in Model.Select((course, index) => new { course, index })
-			          .GroupBy(x => x.index / 3))
+				.GroupBy(x => x.index / 3))
 		{
 			<div class="carousel-item @(group.First().index == 0 ? "active" : "")">
 				<div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-3 justify-content-center gap-3 catalog__block">
-					
+
 					@foreach (var course in group)
 					{
 						<a asp-controller="Course" asp-action="Detail" asp-route-id="@course.course.Id" asp-area="">
 							<div class="card course-card">
 								<div class="card-body d-flex">
-									<img src="@course.course.Preview" alt="@course.course.CourseName" class="me-3 mb-2 float-start rounded me-2" style="width: 80px; height: 80px;">
-									<div>
-										<h3 class="card-title">@course.course.CourseName</h3>
-										@if (!string.IsNullOrWhiteSpace(course.course.Owner.FirstName) || !string.IsNullOrWhiteSpace(course.course.Owner.LastName))
-										{
-											<h5 class="card-subtitle mb-2 text-body-secondary">
-												<i class="fa-solid fa-users" aria-hidden="true"></i>
-												@course.course.Owner.FirstName @course.course.Owner.LastName
-											</h5>
-										}
-										
-										<p class="card-text">@(course.course.FullPrice > 0 ? course.course.FullPrice : "Безкоштовно")</p>
+									<div class="d-flex flex-column">
+										<div class="d-flex flex-row justify-content-between">
+											<img src="@course.course.Preview" alt="@course.course.CourseName" class="me-3 mb-2 float-start rounded me-2" style="width: 70px; height: 70px;">
+											<div>
+												<h3 class="card-title mb-3">@course.course.CourseName</h3>
+												@if (!string.IsNullOrWhiteSpace(course.course.Owner.FirstName) || !string.IsNullOrWhiteSpace(course.course.Owner.LastName))
+												{
+													<h5 class="card-subtitle mb-2 text-body-secondary">
+														<i class="fa-solid fa-users" aria-hidden="true"></i>
+														@course.course.Owner.FirstName @course.course.Owner.LastName
+													</h5>
+												}
+											</div>
+										</div>
+										<div class="d-flex flex-row ">
+											<p class="card-text fs-3">@(course.course.FullPrice > 0 ? course.course.FullPrice : "Безкоштовно")</p>
+
+										</div>
 									</div>
+
 								</div>
 							</div>
 
-						 </a>
+						</a>
 					}
 				</div>
 			</div>
@@ -40,14 +47,14 @@
 	@if (Model.Count() > 3) // Группируем курсы по 3
 	{
 		<button class="carousel-control-prev justify-content-start" type="button"
-		        data-bs-target="#carousel-@catId"
-		        data-bs-slide="prev">
+				data-bs-target="#carousel-@catId"
+				data-bs-slide="prev">
 			<span class="custom-prev-icon" aria-hidden="true"></span>
 			<span class="visually-hidden">Previous</span>
 		</button>
 		<button class="carousel-control-next justify-content-end" type="button"
-		        data-bs-target="#carousel-@catId"
-		        data-bs-slide="next">
+				data-bs-target="#carousel-@catId"
+				data-bs-slide="next">
 			<span class="custom-next-icon" aria-hidden="true"></span>
 			<span class="visually-hidden">Next</span>
 		</button>

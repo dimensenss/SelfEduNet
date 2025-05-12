@@ -26,13 +26,6 @@
 									</span>
 									<input type="text" name="Query" placeholder="Пошук..."
 										   class="form-control search-input" value="@(Model?.Filter?.Query ?? "")">
-									@* <input type="hidden" name="Difficulty" value="@(Model.Filter?.Difficulty ?? "")" />
-									<input type="hidden" name="MinPrice" value="@Model.Filter?.MinPrice" />
-									<input type="hidden" name="MaxPrice" value="@Model.Filter?.MaxPrice" />
-									<input type="hidden" name="Page" value="@Model.Filter?.Page" />
-									<input type="hidden" name="Language" value="@Model.Filter?.Language" />
-									<input type="hidden" name="HaveCertificate" value="@(Model.Filter?.HaveCertificate ?? false)" />
-									<input type="hidden" name="IsFree" value="@(Model.Filter?.IsFree ?? false)" /> *@
 								</div>
 								<div class="d-none d-md-flex">
 									<button class="button-3 flex-fill me-3">Пошук</button>
@@ -79,6 +72,12 @@
 	<script>
 
 	$(document).ready(function () {
+
+		document.getElementById('catalog-search-form-desktop').addEventListener('submit', function () {
+			const mainQuery = document.querySelector('#courses-search-form-main input[name="Query"]').value;
+			document.getElementById('filters-hidden-query').value = mainQuery;
+		});
+				
 		const $filterForms = $('#catalog-search-form-main, #catalog-search-form-desktop, #catalog-search-form-mobile');
 
 		function getParamsFromForms() {

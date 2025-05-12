@@ -32,12 +32,13 @@ namespace SelfEduNet.Services
 		Task<IEnumerable<CourseModules>> GetAllModulesByCourseId(int courseId);
 		Task<Course> GetCourseByIdAsync(int id);
 		Task<Course> GetCourseWithInfoByIdAsync(int id);
-		public Task<int> GetMaxLessonOrderAsync(int moduleId);
-		public Task<int> GetMaxModuleOrderAsync(int courseId);
-		public bool DeleteCourse(Course course);
-		public bool DeleteModule(CourseModules module);
-		public bool DeleteLesson(Lesson lesson);
-		public bool Update(Course course);
+		Task<int> GetMaxLessonOrderAsync(int moduleId);
+		Task<int> GetMaxModuleOrderAsync(int courseId);
+		Task<CourseChecklistViewModel> GetCourseChecklistAsync(int courseId);
+		bool DeleteCourse(Course course);
+		bool DeleteModule(CourseModules module);
+		bool DeleteLesson(Lesson lesson);
+		bool Update(Course course);
 	}
 	public class CourseService(ApplicationDbContext context, ICourseRepository courseRepository, ICategoryService categoryService, IStepRepository stepRepository,
 		IPhotoService photoService): ICourseService
@@ -101,6 +102,7 @@ namespace SelfEduNet.Services
 			var courseVM = new CourseContentViewModel
 			{
 				Id = course.Id,
+				Course = course,
 				CourseName = course.CourseName,
 				Modules = course.Modules,
 				Lessons = course.Modules
@@ -226,6 +228,54 @@ namespace SelfEduNet.Services
 		{
 			return await _courseRepository.GetMaxModuleOrderAsync(courseId);
 		}
+
+		public async Task<CourseChecklistViewModel> GetCourseChecklistAsync(int courseId)
+		{
+			var course = await _courseRepository.GetCourseWithCheckListAsync(courseId);
+
+			var modules = course.Modules ?? new List<CourseModules>();
+			var lessons = modules
+				.SelectMany(m => m.Lessons ?? Enumerable.Empty<Lesson>())
+				.ToList();
+			var steps = lessons
+				.SelectMany(l => l.Steps ?? Enumerable.Empty<Step>())
+				.ToList();
+
+			int emptyModules = modules.Count(m => m.Lessons == null || !m.Lessons.Any());
+			int defaultModuleTitles = modules.Count(m => string.IsNullOrWhiteSpace(m.Title) || m.Title == "Новий модуль");
+			int missingTests = steps.Count(s =>
+				s.StepType == StepType.Test &&
+				(s.StepTest == null ||
+				 string.IsNullOrWhiteSpace(s.StepTest.GoogleSheetUrl) ||
+				 string.IsNullOrWhiteSpace(s.StepTest.GoogleFormUrl))
+			);
+			int defaultTexts = steps.Count(s =>
+				s.StepType == StepType.Text &&
+				(string.IsNullOrWhiteSpace(s.Content) || s.Content == "Урок створений системою")
+			);
+			int missingVideos = steps.Count(s =>
+				s.StepType == StepType.Video &&
+				string.IsNullOrWhiteSpace(s.VideoUrl)
+			);
+
+			return new CourseChecklistViewModel
+			{
+				Course = course,
+				TotalModules = modules.Count,
+				TotalLessons = lessons.Count,
+				TotalSteps = steps.Count,
+				EmptyModules = emptyModules,
+				DefaultModuleTitles = defaultModuleTitles,
+				DefaultTexts = defaultTexts,
+				MissingVideos = missingVideos,
+				MissingTests = missingTests,
+				PreviewIsLoaded = !string.IsNullOrWhiteSpace(course.Preview) ||
+				                  !string.IsNullOrWhiteSpace(course.Info?.PreviewVideo),
+				CategoryIsAttached = course.CategoryId.HasValue,
+				PromoTextExists = !string.IsNullOrWhiteSpace(course.PromoText) && course.PromoText.Length > 100
+			};
+		}
+
 		public async Task<bool> CreateLessonAsync(int moduleId, string title)
 		{
 			await using var transaction = await _context.Database.BeginTransactionAsync();

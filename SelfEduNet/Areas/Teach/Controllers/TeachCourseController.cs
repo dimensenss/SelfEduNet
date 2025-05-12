@@ -116,6 +116,13 @@ namespace SelfEduNet.Areas.Teach.Controllers
 
 			return RedirectToAction("TeacherCourseList", "Home");
 		}
+		public async Task<IActionResult> PublishCourse(int id)
+		{
+			var courseCheckList = await _courseService.GetCourseChecklistAsync(id);
+
+			return View(courseCheckList);
+		}
+
 		[HttpPost]
 		public async Task<IActionResult> UpdateModuleOrder([FromBody] List<ModuleOrderViewModel> moduleOrder)
 		{
