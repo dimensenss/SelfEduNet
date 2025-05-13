@@ -44,6 +44,39 @@
 					}
 				</div>
 			</div>
+			
 		</div>
 	</div>
 </div>
+@section Scripts {
+	<script src="~/js/button-loading.js" asp-append-version="true"></script>
+	<script src="~/js/stars-rating.js" asp-append-version="true"></script>
+	<script>
+		$(document).on("click", 'button[name^="create-review"]', function (event) {
+			event.preventDefault();
+			const $button = $(this);
+			let courseId = $(this).data("course-id");
+			
+			showLoading($button);
+			$.ajax({
+				url: "/Learn/Learning/CreateReviewForm",
+				type: 'POST',
+				data: { id: courseId },
+				success: function (response) {
+					hideLoading($button);
+					$('#review-container-' + courseId).html(response);
+				},
+				error: function (xhr, status, error) {
+					const response = xhr.responseJSON;
+					hideLoading($button);
+					$.notify({ message: response.message }, { type: 'danger' });
+					setTimeout(function () {
+						if (response.redirectUrl) {
+							window.location.href = response.redirectUrl;
+						}
+					}, 1000);
+				}
+			});
+		});
+	</script>
+}

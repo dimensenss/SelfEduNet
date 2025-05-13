@@ -2,6 +2,7 @@
 using EduProject.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using SelfEduNet.Data;
 using SelfEduNet.Data.Enum;
 using SelfEduNet.Models;
@@ -34,20 +35,26 @@ namespace SelfEduNet.Services
 		Task<Course> GetCourseWithInfoByIdAsync(int id);
 		Task<int> GetMaxLessonOrderAsync(int moduleId);
 		Task<int> GetMaxModuleOrderAsync(int courseId);
+		Task<int> GetCourseEnrolledCountAsync(int courseId);
 		Task<CourseChecklistViewModel> GetCourseChecklistAsync(int courseId);
+		Task<bool> MarkCourseAsPublishedAsync(int courseId);
+		Task<double> GetCourseRateAsync(int courseId);
+		Task<int> GetCourseReviewsCountAsync(int courseId);
 		bool DeleteCourse(Course course);
 		bool DeleteModule(CourseModules module);
 		bool DeleteLesson(Lesson lesson);
 		bool Update(Course course);
 	}
 	public class CourseService(ApplicationDbContext context, ICourseRepository courseRepository, ICategoryService categoryService, IStepRepository stepRepository,
-		IPhotoService photoService): ICourseService
+		IPhotoService photoService, IMemoryCache cache, IUserCourseService userCourseService): ICourseService
 	{
 		private readonly ApplicationDbContext _context = context;
 		private readonly ICourseRepository _courseRepository = courseRepository;
 		private readonly ICategoryService _categoryService = categoryService;
 		private readonly IStepRepository _stepRepository = stepRepository;
 		private readonly IPhotoService _photoService = photoService;
+		private readonly IMemoryCache _cache = cache;
+		private readonly IUserCourseService _userCourseService = userCourseService;
 
 		public async Task<EditCourseViewModel> GetEditViewModelAsync(int id)
 		{
@@ -229,6 +236,24 @@ namespace SelfEduNet.Services
 			return await _courseRepository.GetMaxModuleOrderAsync(courseId);
 		}
 
+		public async Task<int> GetCourseEnrolledCountAsync(int courseId)
+		{
+			string cacheKey = $"CourseEnrolledCount_{courseId}";
+
+			if (!_cache.TryGetValue(cacheKey, out int enrolledCount))
+			{
+				var allUserCourses = await _userCourseService.GetEnrolledUserCoursesAsync(courseId);
+				enrolledCount = allUserCourses
+					.Select(uc => uc.UserId)
+					.Distinct()
+					.Count();
+
+				_cache.Set(cacheKey, enrolledCount);
+			}
+
+			return enrolledCount;
+		}
+
 		public async Task<CourseChecklistViewModel> GetCourseChecklistAsync(int courseId)
 		{
 			var course = await _courseRepository.GetCourseWithCheckListAsync(courseId);
@@ -274,6 +299,34 @@ namespace SelfEduNet.Services
 				CategoryIsAttached = course.CategoryId.HasValue,
 				PromoTextExists = !string.IsNullOrWhiteSpace(course.PromoText) && course.PromoText.Length > 100
 			};
+		}
+
+		public async Task<bool> MarkCourseAsPublishedAsync(int courseId)
+		{
+			return await _courseRepository.MarkCourseAsPublishedAsync(courseId);
+		}
+
+		public async Task<double> GetCourseRateAsync(int courseId)
+		{
+			string cacheKey = $"CourseRate_{courseId}";
+			if (!_cache.TryGetValue(cacheKey, out double rate))
+			{
+				rate = await _courseRepository.GetCourseRateAsync(courseId);
+
+				_cache.Set(cacheKey, rate);
+			}
+			return rate;
+		}
+
+		public async Task<int> GetCourseReviewsCountAsync(int courseId)
+		{
+			string cacheKey = $"CourseReviewsCount_{courseId}";
+			if (!_cache.TryGetValue(cacheKey, out int count))
+			{
+				count = await _courseRepository.GetCourseReviewsCountAsync(courseId);
+				_cache.Set(cacheKey, count, TimeSpan.FromMinutes(30));
+			}
+			return count;
 		}
 
 		public async Task<bool> CreateLessonAsync(int moduleId, string title)

@@ -16,7 +16,8 @@ public interface IUserCourseRepository
 	Task<Dictionary<UserCourse, CourseCompletedSteps>> GetUserCoursesWithCompletionAsync(string userId);
 	Task<Dictionary<UserCourse, CourseCompletedSteps>> GetAllCompletedUserCoursesAsync(string userId);
 	Task<UserCourse> GetLastUserCoursesAsync(string userId);
-
+	Task<IEnumerable<UserCourse>> GetEnrolledUserCoursesAsync(int courseId);
+	Task<bool> CreateReviewAsync(Review review);
 	bool Update(UserCourse userCourse);
 	bool Save();
 	Task<bool> SaveAsync();
@@ -115,6 +116,7 @@ public class UserCourseRepository(ApplicationDbContext context) : IUserCourseRep
 		var userCoursesWithCompletion = await _context.UserCourses
 			.Where(uc => uc.UserId == userId && uc.IsEnrolled == true)
 			.Include(uc => uc.Course)
+			.Include(uc => uc.Review)
 			.Select(uc => new
 			{
 				UserCourse = uc,
@@ -154,6 +156,26 @@ public class UserCourseRepository(ApplicationDbContext context) : IUserCourseRep
 			.Include(uc => uc.Course)
 			.OrderByDescending(uc => uc.EnrolledAt)
 			.FirstAsync();
+	}
+
+	public async Task<IEnumerable<UserCourse>> GetEnrolledUserCoursesAsync(int courseId)
+	{
+		return await _context.UserCourses
+			.Where(uc => uc.CourseId == courseId && uc.IsEnrolled == true)
+			.ToListAsync();
+	}
+
+	public async Task<bool> CreateReviewAsync(Review review)
+	{
+		_context.Reviews.Add(review);
+
+		var userCourse = await _context.UserCourses.FindAsync(review.UserCourseId);
+		if (userCourse != null)
+		{
+			userCourse.Review = review;
+		}
+
+		return await SaveAsync();
 	}
 
 	public bool Update(UserCourse userCourse)

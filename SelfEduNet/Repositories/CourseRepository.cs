@@ -36,6 +36,9 @@ namespace SelfEduNet.Repositories
         Task<int> GetMaxLessonOrderAsync(int moduleId);
         Task<int> GetMaxModuleOrderAsync(int courseId);
         Task<Course?> GetCourseWithCheckListAsync(int courseId);
+        Task<bool> MarkCourseAsPublishedAsync(int courseId);
+        Task<double> GetCourseRateAsync(int courseId);
+        Task<int> GetCourseReviewsCountAsync(int courseId);
 		bool Delete(Course course);
 		bool DeleteModule(CourseModules module);
 		bool DeleteLesson(Lesson lesson);
@@ -325,7 +328,38 @@ namespace SelfEduNet.Repositories
 			}
 		}
 
-        public bool Delete(Course course)
+        public async Task<bool> MarkCourseAsPublishedAsync(int courseId)
+        {
+			var course = await _context.Courses.FirstOrDefaultAsync(c => c.Id == courseId);
+
+			if (course == null)
+			{
+				return false;
+			}
+
+			course.IsPublished = true;
+			course.UpdatedAt = DateTime.UtcNow;
+
+			return Update(course);
+		}
+
+        public async Task<double> GetCourseRateAsync(int courseId)
+        {
+			var avg = await _context.Reviews
+				.Where(r => r.UserCourse.CourseId == courseId)
+				.Select(r => (double?)r.Rate)
+				.AverageAsync();
+
+			return avg ?? 0.0;
+        }
+
+		public async Task<int> GetCourseReviewsCountAsync(int courseId)
+		{
+			return await _context.Reviews
+				.CountAsync(r => r.UserCourse.CourseId == courseId);
+		}
+
+		public bool Delete(Course course)
         {
 	        _context.Courses.Remove(course);
 	        return Save();

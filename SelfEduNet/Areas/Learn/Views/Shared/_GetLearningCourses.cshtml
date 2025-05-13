@@ -13,13 +13,13 @@
 									@if (!string.IsNullOrEmpty(userCourse.Course.Preview))
 									{
 										<img src="@userCourse.Course.Preview" alt="@userCourse.Course.CourseName"
-										     class="img-fluid me-3 rounded" style="width: 100px; height:auto"/>
+											 class="img-fluid me-3 rounded" style="width: 100px; height:auto" />
 									}
 									else
 									{
 										<img src="https://dummyimage.com/450x300/dee2e6/6c757d.jpg"
 											 alt="@userCourse.Course.CourseName"
-										     class="img-fluid me-3 rounded" style="width: 100px; height:auto"/>
+											 class="img-fluid me-3 rounded" style="width: 100px; height:auto" />
 									}
 								</div>
 							</a>
@@ -35,7 +35,7 @@
 						}
 
 					</div>
-				
+
 				</div>
 				<div class="row mb-3 ps-2">
 					<p class="text-secondary">
@@ -58,11 +58,25 @@
 					}
 					@if (userCourse is { IsCompleted: true })
 					{
-						<a asp-action="ViewLesson" asp-controller="Lesson" asp-area="Teach" asp-route-courseId="@userCourse.Course.Id" class="btn btn-outline-secondary btn-lg btn-block fs-3 w-25">
+						<button name="create-review-@userCourse.CourseId" data-course-id="@userCourse.CourseId" class="btn btn-outline-dark btn-lg btn-block fs-3 w-25">
 							Написати відгук
-						</a>
+						</button>
 					}
 				</div>
+
+
+				<div id="review-container-@userCourse.CourseId">
+				</div>
+				@if (userCourse.Review != null)
+				{
+					<div class="d-flex flex-column mb-3 ps-2">
+
+						@userCourse.Review.Rate
+						@userCourse.Review.Text
+						@userCourse.Review.CreatedAt
+
+					</div>
+				}
 			</div>
 		</div>
 	</div>

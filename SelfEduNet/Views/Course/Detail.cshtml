@@ -7,7 +7,7 @@
 @model SelfEduNet.ViewModels.CourseWithUserViewModel
 
 <div class="course-detail-header">
-	<div class="d-flex container-xl">
+	<div class="container-xl">
 		<div class="d-flex flex-column text-white">
 			<div class="row">
 				<div class="col-md-8">
@@ -44,16 +44,16 @@
 						@if (Model.Course.HaveCertificate)
 						{
 							<span>
-								<i class="fa-solid fa-award"></i> Сертификат selfedu
+								<i class="fa-solid fa-award"></i> Сертифікат selfedu
 							</span>
 						}
 						<div class="d-flex align-items-center justify-content-between">
 							<div class="me-3">
-								<span class="badge bg-warning text-dark">4.9</span>
-								<span>5 572 учеников</span> @* TODO *@
+								<span class="badge bg-warning text-dark">@Model.CourseRate</span>
+								<span>@Model.EnrolledCount @CourseHelper.GetStudentsCountText(@Model.EnrolledCount)</span>
 							</div>
-							<a href="#" class="text-primary">454 відгуки</a> @* TODO *@
-						</div>
+							<span class="text-secondary">@Model.CourseReviewsCount @CourseHelper.GetReviewsCountText(@Model.CourseReviewsCount)</span>
+							</div>
 					</div>
 				</div>
 			</div>
@@ -79,7 +79,7 @@
 					</div>
 					@if (User.Identity is { IsAuthenticated: true })
 					{
-						<div class="row mb-3 ms-1">
+						<div class="row mb-3 ms-3">
 							@if (Model.UserCourse is { IsCompleted: true })
 							{
 								<a asp-action="ViewLesson" asp-controller="Lesson" asp-area="Teach" asp-route-courseId="@Model.UserCourse.Course.Id" class="btn btn-outline-secondary btn-lg btn-block fs-3 w-50">
@@ -87,7 +87,7 @@
 								</a>
 							}
 						</div>
-						<div class="row mb-3 ms-1">
+						<div class="row mb-3 ms-3">
 							@if (Model.UserCourse is { IsEnrolled: true })
 							{
 								<a asp-action="ViewLesson" asp-controller="Lesson" asp-area="Teach" asp-route-courseId="@Model.UserCourse.Course.Id" class="btn btn-outline-success btn-lg btn-block fs-3 w-50">
@@ -113,8 +113,8 @@
 					{
 						<a asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Url.Action("Detail", "Course", new { id = Model.Course.Id })" class="btn btn-outline-success btn-lg btn-block fs-3">Увійти, щоб записатися</a>
 					}
-					<div class="row mb-20 mt-20 fs-3 ms-1">
-						<form asp-action="AddOrDeleteCourseToWish" asp-controller="Course" asp-area="" asp-route-id="@Model.Course.Id" method="post">
+					<div class="row mb-20 mt-20 fs-3 ms-3">
+						<form asp-action="AddOrDeleteCourseToWish" asp-controller="Course" asp-area="" asp-route-id="@Model.Course.Id" method="post" class="p-0">
 							@if (Model.UserCourse is { IsWish: false })
 							{
 								<input type="hidden" name="delete" value="false" />
@@ -149,7 +149,7 @@
 										@{
 											int lessonCount = module.Lessons.Count();
 										}
-										<span class="badge bg-purple rounded-pill">@lessonCount @LessonHelper.GetLessonText(lessonCount)</span>
+										<span class="badge bg-purple rounded-pill">@lessonCount @CourseHelper.GetLessonText(lessonCount)</span>
 									</li>
 								}
 							</ol>

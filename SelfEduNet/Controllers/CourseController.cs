@@ -25,13 +25,19 @@ namespace SelfEduNet.Controllers
 	    public async Task<IActionResult> Detail(int id)
         {
             var course = await _courseService.GetCourseByIdAsync(id);
+            int enrolledCount = await _courseService.GetCourseEnrolledCountAsync(id);
+            double courseRate = await _courseService.GetCourseRateAsync(id);
+            int courseReviewsCount = await _courseService.GetCourseReviewsCountAsync(id);
             var userId = User.GetUserId();
 
 			var courseVm = new CourseWithUserViewModel()
             {
 	            Course = course,
-	            UserCourse = userId != null ? await _userCourseService.GetOrCreateUserCourseAsync(userId, id) : null
-            };
+	            UserCourse = userId != null ? await _userCourseService.GetOrCreateUserCourseAsync(userId, id) : null,
+				EnrolledCount = enrolledCount,
+				CourseRate = courseRate,
+				CourseReviewsCount = courseReviewsCount
+			};
             return View(courseVm);
         }
 

@@ -116,13 +116,27 @@ namespace SelfEduNet.Areas.Teach.Controllers
 
 			return RedirectToAction("TeacherCourseList", "Home");
 		}
-		public async Task<IActionResult> PublishCourse(int id)
+		public async Task<IActionResult> CheckListCourse(int id)
 		{
 			var courseCheckList = await _courseService.GetCourseChecklistAsync(id);
 
 			return View(courseCheckList);
 		}
+		public async Task<IActionResult> PublishCourse(int id)
+		{
+			var result = await _courseService.MarkCourseAsPublishedAsync(id);
 
+			if (result)
+			{
+				TempData["NotifyMessage"] = "Курс успішно опубліковано";
+				TempData["NotifyType"] = "success";
+				return RedirectToAction("Detail", "Course", new { area="", id = id });
+			}
+			TempData["NotifyMessage"] = "Курс не знайдено або виникла помилка";
+			TempData["NotifyType"] = "danger";
+
+			return RedirectToAction("CheckListCourse", new { id = id });
+		}
 		[HttpPost]
 		public async Task<IActionResult> UpdateModuleOrder([FromBody] List<ModuleOrderViewModel> moduleOrder)
 		{

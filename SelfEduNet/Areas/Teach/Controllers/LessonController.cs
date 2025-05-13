@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using SelfEduNet.Data.Enum;
 using SelfEduNet.Extensions;
 using SelfEduNet.Models;
@@ -11,13 +12,14 @@ namespace SelfEduNet.Areas.Teach.Controllers
 	[Area("Teach")]
 	[Authorize]
 	public class LessonController(ICourseService courseService, IStepService stepService, IUserStepService userStepService,
-		IUserLessonService userLessonService, IUserCourseService userCourseService) : Controller
+		IUserLessonService userLessonService, IUserCourseService userCourseService, IMemoryCache cache) : Controller
 	{
 		private readonly ICourseService _courseService = courseService;
 		private readonly IStepService _stepService = stepService;
 		private readonly IUserStepService _userStepService = userStepService;
 		private readonly IUserLessonService _userLessonService = userLessonService;
 		private readonly IUserCourseService _userCourseService = userCourseService;
+		private readonly IMemoryCache _cache = cache;
 
 		public IActionResult Index()
 		{
@@ -69,53 +71,74 @@ namespace SelfEduNet.Areas.Teach.Controllers
 				: BadRequest(new { message = "Помилка при ствроенні крока" });
 
 		}
-
 		[HttpGet("Lesson/{courseId}/{lessonId?}")]
 		public async Task<IActionResult> ViewLesson(int courseId, int? lessonId, int? stepId)
 		{
 			var userId = User.GetUserId();
-			var courseVM = await _courseService.GetCourseContentViewModelAsync(courseId);
-			var lesson = lessonId.HasValue
-				? await _courseService.GetLessonByIdAsync(lessonId, userId)
-				: courseVM.Lessons.OrderBy(l => l.Order).FirstOrDefault();
+			string cacheKey = $"ViewLesson_{userId}_{courseId}_{lessonId}_{stepId}";
 
-			if (lesson == null) return NotFound();
-
-			if (!lesson.UserLessons.Any())
+			if (!_cache.TryGetValue(cacheKey, out EditLessonViewModel lessonVM))
 			{
-				await _userLessonService.GetOrCreateUserLessonAsync(userId, lesson.Id);
-			}
+				var courseVM = await _cache.GetOrCreateAsync(
+					$"CourseContent_{courseId}",
+					entry => _courseService.GetCourseContentViewModelAsync(courseId)
+				);
 
-			// Получаем шаги с учетом пользователя
-			var allSteps = await _stepService.GetStepsByLessonIdAsync(lesson.Id, null);
-			var userSteps = await _stepService.GetStepsByLessonIdAsync(lesson.Id, userId);
+				var lesson = lessonId.HasValue
+					? await _cache.GetOrCreateAsync(
+						$"Lesson_{lessonId}_{userId}",
+						entry => _courseService.GetLessonByIdAsync(lessonId, userId)
+					)
+					: courseVM.Lessons.OrderBy(l => l.Order).FirstOrDefault();
 
-			// Если у пользователя нет записей по шагам, загружаем все и создаем UserStep
-			if (!userSteps.Any() || userSteps.Count != allSteps.Count())
-			{
-				userSteps = new List<Step>();
+				if (lesson == null) return NotFound();
 
-				foreach (var step in allSteps)
+				if (!lesson.UserLessons.Any())
+					await _userLessonService.GetOrCreateUserLessonAsync(userId, lesson.Id);
+
+				var allSteps = await _cache.GetOrCreateAsync(
+					$"AllSteps_{lesson.Id}",
+					entry => _stepService.GetStepsByLessonIdAsync(lesson.Id, null)
+				);
+
+				var userSteps = await _cache.GetOrCreateAsync(
+					$"UserSteps_{lesson.Id}_{userId}",
+					entry => _stepService.GetStepsByLessonIdAsync(lesson.Id, userId)
+				);
+
+				if (!userSteps.Any() || userSteps.Count != allSteps.Count)
 				{
-					var userStep = await _userStepService.GetOrCreateUserStepAsync(userId, step.Id);
-					userSteps.Add(step);
+					userSteps = new List<Step>();
+					foreach (var step in allSteps)
+					{
+						await _userStepService.GetOrCreateUserStepAsync(userId, step.Id);
+						userSteps.Add(step);
+					}
 				}
+
+				Step currentStep = stepId.HasValue
+					? await _stepService.GetStepByIdAsync(stepId.Value, userId)
+					: userSteps.FirstOrDefault();
+
+				lessonVM = new EditLessonViewModel
+				{
+					Course = courseVM,
+					Lesson = lesson,
+					Steps = userSteps
+				};
+
+				// Cache for 5 minutes (adjust as needed)
+				_cache.Set(cacheKey, lessonVM, TimeSpan.FromMinutes(5));
+				ViewData["Lesson"] = lesson.Id;
+				ViewData["Step"] = currentStep;
 			}
-
-			// Определяем текущий шаг
-			Step currentStep = stepId.HasValue
-				? await _stepService.GetStepByIdAsync(stepId.Value, userId)
-				: userSteps.FirstOrDefault();
-
-			var lessonVM = new EditLessonViewModel
+			else
 			{
-				Course = courseVM,
-				Lesson = lesson,
-				Steps = userSteps
-			};
-
-			ViewData["Lesson"] = lesson.Id;
-			ViewData["Step"] = currentStep;
+				ViewData["Lesson"] = lessonVM.Lesson.Id;
+				ViewData["Step"] = stepId.HasValue
+					? lessonVM.Steps.FirstOrDefault(s => s.Id == stepId.Value)
+					: lessonVM.Steps.FirstOrDefault();
+			}
 
 			return Request.Headers["X-Requested-With"] == "XMLHttpRequest"
 				? PartialView("ViewLessonMode/_ViewLessonContent", lessonVM)

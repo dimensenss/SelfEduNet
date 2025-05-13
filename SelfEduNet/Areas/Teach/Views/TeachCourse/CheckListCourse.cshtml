@@ -219,9 +219,21 @@
 										@if ((Model.StructureCompleted + Model.PresentationCompleted) ==
 																		(Model.StructureTotal + Model.PresentationTotal))
 										{
-											<div class="alert alert-success mt-3" role="alert">
-												🎉 Усі пункти виконано — можна публікувати!
-											</div>
+											if (Model.Course.IsPublished)
+											{
+												<div class="alert alert-success mt-3" role="alert">
+													🎉 Курс вже опубліковано!
+												</div>
+											}
+											else
+											{
+												<div class="alert alert-success mt-3" role="alert">
+													🎉 Усі пункти виконано — можна публікувати!
+												</div>
+												<div class="d-flex justify-content-center mt-3">
+													<a asp-action="PublishCourse" asp-controller="TeachCourse" asp-area="Teach" asp-route-id="@Model.Course.Id" class="button-3 w-100">Опублікувати курс</a>
+												</div>
+											}
 										}
 									</div>
 								</div>
