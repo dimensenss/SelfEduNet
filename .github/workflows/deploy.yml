@@ -4,13 +4,15 @@ on:
   push:
     branches:
       - main
-
+permissions:
+  id-token: write
+  contents: read
 env:
   ACR_NAME: selfeduapp
   ACR_LOGIN_SERVER: selfeduapp.azurecr.io
-  RESOURCE_GROUP: your-resource-group-name
-  APP_CONTAINER_APP: selfedunet-app
-  WORKER_CONTAINER_APP: selfedunet-worker
+  RESOURCE_GROUP: selfeduRG
+  APP_CONTAINER_APP: selfedunet.app
+  WORKER_CONTAINER_APP: selfedunet.worker
   POSTGRES_CONNECTION: "Host=selfedupostgres.postgres.database.azure.com;Port=5432;Database=postgres;Username=selfedu_user;Password=${{ secrets.POSTGRES_PASSWORD }};SslMode=Require;"
 
 jobs:
@@ -21,10 +23,12 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Azure Login
+    - name: Azure Login (OIDC)
       uses: azure/login@v1
       with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        client-id: ${{ secrets.SELFEDUNET_AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.SELFEDUNET_AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.SELFEDUNET_AZURE_SUBSCRIPTION_ID }}
 
     - name: Login to ACR
       run: |
