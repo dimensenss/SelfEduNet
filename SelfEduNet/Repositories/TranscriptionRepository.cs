@@ -15,15 +15,10 @@ public interface ITranscriptionRepository
 	Task<string> AddResumeRequestToQueue(string context);
 	Task<WorkerResult> GetContentByTaskId(string taskId, WorkerTaskType keyType);
 }
-public class TranscriptionRepository : ITranscriptionRepository
+public class TranscriptionRepository(IConnectionMultiplexer redis, ILogger<TranscriptionRepository> logger)
+	: ITranscriptionRepository
 {
-	private readonly IDatabase _redisQueue;
-	private readonly ILogger<TranscriptionRepository> _logger;
-	public TranscriptionRepository(IConnectionMultiplexer redis, ILogger<TranscriptionRepository> logger)
-	{
-		_redisQueue = redis.GetDatabase();
-		_logger = logger;
-	}
+	private readonly IDatabase _redisQueue = redis.GetDatabase();
 
 	public Task AddFileToQueue(IFormFile? file)
 	{
@@ -42,7 +37,7 @@ public class TranscriptionRepository : ITranscriptionRepository
 		};
 
 		_redisQueue.ListRightPush(QueueKeys.TranscriptionQueue, JsonSerializer.Serialize(taskData));
-		_logger.LogInformation($"Added file with length {file.Length} to transcription queue with task ID {taskId}");
+		logger.LogInformation($"Added file with length {file.Length} to transcription queue with task ID {taskId}");
 
 		return Task.CompletedTask;
 	}
@@ -58,7 +53,7 @@ public class TranscriptionRepository : ITranscriptionRepository
 		};
 
 		await _redisQueue.ListRightPushAsync(QueueKeys.TranscriptionQueue, JsonSerializer.Serialize(taskData));
-		_logger.LogInformation($"Added url with length to transcription queue with task ID {taskId}");
+		logger.LogInformation($"Added url with length to transcription queue with task ID {taskId}");
 
 		return taskId.ToString();
 	}
@@ -113,7 +108,7 @@ public class TranscriptionRepository : ITranscriptionRepository
 		};
 
 		await _redisQueue.ListRightPushAsync(QueueKeys.ResumeQueue, JsonSerializer.Serialize(taskData));
-		_logger.LogInformation($"Added request for resume to resume queue with task ID {taskId}");
+		logger.LogInformation($"Added request for resume to resume queue with task ID {taskId}");
 
 		return taskId.ToString();
 	}

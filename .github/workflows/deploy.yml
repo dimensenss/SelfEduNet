@@ -1,0 +1,61 @@
+name: Deploy to Azure
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  ACR_NAME: selfeduapp
+  ACR_LOGIN_SERVER: selfeduapp.azurecr.io
+  RESOURCE_GROUP: your-resource-group-name
+  APP_CONTAINER_APP: selfedunet-app
+  WORKER_CONTAINER_APP: selfedunet-worker
+  POSTGRES_CONNECTION: "Host=selfedupostgres.postgres.database.azure.com;Port=5432;Database=postgres;Username=selfedu_user;Password=${{ secrets.POSTGRES_PASSWORD }};SslMode=Require;"
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Login to ACR
+      run: |
+        az acr login --name $ACR_NAME
+
+    - name: Build and Push App Image
+      run: |
+        docker build -t $ACR_LOGIN_SERVER/selfedunet.app -f SelfEduNet/Dockerfile .
+        docker push $ACR_LOGIN_SERVER/selfedunet.app
+
+    - name: Build and Push Worker Image
+      run: |
+        docker build -t $ACR_LOGIN_SERVER/selfedunet.worker -f Worker/Dockerfile .
+        docker push $ACR_LOGIN_SERVER/selfedunet.worker
+
+    - name: Run EF Core migrations
+      run: |
+        dotnet tool install --global dotnet-ef
+        export PATH="$PATH:/home/runner/.dotnet/tools"
+        dotnet ef database update --project "SelfEduNet/SelfEduNet.csproj" --startup-project "SelfEduNet/SelfEduNet.csproj" --connection "$POSTGRES_CONNECTION"
+
+    - name: Deploy App Container
+      run: |
+        az containerapp update \
+          --name $APP_CONTAINER_APP \
+          --resource-group $RESOURCE_GROUP \
+          --image $ACR_LOGIN_SERVER/selfedunet.app
+
+    - name: Deploy Worker Container
+      run: |
+        az containerapp update \
+          --name $WORKER_CONTAINER_APP \
+          --resource-group $RESOURCE_GROUP \
+          --image $ACR_LOGIN_SERVER/selfedunet.worker
