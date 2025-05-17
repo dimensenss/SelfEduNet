@@ -11,8 +11,8 @@ env:
   ACR_NAME: selfeduapp
   ACR_LOGIN_SERVER: selfeduapp.azurecr.io
   RESOURCE_GROUP: selfeduRG
-  APP_CONTAINER_APP: selfedunet.app
-  WORKER_CONTAINER_APP: selfedunet.worker
+  APP_CONTAINER_APP: selfedunet
+  WORKER_CONTAINER_APP: selfedunetworker
   POSTGRES_CONNECTION: "Host=selfedupostgres.postgres.database.azure.com;Port=5432;Database=postgres;Username=selfedu_user;Password=${{ secrets.POSTGRES_PASSWORD }};SslMode=Require;"
 
 jobs:
